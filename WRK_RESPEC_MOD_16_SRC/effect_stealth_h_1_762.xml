@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="762" Folder="\_Game Effects\Effects\" ResRefName="effect_stealth_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_stealth_h.nss?moduleid=1&amp;resrefid=762" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_stealth_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------                                                                                                     // -----------------------------------------------------------------------------
+// effect_stealth
+// -----------------------------------------------------------------------------
+/*
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "sys_stealth_h"
+
+
+effect EffectStealth();
+effect EffectStealth()
+{
+
+    return Effect(EFFECT_TYPE_STEALTH);
+}
+
+
+
+
+int Effects_HandleApplyEffectStealth(effect eEffect)
+{
+
+    // -------------------------------------------------------------------------
+    // Safety for Stealth flag
+    // -------------------------------------------------------------------------
+   /* if (GetStealthEnabled(OBJECT_SELF))
+    {
+        return FALSE;
+    }*/
+
+
+    effect eTransparent = Effect(EFFECT_TYPE_ALPHA);
+    float fPotency = 0.0;
+
+    // -------------------------------------------------------------------------
+    // Party members only become partially invisible
+    // -------------------------------------------------------------------------
+    if (IsPartyMember(OBJECT_SELF))
+    {
+          fPotency = 0.5;
+    }
+    else
+    {
+         // --------------------------------------------------------------------
+         // Non party members are not interactive anymore
+         // --------------------------------------------------------------------
+         SetObjectInteractive(OBJECT_SELF,FALSE);
+    }
+
+
+    eTransparent = SetEffectEngineFloat(eTransparent, EFFECT_FLOAT_POTENCY, fPotency);
+    Engine_ApplyEffectOnObject(EFFECT_DURATION_TYPE_PERMANENT, eTransparent, OBJECT_SELF, 0.0f,OBJECT_SELF, GetEffectAbilityID(eEffect));
+    SetStealthEnabled(OBJECT_SELF, TRUE);
+
+    return   TRUE;
+}
+
+int Effects_HandleRemoveEffectStealth(effect eEffect)
+{
+
+      SetStealthEnabled(OBJECT_SELF, FALSE);
+
+        effect[] aTransparent = GetEffects(OBJECT_SELF, EFFECT_TYPE_ALPHA, GetEffectAbilityID(eEffect), OBJECT_SELF, EFFECT_DURATION_TYPE_PERMANENT);
+        int nSize = GetArraySize(aTransparent);
+        int i;
+
+        for (i = 0; i &lt; nSize; i++)
+        {
+            RemoveEffect(OBJECT_SELF, aTransparent[i]);
+        }
+
+        if (!IsPartyMember(OBJECT_SELF))
+        {
+            //  ----------------------------------------------------------------
+            //  This makes one assumption:
+            //  None interactive objects are never using stealth, otherwise
+            //  dropping out of stealth will modify their interactive status.
+            //  ----------------------------------------------------------------
+            SetObjectInteractive(OBJECT_SELF, TRUE);
+        }
+
+
+        Log_Trace(LOG_CHANNEL_SYSTEMS,"effect_stealth", "Deactivating stealth flag");
+
+
+    DEBUG_PrintToScreen("stealth enabled: " + ToString(GetStealthEnabled(OBJECT_SELF)));
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

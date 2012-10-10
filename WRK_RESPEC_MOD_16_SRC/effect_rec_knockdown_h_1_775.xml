@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="775" Folder="\_Game Effects\Effects\" ResRefName="effect_rec_knockdown_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_rec_knockdown_h.nss?moduleid=1&amp;resrefid=775" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_rec_knockdown_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------                                                                                                     // -----------------------------------------------------------------------------
+// effect_rec_knockdown_h
+// -----------------------------------------------------------------------------
+/*
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: PeterT
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+effect EffectRecurringKnockdown();
+int Effects_HandleApplyEffectRecurringKnockdown(effect eEffect);
+int Effects_HandleRemoveEffectRecurringKnockdown(effect eEffect);
+
+effect EffectRecurringKnockdown()
+{
+
+    return Effect(EFFECT_TYPE_RECURRING_KNOCKDOWN);
+}
+
+
+
+int Effects_HandleApplyEffectRecurringKnockdown(effect eEffect)
+{
+    // knockdown the player for a set amount of time
+    
+    return 1;
+}
+
+int Effects_HandleRemoveEffectRecurringKnockdown(effect eEffect)
+{
+    // check to see if the effect should be removed
+    // if not, delay apply again
+    
+    return 1;
+}</text>
+	</Agent>
+</Resource>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="2638" Folder="\_Game Effects\Effects\" ResRefName="effect_feign_death_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_feign_death_h.nss?moduleid=1&amp;resrefid=2638" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_feign_death_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_feign_death
+// -----------------------------------------------------------------------------
+/*
+    Effect for feign death.
+
+
+    Implementation Notes:
+
+    - Engages stealth without change in object transparency.
+        - Hostile creatures lose perception and threat.
+        - AoE spells still affect target (makes sense).
+
+    - 2da data disables most of character control and plays death anim.
+
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+#include "effect_constants_h"
+#include "log_h"
+
+effect EffectFeignDeath()
+{
+    return   Effect(EFFECT_TYPE_FEIGN_DEATH);
+}
+
+
+int Effects_HandleApplyEffectFeignDeath(effect eEffect)
+{
+    Log_Trace(LOG_CHANNEL_EFFECTS, "Checking Feign Death");
+    
+    // -------------------------------------------------------------------------
+    // Stealth and Feign Death don't like each other.
+    // -------------------------------------------------------------------------
+    if (GetStealthEnabled(OBJECT_SELF))
+    {
+        return FALSE;
+    }
+    
+    int nCount = GetArraySize(GetEffects(OBJECT_SELF, EFFECT_TYPE_FEIGN_DEATH));
+    Log_Trace(LOG_CHANNEL_EFFECTS, "Feign Death Count = " + ToString(nCount));
+
+    if (nCount &gt; 0)//!= 1)
+    {
+
+        return FALSE;
+    }
+    else
+    {
+
+        SetStealthEnabled(OBJECT_SELF, TRUE);
+    }
+    return TRUE;
+}
+
+int Effects_HandleRemoveEffectFeignDeath(effect eEffect)
+{
+    int nCount = GetArraySize(GetEffects(OBJECT_SELF, EFFECT_TYPE_FEIGN_DEATH));
+    Log_Trace(LOG_CHANNEL_EFFECTS, "Feign Death Count = " + ToString(nCount));
+        
+    if (nCount == 0)
+    {
+        SetStealthEnabled(OBJECT_SELF, FALSE);
+    }
+
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

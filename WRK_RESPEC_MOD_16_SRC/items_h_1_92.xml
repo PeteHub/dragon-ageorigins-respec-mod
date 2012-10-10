@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="92" Folder="\_Core Includes\" ResRefName="items_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\items_h.nss?moduleid=1&amp;resrefid=92" Requested="0">
+	<Agent type="empty">
+		<ResRefName>items_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>#include "2da_constants_h"
+#include "log_h"
+#include "core_h"
+
+
+
+
+
+
+int Items_CheckAmmo(object oAttacker, object oWeapon = OBJECT_INVALID , int nWeaponSet = INVALID_WEAPON_SET);
+int Items_CheckAmmo(object oAttacker, object oWeapon = OBJECT_INVALID , int nWeaponSet = INVALID_WEAPON_SET)
+{
+
+    // -----------------------------------------------------------------
+    // Ammo is in the off hand
+    // -----------------------------------------------------------------
+    object oAmmoStack = GetItemInEquipSlot(INVENTORY_SLOT_OFFHAND,oAttacker, nWeaponSet);
+
+    if (oWeapon == OBJECT_INVALID)
+    {
+        oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN, oAttacker,nWeaponSet);
+    }
+
+    int nWeaponType = GetBaseItemType(oWeapon);
+
+    // -----------------------------------------------------------------
+    // need to have a valid ammo object in the offhand
+    // -----------------------------------------------------------------
+    if (IsObjectValid(oAmmoStack))
+    {
+        // -----------------------------------------------------------------
+        // Check that this is the right ammo type for this weapon
+        // -----------------------------------------------------------------
+        int nBaseItem = GetBaseItemType(oAmmoStack);
+        if (nBaseItem == GetM2DAInt(TABLE_ITEMS,"Ammo",nWeaponType))
+        {
+            // -----------------------------------------------------------------
+            // Check that the stack size is &gt; 0
+            // -----------------------------------------------------------------
+            if (GetItemStackSize(oAmmoStack) &gt; 0)
+            {
+                return GetItemStackSize(oAmmoStack);
+            }
+
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // for everything else ... there is FALSE;
+    // -----------------------------------------------------------------
+    return FALSE;
+}
+
+// Returns max size of ammo
+int Items_CheckMaxAmmo(object oAttacker, object oWeapon = OBJECT_INVALID , int nWeaponSet = INVALID_WEAPON_SET);
+int Items_CheckMaxAmmo(object oAttacker, object oWeapon = OBJECT_INVALID , int nWeaponSet = INVALID_WEAPON_SET)
+{
+    int nMaxAmmo = 0;
+    object oAmmoStack = GetItemInEquipSlot(INVENTORY_SLOT_OFFHAND,oAttacker, nWeaponSet);
+
+    if (oWeapon == OBJECT_INVALID)
+    {
+        oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN, oAttacker,nWeaponSet);
+    }
+
+    int nWeaponType = GetBaseItemType(oWeapon);
+
+    if (IsObjectValid(oAmmoStack))
+    {
+        // -----------------------------------------------------------------
+        // Check that this is the right ammo type for this weapon
+        // -----------------------------------------------------------------
+        int nBaseItem = GetBaseItemType(oAmmoStack);
+        if (nBaseItem == GetM2DAInt(TABLE_ITEMS,"Ammo",nWeaponType))
+        {
+            nMaxAmmo = GetM2DAInt(TABLE_ITEMS, "StackSize", nBaseItem);
+        }
+    }
+    return nMaxAmmo;
+}
+
+
+int Items_GetRangedWeaponSet(object oCreature, int bConsiderStaffRanged = FALSE)
+{
+
+    int nWeaponSet = GetActiveWeaponSet(oCreature);
+    int nInactiveWeaponSet = (nWeaponSet ==1)? 0 : 1;
+
+    object oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN, oCreature, nWeaponSet);
+    if (IsObjectValid (oWeapon))
+    {
+        if (GetItemType(oWeapon) == ITEM_TYPE_WEAPON_RANGED)
+        {
+            //if (Items_CheckAmmo(oCreature, oWeapon))
+            //{
+                return nWeaponSet;
+            //}
+        }    
+        if(bConsiderStaffRanged &amp;&amp; GetItemType(oWeapon) == ITEM_TYPE_WEAPON_WAND)
+            return nWeaponSet;
+    }
+
+    oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN, oCreature, nInactiveWeaponSet);
+    if (IsObjectValid (oWeapon))
+    {
+        if (GetItemType(oWeapon) == ITEM_TYPE_WEAPON_RANGED)
+        {
+            //if (Items_CheckAmmo(oCreature, oWeapon, nInactiveWeaponSet))
+            //{
+                return nInactiveWeaponSet;
+            //}  
+        } 
+        if(bConsiderStaffRanged &amp;&amp; GetItemType(oWeapon) == ITEM_TYPE_WEAPON_WAND)
+            return nInactiveWeaponSet;
+    }
+
+
+    return -1;
+
+}
+
+
+int Items_GetMeleeWeaponSet(object oCreature)
+{
+
+    int nWeaponSet = GetActiveWeaponSet(oCreature);
+    int nInactiveWeaponSet = (nWeaponSet ==1)? 0 : 1;
+
+    object oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN, oCreature, nWeaponSet);
+    if (IsObjectValid (oWeapon))
+    {
+        if (GetItemType(oWeapon) == ITEM_TYPE_WEAPON_MELEE)
+        {
+            return nWeaponSet;
+        }
+    }
+
+    oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN, oCreature, nInactiveWeaponSet);
+    if (IsObjectValid (oWeapon))
+    {
+        if (GetItemType(oWeapon) == ITEM_TYPE_WEAPON_MELEE)
+        {
+                return nInactiveWeaponSet;
+        }
+    }
+
+
+    return -1;
+
+}</text>
+	</Agent>
+</Resource>

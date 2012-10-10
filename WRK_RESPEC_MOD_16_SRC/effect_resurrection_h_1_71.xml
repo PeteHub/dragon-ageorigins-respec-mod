@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="71" Folder="\_Game Effects\Effects\" ResRefName="effect_resurrection_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_resurrection_h.nss?moduleid=1&amp;resrefid=71" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_resurrection_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_resurrection_h
+// -----------------------------------------------------------------------------
+/*
+    Effect to revive a dead creature.
+    'Dead' is defined as health &lt;= 0
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "2da_constants_h"
+#include "wrappers_h"
+#include "events_h"
+#include "effect_constants_h"
+
+// -----------------------------------------------------------------------------
+// This defines the distance the player has to have to his party members
+// before they resurrect after combat.
+//
+// Put it too long and people will stand up and get whacked down by monsters
+// because the player lost perception to them
+//
+// Put it too short and it gets tedious.
+// -----------------------------------------------------------------------------
+const float RULES_RESURRECTION_DISTANCE = 7.5f;
+
+
+void HandlePlayerRessurect(object oCreature, int bApplyInjury = TRUE)
+{
+    // --------------------------------------------------------------------
+    // Restart AI level after it was frozen...
+    // --------------------------------------------------------------------
+    Log_Trace(LOG_CHANNEL_CHARACTER,"HandleEvent_Resurrection", "Forcing AI level normal, then unlocking it!");
+
+    // Restore AI level on target.
+    SetAILevel(oCreature, CSERVERAIMASTER_AI_LEVEL_INVALID);
+    SetCreatureFlag(oCreature,CREATURE_RULES_FLAG_DYING,FALSE);
+   // SetCreatureGoreLevel(oCreature, 0.0);
+
+
+    event evRezz= Event(EVENT_TYPE_RESURRECTION);
+    evRezz = SetEventInteger(evRezz,0, bApplyInjury);
+
+
+    // -------------------------------------------------------------------------
+    // Resurrection comes with a free, 25% heal
+    // -------------------------------------------------------------------------
+    float fHealth =  MaxF(1.0f,GetMaxHealth(oCreature) * 0.25);
+    SetCurrentHealth(oCreature, fHealth);
+
+
+
+    SignalEvent(oCreature, evRezz);
+}
+
+
+/** ----------------------------------------------------------------------------
+@brief Returns an effect which restores a dead creature to life.
+*
+* Constructor for the resurrection effect. When applied to a dead creature, this
+* effect instantly restores the creature to life with 1 health. If the creature
+* is alive then this effect does nothing.
+*
+* @author David Sims
+*
+* @return a valid effect of type EFFECT_TYPE_RESURRECTION.
+-----------------------------------------------------------------------------**/
+effect EffectResurrection(int bApplyInjury = FALSE, int bHealFull = FALSE);
+effect EffectResurrection(int bApplyInjury = FALSE, int bHealFull = FALSE)
+{
+    effect eEffect = Effect(EFFECT_TYPE_RESURRECTION);
+    eEffect = SetEffectInteger (eEffect, 0, bApplyInjury);
+    eEffect = SetEffectInteger (eEffect, 1, bHealFull);
+    return eEffect;
+}
+
+// -----------------------------------------------------------------------------
+// This utility function handles the application of EffectResurrection and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleApplyEffectResurrection(effect eEffect, object oTarget = OBJECT_SELF);
+int Effects_HandleApplyEffectResurrection(effect eEffect, object oTarget = OBJECT_SELF)
+{
+    int    bHealFull = GetEffectInteger(eEffect,1);
+
+    // -------------------------------------------------------------------------
+    // Onle dead creatures can be resurrected.
+    // -------------------------------------------------------------------------
+    if ( IsDead(oTarget) )
+    {
+
+        if (!bHealFull)
+        {
+            SetCurrentHealth(oTarget, 1.00f);
+        }
+        else
+        {
+            SetCurrentHealth(oTarget,GetMaxHealth(oTarget));
+        }
+
+
+
+
+        // flag injury system
+
+        HandlePlayerRessurect(oTarget, GetEffectInteger(eEffect,0));
+
+
+
+    }
+
+
+    return TRUE;
+}
+
+// -----------------------------------------------------------------------------
+// This utility function handles the removal of EffectResurrection and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleRemoveEffectResurrection(effect eEffect);
+int Effects_HandleRemoveEffectResurrection(effect eEffect)
+{
+    return TRUE;
+}
+
+
+
+void ResurrectPartyMembers(int bHealFull = FALSE);
+void ResurrectPartyMembers(int bHealFull = FALSE)
+{
+
+    effect eRez = EffectResurrection(TRUE, bHealFull);
+    eRez = SetEffectCreator(eRez, GetModule());
+
+    object[] partyMembers = GetPartyList();
+    int nMembers = GetArraySize(partyMembers);
+    int i;
+
+    for (i = 0; i &lt; nMembers; i++)
+    {
+        if (IsDead(partyMembers[i]))
+        {
+            Effects_HandleApplyEffectResurrection(eRez, partyMembers[i]);
+        }
+    }
+}
+
+
+
+void ResurrectCreature(object oCreature, int bHealFull = FALSE);
+void ResurrectCreature(object oCreature, int bHealFull = FALSE)
+{
+
+    effect eRez = EffectResurrection(TRUE, bHealFull);
+
+    if (IsDead(oCreature))
+    {
+        ApplyEffectOnObject(EFFECT_DURATION_TYPE_INSTANT, eRez, oCreature,0.0f, OBJECT_SELF);
+    }
+
+}
+
+
+
+int CheckForDeadPartyMembers()
+{
+
+    object[] party= GetPartyList();
+    int nArraySize = GetArraySize(party);
+    int i;
+    for (i=0; i &lt; nArraySize; i++)
+    {
+        if (IsDead(party[i]))
+        {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+/** ----------------------------------------------------------------------------
+@brief Checks all party members if resurrection is possible and ressurects them
+*
+* Function is semi-recursive, don't pass a scope to perform full party check.
+* Talk to Georg before using.
+*
+* Rules for resurrection:
+*
+*   Party Member must be dead (duh)
+*   Another Party member must be with in RULES_RESURRECTION_DISTANCE
+*
+@return TRUE only if ALL party members were resurrected succesfully.
+@author Georg Zoeller
+-----------------------------------------------------------------------------**/
+int CheckResurrection(object oScope = OBJECT_INVALID);
+int CheckResurrection(object oScope = OBJECT_INVALID)
+{
+
+    // -------------------------------------------------------------------------
+    // No scope, check all party members
+    // -------------------------------------------------------------------------
+    if (oScope == OBJECT_INVALID)
+    {
+        object[] aParty = GetPartyList();
+        int nSize = GetArraySize(aParty);
+        int i =0;
+        int bResult = TRUE;
+        object oTmp;
+        for (i = 0; i &lt; nSize; i++)
+        {
+            oTmp =  aParty[i];
+            // -----------------------------------------------------------------
+            // For each dead (and valid) party member, check resurrection
+            // -----------------------------------------------------------------
+            if (IsObjectValid(oTmp) &amp;&amp; IsDead(oTmp))
+            {
+                int tResult = CheckResurrection(oTmp);
+                bResult = bResult &amp;&amp; tResult;
+            }
+        }
+        return bResult;
+    }
+    // -------------------------------------------------------------------------
+    // oScope provided, check if oScope can rezz
+    // -------------------------------------------------------------------------
+    else
+    {
+        int bResult = FALSE;
+        object[] aParty = GetPartyList();
+        int nSize = GetArraySize(aParty);
+        int i =0;
+        object oTmp;     
+        
+        if(GetGameMode() != GM_EXPLORE &amp;&amp; IsNoExploreArea())
+            return FALSE; // ressurection loop can not succeed unless we are in explore (for some specific areas...)
+            
+        for (i = 0; i &lt; nSize; i++)
+        {
+            oTmp =  aParty[i];
+
+            // -----------------------------------------------------------------
+            // Check every non dead party member that is not identical to
+            // oScope and see if they are within resurrection distance.
+            // -----------------------------------------------------------------
+            if (!bResult &amp;&amp; IsObjectValid(oTmp) &amp;&amp; !IsDead(oTmp) &amp;&amp; oTmp != oScope)
+            {
+                if (GetDistanceBetween(oTmp, oScope) &lt; RULES_RESURRECTION_DISTANCE)
+                {
+                    // ---------------------------------------------------------
+                    // They are, resurrect them right now.
+                    // ---------------------------------------------------------
+                    ResurrectCreature(oScope);
+                    bResult = TRUE;
+                }
+            }
+        }
+        return bResult;
+    }
+}</text>
+	</Agent>
+</Resource>

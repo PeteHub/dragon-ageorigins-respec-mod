@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="74" Folder="\_Core Includes\" ResRefName="config_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\config_h.nss?moduleid=1&amp;resrefid=74" Requested="0">
+	<Agent type="empty">
+		<ResRefName>config_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//------------------------------------------------------------------------------
+// config_h - Configuration Management
+//------------------------------------------------------------------------------
+/*
+    This file manages configuration data read from core_rules.xls
+
+*/
+//------------------------------------------------------------------------------
+// Georg Zoeller @ 2006/12/06
+//------------------------------------------------------------------------------
+
+#include "2da_constants_h"
+
+const string CONFIG_ACTIVESET = "Default";           // core_rules.xls supports 'sets' (columns) with different configurations
+
+// -----------------------------------------------------------------------------
+// Level of the Week development feature
+// -----------------------------------------------------------------------------
+
+const string LEVEL_OF_THE_WEEK_RESREF   = "lot100ar_lothering";     // tag/resref
+const string LEVEL_OF_THE_WEEK_WAYPOINT = "lot0100wp_from_wilds";   // waypoint
+
+
+
+// -----------------------------------------------------------------------------
+// These correspond to the rows of core_rules.xls
+// -----------------------------------------------------------------------------
+const int CONFIG_SETTING_INVALID           = 0;
+const int CONFIG_SETTING_SPELLINTERRUPTION      = 1;  // spell interruption rule
+const int CONFIG_SETTING_UPKEEP_COST_PERCENT    = 2;  // %mana cost of upkeep spells
+const int CONFIG_SETTING_UPKEEP_RETURN_PERCENT  = 3;  // % of mana returned after cancelling upkeep spells
+const int CONFIG_SETTING_HEALTH_REGEN_RATE      = 4; // health regen per X seconds
+const int CONFIG_SETTING_HEALTH_REGEN_AMOUNT    = 5; // how much health is reagaine
+
+const int CONFIG_VALUE_SPELLINTERRUPTION_OFF    = 0;
+const int CONFIG_VALUE_SPELLINTERRUPTION_SIMPLE = 1;
+
+
+const int CONFIG_CONSTANT_BLOODPOOL_FREQ = 50;      //% of creature death that spawn a bloodpool
+const float CONFIG_CONSTANT_BLOODPOOL_DURATION = 20.0f;      //% of creature death that spawn a bloodpool
+
+
+const float CONFIG_CONSTANT_HEARTBEAT_RATE = 3.0f;
+
+/** ----------------------------------------------------------------------------
+* @brief Returns an integer configuration setting from core_rules.xls
+*
+* See core_rules.xls for details
+*
+* @param nSetting  The CONFIG_SETTING_* to query
+*
+* @returns  CONFIG_VALUE_* or normal int depending on setting.
+* @author   Georg
+*  -----------------------------------------------------------------------------
+**/
+int Config_GetSetting(int nSetting);
+int Config_GetSetting(int nSetting)
+{
+    return GetM2DAInt(TABLE_CORE_RULES,CONFIG_ACTIVESET,nSetting);
+}
+
+
+float Config_GetSettingFloat(int nSetting);
+float Config_GetSettingFloat(int nSetting)
+{
+    return IntToFloat(GetM2DAInt(TABLE_CORE_RULES,CONFIG_ACTIVESET,nSetting));
+}
+
+
+int ConfigIsAutoPauseEnabled()
+{
+    return (GetAutoPauseCombatStatus() != 0);
+}</text>
+	</Agent>
+</Resource>

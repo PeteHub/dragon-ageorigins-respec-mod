@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="19" Folder="\_Global\Plot Scripts\" ResRefName="gen00pt_class_race_gend" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\gen00pt_class_race_gend.nss?moduleid=1&amp;resrefid=19" Requested="0">
+	<Agent type="empty">
+		<ResRefName>gen00pt_class_race_gend</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//:://////////////////////////////////////////////
+/*
+    Class/race/gender checks
+*/
+//:://////////////////////////////////////////////
+//:: Created By: Yaron
+//:: Created On: July 6th, 2006
+//:://////////////////////////////////////////////
+
+
+#include "plt_gen00pt_class_race_gend"
+#include "wrappers_h"
+#include "utility_h"
+#include "plot_h"
+
+// DEBUG:
+//#include "plt_zz_genpt_char_creation"
+
+int StartingConditional()
+{
+    event eParms = GetCurrentEvent();                // Contains all input parameters
+    int nType = GetEventType(eParms);               // GET or SET call
+    string strPlot = GetEventString(eParms, 0);         // Plot GUID
+    int nFlag = GetEventInteger(eParms, 1);          // The bit flag # being affected
+    object oParty = GetEventCreator(eParms);      // The owner of the plot table for this script
+    int nResult = FALSE;
+
+    plot_GlobalPlotHandler(eParms); // any global plot operations, including debug info
+
+    object oPC = GetHero();
+
+    object oListener = oPC;
+
+    if(DialogIsAmbient())
+        oListener = GetMainControlled();
+
+
+    if(nType == EVENT_TYPE_SET_PLOT) // actions -&gt; normal flags only
+    {
+        int nValue = GetEventInteger(eParms, 2);        // On SET call, the value about to be written
+        int nOldValue = GetEventInteger(eParms, 3);     // On SET call, the current flag value
+
+        switch(nFlag)
+        {
+
+
+        }
+     }
+     else // EVENT_TYPE_GET_PLOT -&gt; defined conditions only
+     {
+        switch(nFlag)
+        {
+            case GEN_CLASS_DEF_BLOODMAGE_OR_REAVER_OR_ASSASSIN:
+            {
+                if(WR_GetPlotFlag(strPlot, GEN_CLASS_ADV_BLOOD_MAGE) ||
+                    WR_GetPlotFlag(strPlot, GEN_CLASS_ADV_ASSASSIN) ||
+                    WR_GetPlotFlag(strPlot, GEN_CLASS_ADV_REAVER))
+                        nResult = TRUE;
+                break;
+            }
+            case GEN_GENDER_FEMALE:
+            {
+                if(GetCreatureGender(oListener) == GENDER_FEMALE)
+                    nResult = TRUE;
+                break;
+            }
+            case GEN_GENDER_MALE:
+            {
+                if(GetCreatureGender(oListener) == GENDER_MALE)
+                    nResult = TRUE;
+                break;
+            }
+            case GEN_CLASS_MAGE:
+            {
+                nResult =   ( GetCreatureCoreClass(oListener) == CLASS_WIZARD );
+                break;
+            }
+            case GEN_CLASS_WARRIOR:
+            {
+                // DEBUG START
+                nResult =   ( GetCreatureCoreClass(oListener) == CLASS_WARRIOR );
+                break;
+            }
+            case GEN_CLASS_ROGUE:
+            {
+                nResult =   ( GetCreatureCoreClass(oListener) == CLASS_ROGUE );
+                break;
+            }
+            case GEN_RACE_HUMAN:
+            {
+                if(GetCreatureRacialType(oListener) == RACE_HUMAN)
+                    nResult = TRUE;
+                break;
+            }
+            case GEN_RACE_ELF:
+            {
+                if(GetCreatureRacialType(oListener) == RACE_ELF)
+                    nResult = TRUE;
+                break;
+            }
+            case GEN_RACE_DWARF:
+            {
+                if(GetCreatureRacialType(oListener) == RACE_DWARF)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_ARCANE_WARRIOR:
+            {
+                if(HasAbility(oListener,ABILITY_SPELL_HIDDEN_ARCANE_WARRIOR) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_ASSASSIN:
+            {
+                if(HasAbility(oListener,ABILITY_TALENT_HIDDEN_ASSASSIN) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_BARD:
+            {
+                if(HasAbility(oListener,ABILITY_SPELL_HIDDEN_BARD) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_BERSERKER:
+            {
+                if(HasAbility(oListener,ABILITY_TALENT_HIDDEN_BERSERKER) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_BLOOD_MAGE:
+            {
+                if(HasAbility(oListener,ABILITY_SPELL_HIDDEN_BLOODMAGE) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_CHAMPION:
+            {
+                if(HasAbility(oListener,ABILITY_TALENT_HIDDEN_CHAMPION) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_DUELIST:
+            {
+                if(HasAbility(oListener,ABILITY_TALENT_HIDDEN_DUELIST) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_RANGER:
+            {
+                if(HasAbility(oListener,ABILITY_TALENT_HIDDEN_RANGER) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_REAVER:
+            {
+                if(HasAbility(oListener,ABILITY_TALENT_HIDDEN_REAVER) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_SHAPESHIFTER:
+            {
+                if(HasAbility(oListener,ABILITY_SPELL_HIDDEN_SHAPESHIFTER) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_SPIRIT_HEALER:
+            {
+                if(HasAbility(oListener,ABILITY_SPELL_HIDDEN_SPIRIT_HEALER) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+
+            case GEN_CLASS_ADV_TEMPLAR:
+            {
+                if(HasAbility(oListener,ABILITY_TALENT_HIDDEN_TEMPLAR) == TRUE)
+                    nResult = TRUE;
+                break;
+            }
+        }
+
+    }
+    plot_OutputDefinedFlag(eParms, nResult);
+
+    return nResult;
+}</text>
+	</Agent>
+</Resource>

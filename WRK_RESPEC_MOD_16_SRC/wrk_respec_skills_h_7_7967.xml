@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="7" OwnerModuleID="7" ResRefID="7967" Folder="\WRK_RESPEC\" ResRefName="wrk_respec_skills_h" IsCore="0" OwnerIsCore="0" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\wrk_respec_skills_h.nss?moduleid=7&amp;resrefid=7967" Requested="1">
+	<Agent type="empty">
+		<ResRefName>wrk_respec_skills_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//////////////////////////////////////////////////////////////////
+//
+// Description: WRK_RESPEC Skill respecialization
+// Owner: Peter 'weriK' Kovacs
+// Date: 11/10/2009 @ 4:31 AM
+//
+/////////////////////////////////////////////////////////////////
+
+#include "wrk_respec_utility_h"
+
+/** @brief Loops through an ability array and resets skills
+*
+*   Looping through a given array that
+*   contains the id's of every skill Ability a character
+*   can have. If the character has an abbility, it removes that,
+*   and in return grants an extra skill point.
+*
+* @param iCounter    - Loop counter. First element of the array to be processed.
+* @param iMax        - Ending condition of the loop. Repeat until iMax &lt;= iCounter
+* @param arAbilityID - Array of ability IDs we want to test against
+* @param oCharacter  - The character
+* @author weriK
+**/
+int WRK_LOOP_SKILL(int iCounter, int iMax, int[] arAbilityID, object oCharacter)
+{
+    int i;
+    for (i = iCounter; i &lt; iMax; i++)
+    {
+        // Check whether the character has the talent
+        if ( HasAbility(oCharacter, arAbilityID[i]) )
+        {
+            // Unlearn the talent
+            RemoveAbility(oCharacter, arAbilityID[i]);
+            WRK_GiveSkillPoints(oCharacter, 1.0f);
+        }
+    }
+
+    return 1;
+}
+
+
+/** @brief Resets the skill points on a character
+*
+*   This is the main function for resetting all skill points
+*   on a character. It contains an Array with all the ability
+*   ID's it is testing against. More elements can be added to the
+*   array every time to extend the list of abilities it checks
+*
+* @param oCharacter - The character
+* @author weriK
+**/
+void WRK_RESPEC_SKILLS(object oCharacter)
+{
+    // Master list of all available skills ( 8 rows, 4 ranks, 32 skill points max )
+    int[] WRK_SKILLLIST;
+
+    // Coercion (Only the hero has this)
+    WRK_SKILLLIST[0] = ABILITY_SKILL_PERSUADE_4;
+    WRK_SKILLLIST[1] = ABILITY_SKILL_PERSUADE_3;
+    WRK_SKILLLIST[2] = ABILITY_SKILL_PERSUADE_2;
+    WRK_SKILLLIST[3] = ABILITY_SKILL_PERSUADE_1;
+
+    WRK_SKILLLIST[4] = ABILITY_SKILL_STEALING_4;
+    WRK_SKILLLIST[5] = ABILITY_SKILL_STEALING_3;
+    WRK_SKILLLIST[6] = ABILITY_SKILL_STEALING_2;
+    WRK_SKILLLIST[7] = ABILITY_SKILL_STEALING_1;
+
+    WRK_SKILLLIST[8] = ABILITY_SKILL_TRAPS_4;
+    WRK_SKILLLIST[9] = ABILITY_SKILL_TRAPS_3;
+    WRK_SKILLLIST[10] = ABILITY_SKILL_TRAPS_2;
+    WRK_SKILLLIST[11] = ABILITY_SKILL_TRAPS_1;
+
+    WRK_SKILLLIST[12] = ABILITY_SKILL_SURVIVAL_4;
+    WRK_SKILLLIST[13] = ABILITY_SKILL_SURVIVAL_3;
+    WRK_SKILLLIST[14] = ABILITY_SKILL_SURVIVAL_2;
+    WRK_SKILLLIST[15] = ABILITY_SKILL_SURVIVAL_1;
+
+    WRK_SKILLLIST[16] = ABILITY_SKILL_HERBALISM_4;
+    WRK_SKILLLIST[17] = ABILITY_SKILL_HERBALISM_3;
+    WRK_SKILLLIST[18] = ABILITY_SKILL_HERBALISM_2;
+    WRK_SKILLLIST[19] = ABILITY_SKILL_HERBALISM_1;
+
+    WRK_SKILLLIST[20] = ABILITY_SKILL_POISON_4;
+    WRK_SKILLLIST[21] = ABILITY_SKILL_POISON_3;
+    WRK_SKILLLIST[22] = ABILITY_SKILL_POISON_2;
+    WRK_SKILLLIST[23] = ABILITY_SKILL_POISON_1;
+
+// ----------- THIS CONSTANT HAS WRONG VALUE IN 2da_constants_h.nss ------------
+// It should have a value of 100104 but it has 100103
+//WRK_SKILLLIST[24] = ABILITY_SKILL_COMBAT_TRAINING_4;
+    WRK_SKILLLIST[24] = 100103;
+// -----------------------------------------------------------------------------
+    WRK_SKILLLIST[25] = ABILITY_SKILL_COMBAT_TRAINING_3;
+    WRK_SKILLLIST[26] = ABILITY_SKILL_COMBAT_TRAINING_2;
+    WRK_SKILLLIST[27] = ABILITY_SKILL_COMBAT_TRAINING_1;
+
+    WRK_SKILLLIST[28] = ABILITY_SKILL_COMBAT_TACTICS_4;
+    WRK_SKILLLIST[29] = ABILITY_SKILL_COMBAT_TACTICS_3;
+    WRK_SKILLLIST[30] = ABILITY_SKILL_COMBAT_TACTICS_2;
+    WRK_SKILLLIST[31] = ABILITY_SKILL_COMBAT_TACTICS_1;
+
+
+    // This will loop through the whole skill list array and free up any skill
+    // point that is taken. Shale has no assignable skills even though he does have
+    // COMBAT_TACTICS_1 hidden. Because of this we want to skip him.
+    if ( GetName(oCharacter) != "Shale"  )
+    {
+        WRK_LOOP_SKILL(0, GetArraySize(WRK_SKILLLIST), WRK_SKILLLIST, oCharacter);
+
+        // Recalculate the amount of available tactics due to the loss of Combat Tactics
+        Chargen_SetNumTactics(oCharacter);
+    }
+}</text>
+	</Agent>
+</Resource>

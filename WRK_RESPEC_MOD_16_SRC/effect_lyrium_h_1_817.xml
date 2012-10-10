@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="817" Folder="\_Game Effects\Effects\" ResRefName="effect_lyrium_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_lyrium_h.nss?moduleid=1&amp;resrefid=817" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_lyrium_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//==============================================================================
+// effect_lyrium_h
+//------------------------------------------------------------------------------
+/*
+
+*/
+//------------------------------------------------------------------------------
+// Created By: Joshua Stiksma
+// Created On: January 18, 2007
+//==============================================================================
+
+#include "sys_injury"
+#include "2da_constants_h"
+#include "sys_lyrium_h"
+#include "core_h"
+#include "log_h"</text>
+	</Agent>
+</Resource>

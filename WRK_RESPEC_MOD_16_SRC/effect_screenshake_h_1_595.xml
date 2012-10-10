@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="595" Folder="\_Game Effects\Effects\" ResRefName="effect_screenshake_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_screenshake_h.nss?moduleid=1&amp;resrefid=595" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_screenshake_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_ai_modifier
+// -----------------------------------------------------------------------------
+/*
+    Effect: AI Modifier
+
+            Used to apply modifiers taken into account by the game AI to the
+            creature
+
+            Example: AI_MODIFIER_IGNORE - AI ignores the target as if it was
+                                          not there
+
+            All these required manual integration into the game AI
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "effect_constants_h"
+#include "2da_constants_h"
+
+const int SCREEN_SHAKE_TYPE_DEFAULT = 1;
+const int SCREEN_SHAKE_TYPE_CRITICAL_HIT = 2;
+const int SCREEN_SHAKE_TYPE_OGRE_STOMP = 3;
+const int SCREEN_SHAKE_TYPE_BROODMOTHER_SCREEM = 7;  
+const int SCREEN_SHAKE_TYPE_WILD_SYLVAN = 8;
+
+effect EffectScreenShake(int nScreenShakeType)
+{
+
+    effect eEffect = Effect(6);
+
+    float fFreqX = GetM2DAFloat(TABLE_SCREEN_SHAKE,"frequency_x",nScreenShakeType);
+    float fFreqY = GetM2DAFloat(TABLE_SCREEN_SHAKE,"frequency_y",nScreenShakeType);
+    float fAmpX  = GetM2DAFloat(TABLE_SCREEN_SHAKE,"amplitude_x",nScreenShakeType);
+    float fAmpY  = GetM2DAFloat(TABLE_SCREEN_SHAKE,"amplitude_y",nScreenShakeType);
+
+
+    Log_Trace(LOG_CHANNEL_EFFECTS,"EffectScreenShake","Creating screen shake effect with "+
+                                    ToString(fFreqX) + "," +ToString(fFreqY) + "," + ToString(fAmpX) + "," +ToString(fAmpY));
+
+    eEffect = SetEffectFloat(eEffect,0, fFreqX);   // &lt;frequency_x&gt;
+    eEffect = SetEffectFloat(eEffect,1, fFreqY);   // &lt;frequency_y&gt;
+    eEffect = SetEffectFloat(eEffect,2, fAmpX);    // &lt;amplitude_x&gt;
+    eEffect = SetEffectFloat(eEffect,3, fAmpY);    // &lt;amplitude_y&gt;
+
+    return eEffect;
+}</text>
+	</Agent>
+</Resource>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="1003" Folder="\_Game Effects\Effects\" ResRefName="effect_summon_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_summon_h.nss?moduleid=1&amp;resrefid=1003" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_summon_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------------------------------------------------------------------------------
+// effect_summon_h
+// -----------------------------------------------------------------------------
+/*
+    Effect: Summon
+
+    Tethers a summoned creature to it's master.
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "effect_constants_h"
+#include "effect_death_h"
+#include "2da_data_h"
+#include "wrappers_h"
+#include "effect_upkeep_h"
+
+effect EffectSummon(object oOwner, object oCreature);
+effect EffectSummon(object oOwner, object oCreature)
+{
+    effect eEffect = Effect(EFFECT_TYPE_SUMMON);
+    eEffect = SetEffectObject(eEffect, 0, oOwner);
+    eEffect = SetEffectObject(eEffect, 1, oCreature);
+
+    return eEffect;
+}
+
+
+
+// -----------------------------------------------------------------------------
+// This utility function handles the application of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleApplyEffectSummon(effect eEffect);
+int Effects_HandleApplyEffectSummon(effect eEffect)
+{
+
+    object oOwner    = GetEffectObject(eEffect,0);
+    object oCreature = GetEffectObject(eEffect,1);
+
+    if ((OBJECT_SELF == oOwner || OBJECT_SELF == oCreature ) &amp;&amp; IsObjectValid(oCreature))
+    {
+           //     ApplyEffectVisualEffect(oCreature, oCreature, 1070,EFFECT_DURATION_TYPE_INSTANT, 0.0f, GetEffectAbilityID(eEffect));
+
+        if (OBJECT_SELF == oCreature)
+        {
+            SetLocalInt(oCreature, IS_SUMMONED_CREATURE,TRUE);
+            SetGroupId(oCreature, GetGroupId(oOwner));
+
+            event eActivate = Event(EVENT_TYPE_SET_OBJECT_ACTIVE);
+            eActivate = SetEventInteger(eActivate,0, TRUE);
+
+            if (IsPartyMember(oOwner))
+            {
+                // the follower state is now ignored for this event - it has moved to ability_summon_h
+                eActivate = SetEventInteger(eActivate,1, FOLLOWER_STATE_ACTIVE);
+            }
+
+            DelayEvent(0.5, oCreature,eActivate);
+        }
+
+
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+
+
+}
+
+// -----------------------------------------------------------------------------
+// This utility function handles the removal of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleRemoveEffectSummon(effect eEffect);
+int Effects_HandleRemoveEffectSummon(effect eEffect)
+{
+    object oOwner    = GetEffectObject(eEffect,0);
+    object oCreature = GetEffectObject(eEffect,1);
+
+   if (OBJECT_SELF == oOwner || OBJECT_SELF == oCreature)
+    {
+        if (OBJECT_SELF == oOwner)
+        {
+            if (!IsInvalidDeadOrDying(oCreature) &amp;&amp; GetObjectActive(oCreature))
+            {
+                 SetCreatureProperty(oCreature,PROPERTY_DEPLETABLE_HEALTH, 0.0f, PROPERTY_VALUE_CURRENT);
+                 SetObjectInteractive(oCreature,FALSE);
+            }
+        }
+        else if (OBJECT_SELF == oCreature)
+        {
+            if (!IsInvalidDeadOrDying(oOwner))
+            {
+                event evNotice = Event(EVENT_TYPE_SUMMON_DIED);
+                evNotice = SetEventInteger(evNotice, 0, GetEffectAbilityID(eEffect));
+                DelayEvent(0.0f, oOwner, evNotice );
+            }
+
+            if (!IsInvalidDeadOrDying(oCreature) &amp;&amp; GetObjectActive(oCreature))
+            {
+                 SetCreatureProperty(oCreature,PROPERTY_DEPLETABLE_HEALTH, 0.0f, PROPERTY_VALUE_CURRENT);
+                 SetObjectInteractive(oCreature,FALSE);
+            }
+
+            if (IsPartyMember(oCreature))
+            {
+                 WR_SetFollowerState(oCreature, FOLLOWER_STATE_INVALID);
+            }
+
+           //ApplyEffectVisualEffect(oOwner, oCreature, 1070,EFFECT_DURATION_TYPE_INSTANT, 0.0f, GetEffectAbilityID(eEffect));
+        }
+    }
+
+    return TRUE;
+}
+
+void EffectSummon_HandleEventSummonDied(object oOwner, int nAbility)
+{
+   if (nAbility &gt; 0)
+   {
+       Effects_RemoveUpkeepEffect(oOwner, nAbility);
+    }
+}
+
+/*
+  Returns the current summon for a specified caster.
+
+  @author: Georg
+*/
+object GetCurrentSummon(object oCaster);
+object GetCurrentSummon(object oCaster)
+{
+    effect[] eSummons = GetEffects(oCaster, EFFECT_TYPE_SUMMON, 0, oCaster);
+    int nSize = GetArraySize(eSummons);
+
+    if (nSize)
+    {
+        return GetEffectObject(eSummons[0],1);
+    }
+    else
+    {
+        return OBJECT_INVALID;
+    }
+
+}
+
+void RemoveAllSummons(int bDestroySummon = FALSE)
+{
+     object[] partyList = GetPartyPoolList();
+    int nSize=GetArraySize(partyList);
+    int i;
+
+    // -------------------------------------------------------------------------
+    // For all summoned creatures, strip all effects.
+    // This removes the summon effect that teathers the creature to it's master
+    // causing it to die on the spot and deactivates the summon ability
+    // on the master. Yay for the ranger, abuser of wildlife.
+    // -------------------------------------------------------------------------
+    for (i=0; i&lt; nSize;i++)
+    {
+        if (IsSummoned(partyList[i]))
+        {
+            RemoveAllEffects(partyList[i]);
+
+            if (bDestroySummon == TRUE)
+            {
+                DestroyObject(partyList[i]);
+            }
+        }
+    }
+
+}</text>
+	</Agent>
+</Resource>

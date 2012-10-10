@@ -1,0 +1,1765 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="4265" Folder="\_Core Includes\" ResRefName="achievement_core_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\achievement_core_h.nss?moduleid=1&amp;resrefid=4265" Requested="0">
+	<Agent type="empty">
+		<ResRefName>achievement_core_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//void main() {} // MUST ALWAYS BE COMMENTED OUT. THIS IS FOR DEBUG ONLY
+//
+// achievement_core_h
+// Includes all core achievement-related constants
+
+// -----------------------------------------------------------------------------
+// Associated 2DA: Achievements.xls
+// //tag/main/data/Source/2DA/Achievements.xls
+// -----------------------------------------------------------------------------
+
+#include "2da_constants_h"
+#include "wrappers_h"
+#include "design_tracking_h"
+#include "sys_achievements_h"
+#include "plt_genpt_core_achievements"
+
+
+const string sACHIEVEMENT_DEBUG_VERSION = "|ACH V0.07006|"; //Debug Version
+const int ACH_SCREENSHOT_TYPE = 1;
+const int ACH_SCREENSHOT_HP_TYPE = 3;
+
+const int ACHIEVEMENT__APP_FOLLOWER_ALISTAIR = 1;
+const int ACHIEVEMENT__APP_FOLLOWER_DOG = 2;
+const int ACHIEVEMENT__APP_FOLLOWER_MORRIGAN = 3;
+const int ACHIEVEMENT__APP_FOLLOWER_WYNNE = 4;
+const int ACHIEVEMENT__APP_FOLLOWER_SHALE = 5;
+const int ACHIEVEMENT__APP_FOLLOWER_STEN = 6;
+const int ACHIEVEMENT__APP_FOLLOWER_ZEVRAN = 7;
+const int ACHIEVEMENT__APP_FOLLOWER_OGHREN = 8;
+const int ACHIEVEMENT__APP_FOLLOWER_LELIANA = 9;
+const int ACHIEVEMENT__APP_FOLLOWER_LOGHAIN = 10;
+
+const int ACHIEVEMENT__CREATURE_TYPE_DARKSPAWN = 7;
+// Broodmother Achievement constants
+const float BROODMOTHER_ACHIEVEMENT_DURATION = 120.0; // May need adjusting; this is a pretty long time
+const int BROOD_PSEUDO_ABILITY_ID = 1;
+
+// Gauntlet Achievement constants
+const float RIDDLE_ACHIEVEMENT_DURATION = 300.0;
+const int RIDDLE_PSEUDO_ABILITY_ID_TEMP = 2;
+const int RIDDLE_PSEUDO_ABILITY_ID_PERM = 3;
+
+// Ogre Achievement constants
+const int OGRE_PSEUDO_ABILITY_ID = 4;
+
+// Options constants
+const int GAME_DIFFICULTY_CASUAL = 0;
+const int GAME_DIFFICULTY_NORMAL = 1;
+const int GAME_DIFFICULTY_HARD   = 2;
+
+///////////////////////////////////////////////////////////////////
+const int EVENT_TYPE_ACHIEVEMENT    = 1081;
+///////////////////////////////////////////////////////////////////
+
+const int ACH_NUMBER_OF_ACHIEVEMENT_IN_THIS_EVENT = 0; // INDEX of where on the Event the number of achievement should be stored
+// Chain Lightning is not declared elsewhere
+const int ABILITY_SPELL_CHAIN_LIGHTNING = 10211;
+// Mental Fortress is not declared elsewhere
+const int ABILITY_TALENT_MENTAL_FORTRESS = 52;
+// Two-Handed Strength is not declared elsewhere
+const int ABILITY_TALENT_2H_STRENGTH = 27;
+// Coup De Grace is not declared elsewhere
+const int ABILITY_TALENT_COUP_DE_GRACE = 3002;
+// Summon Wolf is not declared elsewhere
+const int ABILITY_TALENT_SUMMON_WOLF = 1004;
+// Stealthy Item Use is not declared elsewhere
+const int ABILITY_TALENT_STEALTHY_ITEM_USE = 100076;
+
+
+///////////////////////////////////////////////////////////////////
+const int ACH_INVALID_ACHIEVEMENT = -1;
+
+// Advancement constants
+const int ACH_ADVANCE_LAST_OF_YOUR_LINE = 0;
+const int ACH_ADVANCE_CORRUPTED = 1;
+const int ACH_ADVANCE_CONSCRIPTED = 2;
+const int ACH_ADVANCE_HARROWED = 3;
+const int ACH_ADVANCE_CASTELESS = 4;
+const int ACH_ADVANCE_KINSLAYER = 5;
+const int ACH_ADVANCE_LAST_OF_THE_WARDENS = 6;
+
+const int ACH_ADVANCE_STANDARD_BEARER = 31;
+const int ACH_ADVANCE_HERO_OF_REDCLIFFE = 32;
+const int ACH_ADVANCE_RABBLE_ROUSER = 33;
+
+// Decisive Advancement constants
+const int ACH_DECISIVE_ULTIMATE_SACRIFICE = 42;
+const int ACH_DECISIVE_WARDEN_COMMANDER = 43;
+const int ACH_DECISIVE_A_DARK_PROMISE = 44;
+const int ACH_DECISIVE_REDEEMER = 45;
+const int ACH_DECISIVE_MAGIC_SYMPATHIZER = 46;
+const int ACH_DECISIVE_ANNULMENT_INVOKER = 47;
+const int ACH_DECISIVE_SLAYER = 48;
+const int ACH_DECISIVE_POACHER = 49;
+const int ACH_DECISIVE_SACRILEGIOUS = 50;
+const int ACH_DECISIVE_CEREMONIALIST = 51;
+const int ACH_DECISIVE_BHELEN_S_ALLY = 52;
+const int ACH_DECISIVE_HARROWMONT_S_ALLY = 53;
+const int ACH_DECISIVE_LIBERATOR = 54;
+const int ACH_DECISIVE_PRAGMATIST = 55;
+
+// Specialist
+const int SPC_CHAMPION = 7;
+const int SPC_TEMPLAR = 8;
+const int SPC_BERSERKER = 9;
+const int SPC_REAVER = 10;
+const int SPC_SHAPESHIFT = 11;
+const int SPC_SPIRIT_HEALER = 12;
+const int SPC_ARCANE_WARRIOR = 13;
+const int SPC_BLOOD_MAGE = 14;
+const int SPC_ASSASSIN = 15;
+const int SPC_BARD = 16;
+const int SPC_RANGER = 17;
+const int SPC_DUELIST = 18;
+
+// Ability constants
+const int ACH_ABI_BLOOD_MAGE = 19;
+const int ACH_ABI_SHAPESHIFTER = 20;
+const int ACH_ABI_ARCANE_WARRIOR = 21;
+const int ACH_ABI_SPIRIT_HEALER = 22;
+const int ACH_ABI_DUELIST = 23;
+const int ACH_ABI_ASSASSIN = 24;
+const int ACH_ABI_RANGER = 25;
+const int ACH_ABI_BARD = 26;
+const int ACH_ABI_REAVER = 27;
+const int ACH_ABI_BERSERKER = 28;
+const int ACH_ABI_TEMPLAR = 29;
+const int ACH_ABI_CHAMPION = 30;
+const int ACH_ABI_DUAL_WEAPONRY_MASTER = 63;
+const int ACH_ABI_ARCHERY_MASTER = 64;
+const int ACH_ABI_SHIELD_MASTER = 65;
+const int ACH_ABI_2H_WEAPON_MASTER = 66;
+const int ACH_ABI_ACCOMPLISHED_WARRIOR = 67;
+const int ACH_ABI_ACCOMPLISHED_ROGUE = 68;
+const int ACH_ABI_ELEMENTALIST = 69;
+const int ACH_ABI_CONJURER = 70;
+const int ACH_ABI_THAUMATURGIST = 71;
+const int ACH_ABI_HEXER = 72;
+const int ACH_ABI_VETERAN = 143;
+const int ACH_ABI_ELITE = 144;
+const int ACH_ABI_EDUCATED = 142;
+
+// Collection constants
+const int ACH_COLLECT_MERCENARY = 34;
+const int ACH_COLLECT_PARAMOUR = 35;
+const int ACH_COLLECT_LORE_MASTER = 36;
+const int ACH_COLLECT_RECRUITER = 37;
+const int ACH_COLLECT_HOPELESSLY_ROMANTIC = 38;
+const int ACH_COLLECT_PERFECTIONIST = 39;
+const int ACH_COLLECT_EASILY_SIDETRACKED = 40;
+const int ACH_COLLECT_DEATH_DEALER = 41;
+
+// Feat constants
+const int ACH_FEAT_TRAVELER = 56;
+const int ACH_FEAT_MASTER_OF_ARMS = 57;
+const int ACH_FEAT_SHADOW = 58;
+const int ACH_FEAT_ARCHMAGE = 59;
+//const int ACH_FEAT_HARDBOILED = 60;
+const int ACH_FEAT_DRAGONSLAYER = 61;
+const int ACH_FEAT_OGREBANE = 62;
+const int ACH_FEAT_WORLDLY = 89;
+const int ACH_FEAT_GREY_WARDEN = 90;
+const int ACH_FEAT_MASTER_WARDEN = 91;
+const int ACH_FEAT_BLIGHT_QUELLER = 92;
+const int ACH_FEAT_BLOODIED = 93;
+const int ACH_FEAT_VETERAN = 94;
+const int ACH_FEAT_GENERAL = 95;
+const int ACH_FEAT_I_M_KIND_OF_A_BIG_DEAL = 96;
+const int ACH_FEAT_BROOD_EXTERMINATOR = 97;
+const int ACH_FEAT_DEFENDER = 98;
+const int ACH_FEAT_PROTECTOR = 99;
+const int ACH_FEAT_RIDDLER = 100;
+const int ACH_FEAT_STREET_SWEEPER = 101;
+const int ACH_FEAT_HEAVY_HITTER = 102;
+const int ACH_FEAT_TACTICIAN = 103;
+const int ACH_FEAT_DESTROYER = 104;
+
+// Stat constants
+const int ACH_STATS_PERSUASIVE = 105;
+const int ACH_STATS_SILVER_TONGUED = 106;
+const int ACH_STATS_BULLY = 107;
+const int ACH_STATS_MENACING = 108;
+const int ACH_STATS_THE_PUNISHER = 109;
+const int ACH_STATS_WHIRLING_DERVISH = 110;
+const int ACH_STATS_CALL_ME_CRITICLES = 111;
+const int ACH_STATS_CRUSHER = 112;
+const int ACH_STATS_BATTERY = 113;
+const int ACH_STATS_MUGGER = 114;
+const int ACH_STATS_TINKERER = 115;
+const int ACH_STATS_CRAFTY = 116;
+const int ACH_STATS_CLEVER = 117;
+const int ACH_STATS_INSIDIOUS = 118;
+const int ACH_STATS_NIMBLE = 138;
+const int ACH_STATS_LIGHTNING = 139;
+const int ACH_STATS_LOCKPICKER = 140;
+const int ACH_STATS_MASTER_LOCKPICKER = 141;
+
+//THESE ARE NO LONGER FAKE
+//made into real achievements but not renamed in
+//script to avoid breaking.
+const int ACH_FAKE_PARAMOUR_ALISTAIR = 119;
+const int ACH_FAKE_PARAMOUR_MORRIGAN = 120;
+const int ACH_FAKE_PARAMOUR_ZEVRAN = 121;
+const int ACH_FAKE_PARAMOUR_LELIANA = 122;
+
+// Fakes
+const int ACH_FAKE_ALISTAIR_ENDING = 123;
+const int ACH_FAKE_LOGHAIN_ENDING = 124;
+const int ACH_FAKE_PC_ENDING = 125;
+const int ACH_FAKE_RECRUITER_ALISTAIR = 126;
+const int ACH_FAKE_RECRUITER_MORRIGAN = 127;
+const int ACH_FAKE_RECRUITER_WYNNE = 128;
+const int ACH_FAKE_RECRUITER_ZEVRAN = 129;
+const int ACH_FAKE_RECRUITER_OGHREN = 130;
+const int ACH_FAKE_RECRUITER_DOG = 131;
+const int ACH_FAKE_RECRUITER_LELIANA = 132;
+const int ACH_FAKE_RECRUITER_STEN = 133;
+const int ACH_FAKE_RECRUITER_LOGHAIN = 134;
+
+//Boards
+const int ACH_PILGRIM = 135;
+const int ACH_STREETWISE = 136;
+const int ACH_COLLECTIVE = 137;
+const int ACH_BLACKSTONE = 145;
+
+const int ACH_PARAM_STREET_SWEEPER_COUNT = 4;
+const int ACH_PARAM_DESTROYER_COUNT = 15;
+const int ACH_PARAM_HEAVY_HITTER_THRESHOLD = 250;
+const int ACH_PARAM_TACTICIAN = 250;
+
+const int ACH_EFFECT_DEATH_DAMAGE_INDEX = 4;
+
+// to optimize things, we also have constant int to use for achievements counts
+const int ACH_PARAM_GREY_WARDEN    =   100; // MUST CORRESPOND TO value in achievements.xls
+const int ACH_PARAM_MASTER_WARDEN  =  500; // MUST CORRESPOND TO value in achievements.xls
+const int ACH_PARAM_BLIGHT_QUELLER = 1000; // MUST CORRESPOND TO value in achievements.xls
+
+const int ACH_PARAM_SKILLS_MAJOR_ACHIEVEMENT = 25;
+const int ACH_PARAM_SKILLS_MINOR_ACHIEVEMENT = 5;
+const int ACH_PARAM_SKILLS_SIMPLE_ACHIEVEMENT = 10;
+
+const int ACH_PARAM_PERSUADE_SKILL_BASE_INDEX = 1;
+const int ACH_PARAM_INTIMIDATE_SKILL_BASE_INDEX = 9;
+const int ACH_PARAM_DISARM_SKILL_BASE_INDEX = 17;
+const int ACH_PARAM_TRAP_SKILL_BASE_INDEX = 25;
+const int ACH_PARAM_CODEX_BASE_INDEX = 33;
+const int ACH_PARAM_CODEX_COUNTER_SIZE = 10;
+const int ACH_PARAM_TRAVELER_BASE_INDEX = 43;
+const int ACH_PARAM_EASILY_SIDETRACKED_BASE_INDEX = 54;
+const int ACH_PARAM_CRAFTING_BASE_INDEX = 64;
+const int ACH_PARAM_UNLOCK_BASE_INDEX = 86;
+const int ACH_PARAM_BOARD_BASE_INDEX = 94;
+const int ACH_PARAM_BOARD_COUNTER_SIZE = 8;
+
+//plot tracking achievements - hidden
+//JH Sep 11, 2009: hidden achievements all cut, percent complete,
+//based off visible achievements now.
+const int NUMBER_OF_QUESTS = 83;    //should be 83 to ship
+
+const int ACH_FAKE_BLIGHT_1 = 146;
+const int ACH_FAKE_BLIGHT_2a = 147;
+const int ACH_FAKE_BLIGHT_2b = 148;
+const int ACH_FAKE_BLIGHT_2c = 149;
+const int ACH_FAKE_BLIGHT_3a = 150;
+const int ACH_FAKE_BLIGHT_3b = 151;
+const int ACH_FAKE_BLIGHT_3c = 152;
+const int ACH_FAKE_BLIGHT_3d = 153;
+const int ACH_FAKE_BLIGHT_3e = 154;
+const int ACH_FAKE_BLIGHT_3f = 155;
+const int ACH_FAKE_BLIGHT_3g = 156;
+const int ACH_FAKE_BLIGHT_3h = 157;
+const int ACH_FAKE_BLIGHT_4a = 158;
+const int ACH_FAKE_BLIGHT_4b = 159;
+const int ACH_FAKE_BLIGHT_5a = 160;
+const int ACH_FAKE_BLIGHT_5b = 161;
+const int ACH_FAKE_BLIGHT_5c = 162;
+const int ACH_FAKE_BLIGHT_5d = 163; // CUT
+const int ACH_FAKE_BLIGHT_5e = 164;
+const int ACH_FAKE_BLIGHT_5f = 165;
+const int ACH_FAKE_BLIGHT_6 = 166;
+const int ACH_FAKE_BLIGHT_7a = 167;
+const int ACH_FAKE_BLIGHT_7b = 168;
+const int ACH_FAKE_BLIGHT_7c = 169;
+const int ACH_FAKE_BLIGHT_7d = 170;
+const int ACH_FAKE_BLIGHT_7e = 171;
+
+const int ACH_FAKE_REDCLIFFE_1a = 172;
+const int ACH_FAKE_REDCLIFFE_1b = 173;
+const int ACH_FAKE_REDCLIFFE_1c = 174;
+const int ACH_FAKE_REDCLIFFE_1d = 175;
+const int ACH_FAKE_REDCLIFFE_1e = 176;
+const int ACH_FAKE_REDCLIFFE_1f = 177;
+const int ACH_FAKE_REDCLIFFE_1g = 178; // CUT
+const int ACH_FAKE_REDCLIFFE_1h = 179; // CUT
+const int ACH_FAKE_REDCLIFFE_1i = 180;
+const int ACH_FAKE_REDCLIFFE_1j = 181;
+const int ACH_FAKE_REDCLIFFE_1k = 182;
+const int ACH_FAKE_REDCLIFFE_1l = 183;
+const int ACH_FAKE_REDCLIFFE_2a = 184;
+const int ACH_FAKE_REDCLIFFE_2b = 185;
+const int ACH_FAKE_REDCLIFFE_3 = 186;
+const int ACH_FAKE_REDCLIFFE_4 = 187;
+
+const int ACH_FAKE_CIRCLE_1a = 188;
+const int ACH_FAKE_CIRCLE_1b = 189;
+const int ACH_FAKE_CIRCLE_1c = 190;
+const int ACH_FAKE_CIRCLE_1d = 191;//does not get counted.
+const int ACH_FAKE_CIRCLE_1e = 192;
+const int ACH_FAKE_CIRCLE_1f = 193;
+const int ACH_FAKE_CIRCLE_1g = 194;
+const int ACH_FAKE_CIRCLE_1h = 195;
+const int ACH_FAKE_CIRCLE_1i = 196;
+const int ACH_FAKE_CIRCLE_1j = 197;
+const int ACH_FAKE_CIRCLE_1k = 198;
+const int ACH_FAKE_CIRCLE_1l = 199;
+const int ACH_FAKE_CIRCLE_1m = 200;
+const int ACH_FAKE_CIRCLE_1n = 201;
+const int ACH_FAKE_CIRCLE_2 = 202;
+const int ACH_FAKE_CIRCLE_3 = 203;
+const int ACH_FAKE_CIRCLE_4 = 204;
+
+const int ACH_FAKE_FINAL_1a = 205;
+const int ACH_FAKE_FINAL_1b = 206;
+const int ACH_FAKE_FINAL_1c = 207;
+const int ACH_FAKE_FINAL_1d = 208;
+const int ACH_FAKE_FINAL_2 = 209;
+const int ACH_FAKE_FINAL_3a = 210;
+const int ACH_FAKE_FINAL_3b = 211; // CUT
+
+const int ACH_FAKE_DENERIM_1 = 212;
+const int ACH_FAKE_DENERIM_2 = 213;
+const int ACH_FAKE_DENERIM_3 = 214;
+const int ACH_FAKE_DENERIM_4a = 215;
+const int ACH_FAKE_DENERIM_4b = 216;
+const int ACH_FAKE_DENERIM_4c = 217;
+const int ACH_FAKE_DENERIM_4d = 218;
+const int ACH_FAKE_DENERIM_4e = 219;
+const int ACH_FAKE_DENERIM_4f = 220;
+const int ACH_FAKE_DENERIM_4g = 221;
+const int ACH_FAKE_DENERIM_4h = 222;
+const int ACH_FAKE_DENERIM_5 = 223;
+const int ACH_FAKE_DENERIM_6 = 224;
+const int ACH_FAKE_DENERIM_7 = 225; // CUT
+const int ACH_FAKE_DENERIM_8 = 226;
+const int ACH_FAKE_DENERIM_9 = 227;
+const int ACH_FAKE_DENERIM_10 = 228;
+const int ACH_FAKE_DENERIM_11 = 229;
+const int ACH_FAKE_DENERIM_12 = 230;
+const int ACH_FAKE_DENERIM_13 = 231;
+const int ACH_FAKE_DENERIM_14 = 232;
+const int ACH_FAKE_DENERIM_15 = 233;
+const int ACH_FAKE_DENERIM_16 = 234;
+const int ACH_FAKE_DENERIM_17a = 235;
+const int ACH_FAKE_DENERIM_17b = 236;
+const int ACH_FAKE_DENERIM_17c = 237;
+const int ACH_FAKE_DENERIM_17d = 238;
+const int ACH_FAKE_DENERIM_18 = 239;
+const int ACH_FAKE_DENERIM_19 = 240;
+const int ACH_FAKE_DENERIM_20 = 241;
+
+const int ACH_FAKE_CHANTRY_1 = 242;
+const int ACH_FAKE_CHANTRY_2 = 243;
+const int ACH_FAKE_CHANTRY_3 = 244;
+const int ACH_FAKE_CHANTRY_4 = 245; // CUT
+const int ACH_FAKE_CHANTRY_5 = 246;
+const int ACH_FAKE_CHANTRY_6 = 247;
+
+const int ACH_FAKE_BLACKSTONE_1 = 248;
+const int ACH_FAKE_BLACKSTONE_2  = 249; // CUT
+const int ACH_FAKE_BLACKSTONE_3 = 250;
+const int ACH_FAKE_BLACKSTONE_4 = 251;
+const int ACH_FAKE_BLACKSTONE_5 = 252;
+const int ACH_FAKE_BLACKSTONE_6 = 253;
+const int ACH_FAKE_BLACKSTONE_7 = 254;
+
+const int ACH_FAKE_PARTY_1 = 255;
+
+const int ACH_FAKE_ORZAMMAR_1 = 256;
+const int ACH_FAKE_ORZAMMAR_2a = 257;
+const int ACH_FAKE_ORZAMMAR_2b = 258;
+const int ACH_FAKE_ORZAMMAR_2c = 259;
+const int ACH_FAKE_ORZAMMAR_2d = 260;
+const int ACH_FAKE_ORZAMMAR_3a = 261;
+const int ACH_FAKE_ORZAMMAR_3b = 262;
+const int ACH_FAKE_ORZAMMAR_3c = 263;
+const int ACH_FAKE_ORZAMMAR_4 = 264;
+const int ACH_FAKE_ORZAMMAR_5 = 265;
+const int ACH_FAKE_ORZAMMAR_6a = 266;
+const int ACH_FAKE_ORZAMMAR_6b = 267;
+const int ACH_FAKE_ORZAMMAR_6c = 268;
+const int ACH_FAKE_ORZAMMAR_7 = 269;
+const int ACH_FAKE_ORZAMMAR_8a = 270; // CUT
+const int ACH_FAKE_ORZAMMAR_8b = 271; // CUT
+const int ACH_FAKE_ORZAMMAR_9 = 272;
+const int ACH_FAKE_ORZAMMAR_10a = 273;
+const int ACH_FAKE_ORZAMMAR_10b = 274; // CUT
+const int ACH_FAKE_ORZAMMAR_11 = 275;
+const int ACH_FAKE_ORZAMMAR_12 = 276;
+const int ACH_FAKE_ORZAMMAR_13 = 277;
+const int ACH_FAKE_ORZAMMAR_14 = 278;
+const int ACH_FAKE_ORZAMMAR_15 = 279;
+const int ACH_FAKE_ORZAMMAR_16 = 280;
+const int ACH_FAKE_ORZAMMAR_17 = 281;
+const int ACH_FAKE_ORZAMMAR_18 = 282;
+const int ACH_FAKE_ORZAMMAR_19 = 283;
+const int ACH_FAKE_ORZAMMAR_20 = 284;
+const int ACH_FAKE_ORZAMMAR_21 = 285;
+const int ACH_FAKE_ORZAMMAR_22 = 286;
+const int ACH_FAKE_ORZAMMAR_23 = 287;
+const int ACH_FAKE_ORZAMMAR_24 = 288;
+const int ACH_FAKE_ORZAMMAR_25a = 289;
+const int ACH_FAKE_ORZAMMAR_25b = 290; // CUT
+const int ACH_FAKE_ORZAMMAR_25c = 291; // CUT
+const int ACH_FAKE_ORZAMMAR_26 = 292;
+const int ACH_FAKE_ORZAMMAR_27 = 293; // CUT
+const int ACH_FAKE_ORZAMMAR_28 = 294;
+const int ACH_FAKE_ORZAMMAR_29 = 295;
+const int ACH_FAKE_ORZAMMAR_30 = 296;
+
+const int ACH_FAKE_URN_1 = 297;
+const int ACH_FAKE_URN_2 = 298;
+const int ACH_FAKE_URN_3a = 299; // CUT
+const int ACH_FAKE_URN_3b = 300; // CUT
+
+const int ACH_FAKE_BRECILIAN_1a = 301;
+const int ACH_FAKE_BRECILIAN_1b = 302; // CUT
+const int ACH_FAKE_BRECILIAN_1c = 303; // CUT
+const int ACH_FAKE_BRECILIAN_2a = 304;
+const int ACH_FAKE_BRECILIAN_2b = 305; // CUT
+const int ACH_FAKE_BRECILIAN_3 = 306;
+const int ACH_FAKE_BRECILIAN_4a = 307;
+const int ACH_FAKE_BRECILIAN_4b = 308; // CUT
+const int ACH_FAKE_BRECILIAN_4c = 309; // CUT
+const int ACH_FAKE_BRECILIAN_4d = 310; // CUT
+const int ACH_FAKE_BRECILIAN_5a = 311;
+const int ACH_FAKE_BRECILIAN_5b = 312; // CUT
+const int ACH_FAKE_BRECILIAN_6 = 313;
+const int ACH_FAKE_BRECILIAN_7 = 314;
+const int ACH_FAKE_BRECILIAN_8a = 315;
+const int ACH_FAKE_BRECILIAN_8b = 316; // CUT
+
+const int ACH_FAKE_LOTHERING_1 = 317;
+const int ACH_FAKE_LOTHERING_2a = 318;
+const int ACH_FAKE_LOTHERING_2b = 319;
+const int ACH_FAKE_LOTHERING_2c = 320;
+const int ACH_FAKE_LOTHERING_3a = 321;
+const int ACH_FAKE_LOTHERING_3b = 322;
+const int ACH_FAKE_LOTHERING_3c = 323;
+const int ACH_FAKE_LOTHERING_4 = 324;
+const int ACH_FAKE_LOTHERING_5 = 325;
+const int ACH_FAKE_LOTHERING_6 = 326;
+const int ACH_FAKE_LOTHERING_7 = 327;
+
+const int ACH_FAKE_OSTAGAR_1 = 328; // CUT
+const int ACH_FAKE_OSTAGAR_2 = 329;
+const int ACH_FAKE_OSTAGAR_3 = 330;
+const int ACH_FAKE_OSTAGAR_4 = 331;
+const int ACH_FAKE_OSTAGAR_5 = 332;
+const int ACH_FAKE_OSTAGAR_6 = 333;
+const int ACH_FAKE_OSTAGAR_7 = 334;
+
+const int ACH_FAKE_COLLECTIVE_1 = 335;
+const int ACH_FAKE_COLLECTIVE_2 = 336;
+const int ACH_FAKE_COLLECTIVE_3 = 337;
+const int ACH_FAKE_COLLECTIVE_4 = 338;
+const int ACH_FAKE_COLLECTIVE_5 = 339;
+const int ACH_FAKE_COLLECTIVE_6a = 340;
+const int ACH_FAKE_COLLECTIVE_6b = 341; // CUT
+const int ACH_FAKE_COLLECTIVE_7 = 342;
+const int ACH_FAKE_COLLECTIVE_8 = 343;
+const int ACH_FAKE_COLLECTIVE_9 = 344;
+const int ACH_FAKE_COLLECTIVE_10 = 345;
+
+const int ACH_FAKE_ROGUE_1 = 346;
+const int ACH_FAKE_ROGUE_2 = 347;
+const int ACH_FAKE_ROGUE_3 = 348;
+const int ACH_FAKE_ROGUE_4 = 349;
+const int ACH_FAKE_ROGUE_5 = 350;
+const int ACH_FAKE_ROGUE_6 = 351;
+const int ACH_FAKE_ROGUE_7 = 352;
+const int ACH_FAKE_ROGUE_8 = 353;
+const int ACH_FAKE_ROGUE_9 = 354;
+
+const int ACH_FAKE_COMPANIONS_1 = 355;
+const int ACH_FAKE_COMPANIONS_2a = 356;
+const int ACH_FAKE_COMPANIONS_2b = 357; // CUT
+const int ACH_FAKE_COMPANIONS_3a = 358;
+const int ACH_FAKE_COMPANIONS_3b = 359; // CUT
+const int ACH_FAKE_COMPANIONS_4 = 360;
+const int ACH_FAKE_COMPANIONS_5 = 361;
+const int ACH_FAKE_COMPANIONS_6 = 362;
+
+const int ACH_FAKE_KOKARI_1 = 363;
+const int ACH_FAKE_KOKARI_2 = 364;
+const int ACH_FAKE_KOKARI_3 = 365; // CUT
+const int ACH_FAKE_KOKARI_4 = 366;
+
+const int ACH_FAKE_BDC_1 = 367;
+const int ACH_FAKE_BDC_2 = 368;
+const int ACH_FAKE_BDC_3 = 369;
+const int ACH_FAKE_BDN_1 = 370;
+const int ACH_FAKE_BDN_2 = 371;
+const int ACH_FAKE_BDN_3 = 372;
+const int ACH_FAKE_BEC_1 = 373;
+const int ACH_FAKE_BEC_2 = 374;
+const int ACH_FAKE_BEC_3 = 375; // CUT
+const int ACH_FAKE_BHM_1 = 376;
+const int ACH_FAKE_BHM_2 = 377;
+const int ACH_FAKE_BHM_3 = 378;
+const int ACH_FAKE_BHM_4 = 379;
+const int ACH_FAKE_BHN_1 = 380;
+const int ACH_FAKE_BHN_2 = 381;
+const int ACH_FAKE_BHN_3 = 382;
+const int ACH_FAKE_BHN_4 = 383;
+const int ACH_FAKE_BHN_5 = 384;
+const int ACH_FAKE_BHN_6 = 385;
+const int ACH_FAKE_BED_1 = 386;
+const int ACH_FAKE_BED_2 = 387;
+const int ACH_FAKE_BED_3 = 388;
+const int ACH_FAKE_BED_4 = 389;
+const int ACH_FAKE_BED_5 = 390;
+
+
+///////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////
+
+void ACH_LogTrace(int nChannel=LOG_CHANNEL_GENERAL, string sLogEntry="", object oTarget=OBJECT_INVALID);
+void ACH_LogTrace(int nChannel, string sLogEntry, object oTarget)
+{
+    #ifdef DEBUG
+    LogTrace(nChannel, sACHIEVEMENT_DEBUG_VERSION+ sLogEntry, oTarget);
+    #endif
+}
+
+
+///////////////////////////////////////////////////////////////////
+// DUMMY FUNCTIONS TO BE USED UNTIL WE GET NEW ONES FROM PROGRAMMING
+///////////////////////////////////////////////////////////////////
+int ACH__GetAchievementCount(string sAchievement)
+{
+    #ifdef DEBUG
+    ACH_LogTrace(LOG_CHANNEL_REWARDS, "Trying to read achievement count for " + sAchievement + ", returning 0 for now.");
+    #endif
+    return 0;
+}
+
+void ACH__SetAchievementCount(string sAchievement, int nCount)
+{
+    #ifdef DEBUG
+    ACH_LogTrace(LOG_CHANNEL_REWARDS, "Trying to set an achievement count for " + sAchievement + ", doing nothing for now.");
+    #endif
+
+}
+
+///////////////////////////////////////////////////////////////////
+
+// Read a series of consecutive plot flags as an integer.
+int ACH_GetPlotCounter(string sPlot, int nBaseIndex = 0, int nCounterSize=8);
+int ACH_GetPlotCounter(string sPlot, int nBaseIndex, int nCounterSize)
+{
+    int nCount = 0;
+    int nBitIndex = 0;
+    int nMultiplier = 1;
+
+    // read each bit and add 1 for the first bit, 2 for the second, 4 for the third, etc.
+    while (nBitIndex &lt; nCounterSize)
+    {
+
+        if (WR_GetPlotFlag(sPlot, nBaseIndex+nBitIndex) == TRUE)
+        {
+            nCount = nCount + nMultiplier;
+        }
+        nMultiplier = nMultiplier * 2; // value of each bit double with each consecutive bit
+        nBitIndex   = nBitIndex   + 1;
+    }
+
+    return nCount;
+}
+
+// Read a series of consecutive plot flag as an integer, increment that integer and return it.
+int ACH_IncrementPlotCounter(string sPlot, int nBaseIndex=0, int nCounterSize=8);
+int ACH_IncrementPlotCounter(string sPlot, int nBaseIndex, int nCounterSize)
+{
+    // read the current count and increment it
+    int nCount = ACH_GetPlotCounter(sPlot, nBaseIndex, nCounterSize);
+    nCount++;
+
+    int nBitIndex = 0;
+    int bOverflow = TRUE;
+
+    // read each bit starting with the lowest.
+    // If the bit is equal to 1, flip it and move to the next bit.
+    // If the bit is equal to 0, flip it and stop
+    while (nBitIndex &lt; nCounterSize)
+    {
+        if (WR_GetPlotFlag(sPlot, nBaseIndex+nBitIndex) == TRUE)
+        {
+            WR_SetPlotFlag(sPlot, nBaseIndex+nBitIndex, FALSE);
+            nBitIndex++;
+        }
+        else
+        {
+            WR_SetPlotFlag(sPlot, nBaseIndex+nBitIndex, TRUE);
+            nBitIndex = nCounterSize; // break out of the loop
+            bOverflow = FALSE;
+        }
+    }
+
+    if (bOverflow == TRUE)
+    {
+        #ifdef DEBUG
+        string sWarning = "ACHIEVEMENT PLOT COUNTER OVERFLOW! PLOT= " + sPlot + ", BaseIndex= "+IntToString(nBaseIndex) + ", nCounterSize=" + IntToString(nCounterSize) + ". Contact Emmanuel or Georg";
+        Warning(sWarning );
+        ACH_LogTrace(LOG_CHANNEL_REWARDS, sWarning );
+        Log_Trace_Scripting_Error("achievement_core_h.ACH_IncrementPlotCountert", sWarning, OBJECT_SELF);
+        #endif
+    }
+
+    return nCount;
+}
+
+/*
+* This function is used to handle general procedures that occur
+* when an achievement is unlocked.  An eventID will always be sent to the
+* web server.  If bTakeScreenshot is set to false when WR_UnlockAchievement or
+* WR_IncrementAndMaybeGrantAchievement is called, no screenshot is taken.  If
+* it is set to true (default), it then goes to the Achievements 2DA and
+* uses the HandleFlag to determine how to take the screenshot.  0 is no screenshot.
+* Anything greater than 0 is take a screenshot.  The exact value can be used in the
+* future to classify individual shots.
+*
+* EV152396
+* EV153349
+*
+* Jason Hill
+* Mar 19, 2009
+*/
+void HandleAchGrant(int nAchievementID, int bTakeScreenshot);
+void HandleAchGrant(int nAchievementID, int bTakeScreenshot)
+{
+    // -----------------------------------------------------------------
+    // Georg: Grant achievement on the SkyNet Development Telemetry
+    //        system as well.
+    // -----------------------------------------------------------------
+    #ifdef SKYNET
+        Acv_Grant(nAchievementID + 10000 /* magic number for enduser acvs*/ );
+    #endif
+
+    // Grant screenshot if indicated, event sent in TakeScreenshot
+    if (bTakeScreenshot &gt; 0)
+    {
+        string sAchievement = GetM2DAString(TABLE_ACHIEVEMENTS, "AchievementID", nAchievementID);
+        int nTitle = GetM2DAInt(TABLE_ACHIEVEMENTS, "TitleStrRef", nAchievementID);
+        int nDescription = GetM2DAInt(TABLE_ACHIEVEMENTS, "DescStrRef", nAchievementID);
+        string sEventID = IntToString(nTitle);
+
+        #ifdef DEBUG
+        ACH_LogTrace(LOG_CHANNEL_REWARDS, "Screenshot Taken: " +sAchievement +"; Script: " +GetCurrentScriptName());
+        #endif
+
+        if(bTakeScreenshot == 1) //HIGH PRIORITY
+            TakeScreenshot(FALSE, nTitle, nDescription, ACH_SCREENSHOT_HP_TYPE, sEventID);
+        else //NOT SO HIGH PRIORITY
+            TakeScreenshot(FALSE, nTitle, nDescription, ACH_SCREENSHOT_TYPE, sEventID);
+        //DisplayFloatyMessage(GetHero(), "Shot");
+    }
+    else
+    {
+        //Send a Log Event regardless
+        int iEventID = GetM2DAInt(TABLE_ACHIEVEMENTS, "TitleStrRef", nAchievementID);
+        LogStoryEvent(iEventID);
+        //DisplayFloatyMessage(GetHero(), "No Shot");
+    }
+}
+
+/**
+* @brief                Wrapper function to unlock an achievement and log
+* @param nAchievementID   The achievement to unlock; //tag/main/data/Source/2DA/Achievements.xls
+*
+* @author               Austin Peckenpaugh
+*
+**/
+int WR_IncrementAndMaybeGrantAchievement(int nAchievementID, int bTakeScreenshot = TRUE);
+int WR_IncrementAndMaybeGrantAchievement(int nAchievementID, int bTakeScreenshot)
+{
+    // Unlock the achievement. This is called everytime the player could unlock
+    // the achievement and the game will sort out if this has already occured or not
+
+    #ifdef DEBUG
+    ACH_LogTrace(LOG_CHANNEL_REWARDS, "Unlocking " +IntToString(nAchievementID) +", screenshot="+IntToString(bTakeScreenshot));
+    #endif
+
+    int bAchieved = IncrementAchievementCountByID(nAchievementID);
+
+    if (bAchieved == TRUE)
+    {
+        //If true, take value from 2DA
+        if(bTakeScreenshot)
+            bTakeScreenshot = GetM2DAInt(TABLE_ACHIEVEMENTS, "HandleFlag", nAchievementID);
+
+        #ifdef DEBUG
+        ACH_LogTrace(LOG_CHANNEL_REWARDS, "Achievement Unlocked: ID= " +IntToString(nAchievementID) +", screenshot="+IntToString(bTakeScreenshot));
+        #endif
+
+        HandleAchGrant(nAchievementID, bTakeScreenshot);
+    }
+
+    return bAchieved;
+}
+
+
+/**
+* @brief                  Wrapper function to unlock an achievement regardless of count
+* @param nAchievementID   The achievement to unlock; //tag/main/data/Source/2DA/Achievements.xls
+*
+* @author               Austin Peckenpaugh
+*
+**/
+void WR_UnlockAchievement(int nAchievementID, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE);
+void WR_UnlockAchievement(int nAchievementID, int bTakeScreenshot, int bGrantAchievement)
+{
+
+    // Unlock the achievement. This is called everytime the player could unlock
+    // the achievement and the game will sort out if this has already occured or not
+
+    #ifdef DEBUG
+    ACH_LogTrace(LOG_CHANNEL_REWARDS, "Unlocking " +IntToString(nAchievementID) +", screenshot="+IntToString(bTakeScreenshot)+", grantforreal="+IntToString(bGrantAchievement));
+    #endif
+
+    // Grant achievement if indicated
+    if (bGrantAchievement == TRUE &amp;&amp; !GetHasAchievementByID(nAchievementID))
+    {
+        //If true, take value from 2DA
+        if(bTakeScreenshot)
+            bTakeScreenshot = GetM2DAInt(TABLE_ACHIEVEMENTS, "HandleFlag", nAchievementID);
+
+        UnlockAchievementByID(nAchievementID);
+
+        #ifdef DEBUG
+        ACH_LogTrace(LOG_CHANNEL_REWARDS, "Achievement Unlocked: ID= " +IntToString(nAchievementID) +", screenshot="+IntToString(bTakeScreenshot)+", grantforreal="+IntToString(bGrantAchievement));
+        #endif
+
+        HandleAchGrant(nAchievementID, bTakeScreenshot);
+     }
+}
+
+void ACH_CalculatePercentageComplete();
+void ACH_CalculatePercentageComplete()
+{
+    //get all the tracking achievements and get percentage
+    int iNumberOfQuestsCompleted =  GetHasAchievementByID(ACH_ADVANCE_LAST_OF_YOUR_LINE) +
+                                    GetHasAchievementByID(ACH_ADVANCE_CORRUPTED) +
+                                    GetHasAchievementByID(ACH_ADVANCE_CONSCRIPTED) +
+                                    GetHasAchievementByID(ACH_ADVANCE_HARROWED) +
+                                    GetHasAchievementByID(ACH_ADVANCE_CASTELESS) +
+                                    GetHasAchievementByID(ACH_ADVANCE_KINSLAYER) +
+                                    GetHasAchievementByID(ACH_ADVANCE_LAST_OF_THE_WARDENS) +
+                                    GetHasAchievementByID(ACH_ADVANCE_STANDARD_BEARER) +
+                                    GetHasAchievementByID(ACH_ADVANCE_HERO_OF_REDCLIFFE) +
+                                    GetHasAchievementByID(ACH_ADVANCE_RABBLE_ROUSER) +
+                                    GetHasAchievementByID(ACH_COLLECT_MERCENARY) +
+                                    GetHasAchievementByID(ACH_COLLECT_RECRUITER) +
+                                    GetHasAchievementByID(ACH_COLLECT_HOPELESSLY_ROMANTIC) +
+                                    GetHasAchievementByID(ACH_COLLECT_PERFECTIONIST) +
+                                    GetHasAchievementByID(ACH_COLLECT_EASILY_SIDETRACKED) +
+                                    GetHasAchievementByID(ACH_DECISIVE_WARDEN_COMMANDER) +
+                                    GetHasAchievementByID(ACH_DECISIVE_REDEEMER) +                                    
+                                    GetHasAchievementByID(ACH_DECISIVE_ULTIMATE_SACRIFICE) +                                                                        
+                                    GetHasAchievementByID(ACH_DECISIVE_A_DARK_PROMISE) +
+                                    GetHasAchievementByID(ACH_DECISIVE_MAGIC_SYMPATHIZER) +
+                                    GetHasAchievementByID(ACH_DECISIVE_ANNULMENT_INVOKER) +
+                                    GetHasAchievementByID(ACH_DECISIVE_SLAYER) +
+                                    GetHasAchievementByID(ACH_DECISIVE_POACHER) +
+                                    GetHasAchievementByID(ACH_DECISIVE_SACRILEGIOUS) +
+                                    GetHasAchievementByID(ACH_DECISIVE_CEREMONIALIST) +
+                                    GetHasAchievementByID(ACH_DECISIVE_BHELEN_S_ALLY) +
+                                    GetHasAchievementByID(ACH_DECISIVE_HARROWMONT_S_ALLY) +
+                                    GetHasAchievementByID(ACH_DECISIVE_LIBERATOR) +
+                                    GetHasAchievementByID(ACH_DECISIVE_PRAGMATIST) +
+                                    GetHasAchievementByID(ACH_FEAT_TRAVELER) +
+                                    GetHasAchievementByID(ACH_FEAT_MASTER_OF_ARMS) +
+                                    GetHasAchievementByID(ACH_FEAT_SHADOW) +
+                                    GetHasAchievementByID(ACH_FEAT_ARCHMAGE) +
+                                    GetHasAchievementByID(ACH_FEAT_DRAGONSLAYER) + 
+                                    GetHasAchievementByID(ACH_ABI_DUAL_WEAPONRY_MASTER) +
+                                    GetHasAchievementByID(ACH_ABI_ARCHERY_MASTER) +
+                                    GetHasAchievementByID(ACH_ABI_SHIELD_MASTER) +
+                                    GetHasAchievementByID(ACH_ABI_2H_WEAPON_MASTER) +
+                                    GetHasAchievementByID(ACH_ABI_ACCOMPLISHED_WARRIOR) +
+                                    GetHasAchievementByID(ACH_ABI_ACCOMPLISHED_ROGUE) +
+                                    GetHasAchievementByID(ACH_ABI_ELEMENTALIST) +
+                                    GetHasAchievementByID(ACH_ABI_CONJURER) +
+                                    GetHasAchievementByID(ACH_ABI_THAUMATURGIST) +
+                                    GetHasAchievementByID(ACH_ABI_HEXER) +
+                                    GetHasAchievementByID(ACH_FEAT_GREY_WARDEN) +
+                                    GetHasAchievementByID(ACH_FEAT_MASTER_WARDEN) +
+                                    GetHasAchievementByID(ACH_FEAT_BLIGHT_QUELLER) +
+                                    GetHasAchievementByID(ACH_FEAT_BLOODIED) +
+                                    GetHasAchievementByID(ACH_FEAT_VETERAN) +
+                                    GetHasAchievementByID(ACH_FEAT_GENERAL) +
+                                    GetHasAchievementByID(ACH_FEAT_I_M_KIND_OF_A_BIG_DEAL) +                                   
+                                    GetHasAchievementByID(ACH_FEAT_DEFENDER) +
+                                    GetHasAchievementByID(ACH_FEAT_HEAVY_HITTER) + 
+                                    GetHasAchievementByID(ACH_FEAT_TACTICIAN) +                                  
+                                    GetHasAchievementByID(ACH_STATS_PERSUASIVE) +
+                                    GetHasAchievementByID(ACH_STATS_SILVER_TONGUED) +
+                                    GetHasAchievementByID(ACH_STATS_BULLY) +
+                                    GetHasAchievementByID(ACH_STATS_MENACING) + 
+                                    GetHasAchievementByID(ACH_STATS_THE_PUNISHER) +
+                                    GetHasAchievementByID(ACH_STATS_WHIRLING_DERVISH) +
+                                    GetHasAchievementByID(ACH_STATS_CALL_ME_CRITICLES) +
+                                    GetHasAchievementByID(ACH_STATS_CRUSHER) +
+                                    GetHasAchievementByID(ACH_STATS_BATTERY) +
+                                    GetHasAchievementByID(ACH_STATS_MUGGER) +                                  
+                                    GetHasAchievementByID(ACH_STATS_TINKERER) +
+                                    GetHasAchievementByID(ACH_STATS_CRAFTY) +
+                                    GetHasAchievementByID(ACH_STATS_CLEVER) +
+                                    GetHasAchievementByID(ACH_STATS_INSIDIOUS) +                                    
+                                    GetHasAchievementByID(ACH_FAKE_PARAMOUR_ALISTAIR) +
+                                    GetHasAchievementByID(ACH_FAKE_PARAMOUR_MORRIGAN) +
+                                    GetHasAchievementByID(ACH_FAKE_PARAMOUR_ZEVRAN) +
+                                    GetHasAchievementByID(ACH_FAKE_PARAMOUR_LELIANA) +
+                                    GetHasAchievementByID(ACH_PILGRIM) +  
+                                    GetHasAchievementByID(ACH_STREETWISE) +
+                                    GetHasAchievementByID(ACH_COLLECTIVE) +
+                                    GetHasAchievementByID(ACH_STATS_NIMBLE) +
+                                    GetHasAchievementByID(ACH_STATS_LIGHTNING) +
+                                    GetHasAchievementByID(ACH_STATS_LOCKPICKER) +
+                                    GetHasAchievementByID(ACH_STATS_MASTER_LOCKPICKER) +                                    
+                                    GetHasAchievementByID(ACH_ABI_EDUCATED) +
+                                    GetHasAchievementByID(ACH_ABI_VETERAN) + 
+                                    GetHasAchievementByID(ACH_BLACKSTONE) +
+                                    GetHasAchievementByID(ACH_ABI_ELITE);                                     
+
+    float fPercentageComplete = IntToFloat(iNumberOfQuestsCompleted)/NUMBER_OF_QUESTS*100;
+    float fResult = MinF(fPercentageComplete, 100.0f);
+    SetGameCompletionPercentage(fResult);
+}
+
+void ACH_TrackPercentageComplete(int iPlotCompleted);
+void ACH_TrackPercentageComplete(int iPlotCompleted)
+{           
+    //This functionality was cut on Sep 11, 2009
+    //DisplayFloatyMessage(GetHero(), IntToString(iPlotCompleted));
+    //WR_UnlockAchievement(iPlotCompleted);
+}
+
+// Check the hero's level and grant achievement if 20
+void ACH_WhenHeroGainsLevel(object oChar, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE);
+void ACH_WhenHeroGainsLevel(object oChar, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE)
+{
+    if (IsHero(oChar) == TRUE)
+    {
+        int nLevel = GetLevel(oChar);
+        int nClass = GetCreatureCoreClass(oChar);
+        if (nLevel &gt;= 20)
+        {
+            switch (nClass)
+            {
+                case CLASS_WARRIOR:
+                {
+                    WR_UnlockAchievement(ACH_FEAT_MASTER_OF_ARMS);
+                }
+                break;
+
+                case CLASS_ROGUE:
+                {
+                    WR_UnlockAchievement(ACH_FEAT_SHADOW);
+                }
+                break;
+
+                case CLASS_WIZARD:
+                {
+                    WR_UnlockAchievement(ACH_FEAT_ARCHMAGE);
+                }
+                break;
+            }
+        }
+    }
+}
+
+// Check the hero's abilities and grant achievements for certain combos
+void ACH_WhenHeroLevelsUp(object oChar, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE);
+void ACH_WhenHeroLevelsUp(object oChar, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE)
+{
+    if (IsHero(oChar) == TRUE)
+    {
+        ///////////////////////////////////////////////////////////////////
+        // Ability combos
+        ///////////////////////////////////////////////////////////////////
+
+        // Weapon Talents
+        int bDualWeaponryMaster =   ((HasAbility(oChar, ABILITY_TALENT_DUAL_WEAPON_MASTER)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_PUNISHER)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_DUAL_WEAPON_WHIRLWIND)));
+
+        int bArcheryMaster =        ((HasAbility(oChar, ABILITY_TALENT_MASTER_ARCHER)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_ARROW_OF_SLAYING)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_SCATTERSHOT)));
+
+        int bShieldMaster =         ((HasAbility(oChar, ABILITY_TALENT_SHIELD_MASTERY)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_SHIELD_EXPERTISE)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_OVERPOWER)));
+
+        int b2HWeaponMaster =       ((HasAbility(oChar, ABILITY_TALENT_CRITICAL_STRIKE)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_DESTROYER)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_WEAPON_SWEEP)));
+
+        // Spell Talents
+        int bElementalist =         ((HasAbility(oChar, ABILITY_SPELL_BLIZZARD)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_INFERNO)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_PETRIFY)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_CHAIN_LIGHTNING)));
+
+        int bConjurer =             ((HasAbility(oChar, ABILITY_SPELL_PURIFY)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_HEROS_ARMOR)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_GLYPH_OF_NEUTRALIZATION)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_STINGING_SWARM)));
+
+        int bThaumaturgist =        ((HasAbility(oChar, ABILITY_SPELL_ANTIMAGIC_BURST)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_MANA_CLASH)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_ANIMATE_DEAD)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_CRUSHING_PRISON)));
+
+        int bHexer =                ((HasAbility(oChar, ABILITY_SPELL_MASS_PARALYSIS)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_IMMOBILIZE)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_MIND_ROT)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SPELL_DEATH_CLOUD)));
+
+        // Class Talents
+        int bAccomplishedWarrior =  ((HasAbility(oChar, ABILITY_TALENT_PERFECT_STRIKING)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_DEATH_BLOW)));
+
+        int bAccomplishedRogue =    ((HasAbility(oChar, ABILITY_SKILL_LOCKPICKING_4)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SKILL_STEALTH_4)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_EVASION)))
+                                    ||
+                                    ((HasAbility(oChar, ABILITY_SKILL_LOCKPICKING_4)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SKILL_STEALTH_4)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_FEIGN_DEATH)))
+                                    ||
+                                    ((HasAbility(oChar, ABILITY_TALENT_EVASION)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_SKILL_STEALTH_4)) &amp;&amp;
+                                    (HasAbility(oChar, ABILITY_TALENT_FEIGN_DEATH)));
+
+        // If hero has the ability combo, grant the achievement
+        if (bDualWeaponryMaster) WR_UnlockAchievement(ACH_ABI_DUAL_WEAPONRY_MASTER);
+        if (bArcheryMaster) WR_UnlockAchievement(ACH_ABI_ARCHERY_MASTER);
+        if (bShieldMaster) WR_UnlockAchievement(ACH_ABI_SHIELD_MASTER);
+        if (b2HWeaponMaster) WR_UnlockAchievement(ACH_ABI_2H_WEAPON_MASTER);
+        if (bElementalist) WR_UnlockAchievement(ACH_ABI_ELEMENTALIST);
+        if (bConjurer) WR_UnlockAchievement(ACH_ABI_CONJURER);
+        if (bThaumaturgist) WR_UnlockAchievement(ACH_ABI_THAUMATURGIST);
+        if (bHexer) WR_UnlockAchievement(ACH_ABI_HEXER);
+        if (bAccomplishedWarrior) WR_UnlockAchievement(ACH_ABI_ACCOMPLISHED_WARRIOR);
+        if (bAccomplishedRogue) WR_UnlockAchievement(ACH_ABI_ACCOMPLISHED_ROGUE);
+    }
+
+    if (IsHero(oChar) == TRUE)
+    {
+        ///////////////////////////////////////////////////////////////////
+        // Specialty Classes
+        ///////////////////////////////////////////////////////////////////
+
+        //Player has ability
+        int bAssassin = HasAbility(oChar, ABILITY_TALENT_HIDDEN_ASSASSIN);
+        int bBerserker = HasAbility(oChar, ABILITY_TALENT_HIDDEN_BERSERKER);
+        int bChampion = HasAbility(oChar, ABILITY_TALENT_HIDDEN_CHAMPION);
+        int bDuelist = HasAbility(oChar, ABILITY_TALENT_HIDDEN_DUELIST);
+        int bRanger = HasAbility(oChar, ABILITY_TALENT_HIDDEN_RANGER);
+        int bReaver = HasAbility(oChar, ABILITY_TALENT_HIDDEN_REAVER);
+        int bTemplar = HasAbility(oChar, ABILITY_TALENT_HIDDEN_TEMPLAR);
+        int bArcaneWarrior = HasAbility(oChar, ABILITY_SPELL_HIDDEN_ARCANE_WARRIOR);
+        int bBard = HasAbility(oChar, ABILITY_SPELL_HIDDEN_BARD);
+        int bBloodMage = HasAbility(oChar, ABILITY_SPELL_HIDDEN_BLOODMAGE);
+        int bShapeshifter = HasAbility(oChar, ABILITY_SPELL_HIDDEN_SHAPESHIFTER);
+        int bSpiritHealer = HasAbility(oChar, ABILITY_SPELL_HIDDEN_SPIRIT_HEALER);
+
+        //Player has recieved this achievement
+        int bAchAssassin = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ASSASSIN);
+        int bAchBerserker = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_BERSERKER);
+        int bAchChampion = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_CHAMPION);
+        int bAchDuelist = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_DUELIST);
+        int bAchRanger = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_RANGER);
+        int bAchReaver = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_REAVER);
+        int bAchTemplar = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TEMPLAR);
+        int bAchArcaneWarrior = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ARCANEWARRIOR);
+        int bAchBard = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_BARD);
+        int bAchBloodMage = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_BLOODMAGE);
+        int bAchShapeshifter = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_SHAPESHIFTER);
+        int bAchSpiritHealer = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_SPIRITHEALER);
+
+        int bOneSpec = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC);
+        int bTwoSpec = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS);
+
+        //do this test only if the player doesn't have two specializations
+        if(!bTwoSpec)
+        {
+            //grant the ach. if the player has the spec, does not have the ach.
+            //for it, and doesn't already have two specs.
+            if(bAssassin &amp;&amp; !bAchAssassin)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ASSASSIN, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ASSASSIN, TRUE, TRUE);
+                }
+            }
+
+            if(bBerserker &amp;&amp; !bAchBerserker)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_BERSERKER, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_BERSERKER, TRUE, TRUE);
+                }
+            }
+
+            if(bChampion &amp;&amp; !bAchChampion)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_CHAMPION, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_CHAMPION, TRUE, TRUE);
+                }
+            }
+
+            if(bDuelist &amp;&amp; !bAchDuelist)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_DUELIST, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_DUELIST, TRUE, TRUE);
+                }
+            }
+
+            if(bRanger &amp;&amp; !bAchRanger)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_RANGER, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_RANGER, TRUE, TRUE);
+                }
+            }
+
+            if(bReaver &amp;&amp; !bAchReaver)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_REAVER, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_REAVER, TRUE, TRUE);
+                }
+            }
+
+            if(bTemplar &amp;&amp; !bAchTemplar)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TEMPLAR, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TEMPLAR, TRUE, TRUE);
+                }
+            }
+
+            if(bArcaneWarrior &amp;&amp; !bAchArcaneWarrior)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ARCANEWARRIOR, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ARCANEWARRIOR, TRUE, TRUE);
+                }
+            }
+
+            if(bBard &amp;&amp; !bAchBard)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_BARD, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_BARD, TRUE, TRUE);
+                }
+            }
+
+            if(bBloodMage &amp;&amp; !bAchBloodMage)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_BLOODMAGE, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_BLOODMAGE, TRUE, TRUE);
+                }
+            }
+
+            if(bShapeshifter &amp;&amp; !bAchShapeshifter)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_SHAPESHIFTER, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_SHAPESHIFTER, TRUE, TRUE);
+                }
+            }
+
+            if(bSpiritHealer &amp;&amp; !bAchSpiritHealer)
+            {
+                if(!bOneSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_VETERAN);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_ONE_SPEC, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_SPIRITHEALER, TRUE, TRUE);
+                }
+                else if(!bTwoSpec)
+                {
+                    WR_UnlockAchievement(ACH_ABI_ELITE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_TWO_SPECS, TRUE, TRUE);
+                    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_HAS_SPIRITHEALER, TRUE, TRUE);
+                }
+            }
+        }
+    }
+}
+
+// Handle and apply romance-related achievements
+// Additionally, grant "hidden" achievements associated with the follower for each romance unlocked
+// Then check to see if all romances have been unlocked
+void ACH_HandleHeroRomance(int nFollower, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE);
+void ACH_HandleHeroRomance(int nFollower, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE)
+{
+    //THESE ARE NO LONGER FAKE
+    //made into real achievements but not renamed in
+    //script to avoid breaking.
+    switch (nFollower)
+    {
+        case ACHIEVEMENT__APP_FOLLOWER_ALISTAIR:
+        {
+            WR_UnlockAchievement(ACH_FAKE_PARAMOUR_ALISTAIR);
+        }
+        break;
+
+        case ACHIEVEMENT__APP_FOLLOWER_LELIANA:
+        {
+            WR_UnlockAchievement(ACH_FAKE_PARAMOUR_LELIANA);
+        }
+        break;
+
+        case ACHIEVEMENT__APP_FOLLOWER_ZEVRAN:
+        {
+            WR_UnlockAchievement(ACH_FAKE_PARAMOUR_ZEVRAN);
+        }
+        break;
+
+        case ACHIEVEMENT__APP_FOLLOWER_MORRIGAN:
+        {
+            WR_UnlockAchievement(ACH_FAKE_PARAMOUR_MORRIGAN);
+        }
+        break;
+    }
+
+    int bAlistair = GetHasAchievementByID(ACH_FAKE_PARAMOUR_ALISTAIR);
+    int bLeliana = GetHasAchievementByID(ACH_FAKE_PARAMOUR_LELIANA);
+    int bZevran = GetHasAchievementByID(ACH_FAKE_PARAMOUR_ZEVRAN);
+    int bMorrigan = GetHasAchievementByID(ACH_FAKE_PARAMOUR_MORRIGAN);
+
+    if ((bAlistair) &amp;&amp; (bMorrigan) &amp;&amp; (bLeliana) &amp;&amp; (bZevran))
+    {
+        // Grant "has all romances" achievement
+        WR_UnlockAchievement(ACH_COLLECT_HOPELESSLY_ROMANTIC);
+    }
+}
+
+
+void ACH_HandleDeathEffect(object oTarget, object oKiller, effect eEffect);
+void ACH_HandleDeathEffect(object oTarget, object oKiller, effect eEffect)
+{
+    event eAchievement = Event(EVENT_TYPE_ACHIEVEMENT);
+    int nNumberOfAchievement = 0;
+    // for each achievement found, nNumberOfAchievement will be incremented
+
+    if (IsObjectValid(oKiller) == TRUE)
+    {
+        if (IsHero(oTarget) == TRUE)
+        {
+            // Only acknowledge this death if not in camp
+            int bCamp = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, PLT_CORE_BOOKKEEPING_CAMP);
+            if (!bCamp)
+            {
+                // Set a Plot Flag to indicate that the Hero has been defeated.
+                // This is used to disqualify players from the following achievements:
+                // Bloodied, Veteran, General and I'm kind of a Big Deal
+                WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, PLT_CORE_BOOKKEEPING_HERO_DIED, TRUE);
+                #ifdef DEBUG
+                ACH_LogTrace(LOG_CHANNEL_REWARDS, "The hero has died. No more survival achievement for you!");
+                #endif
+            }
+            else
+            {
+                // The player died in camp; ignore the death
+                #ifdef DEBUG
+                ACH_LogTrace(LOG_CHANNEL_REWARDS, "The hero has died, but this was a camping death. Ignore this death.");
+                #endif
+            }
+        }
+        else
+        if (IsPartyMember(oKiller) == TRUE)
+        {
+
+            //                                                        //
+            // ---------------- DARKSPAWN KILLING ------------------- //
+            //                                                        //
+            if (GetCreatureRacialType(oTarget) == ACHIEVEMENT__CREATURE_TYPE_DARKSPAWN)
+            {
+                #ifdef DEBUG
+                ACH_LogTrace(LOG_CHANNEL_REWARDS, "Potential achievement: killed a darkspawn");
+                #endif
+
+                if (GetHasAchievementByID(ACH_FEAT_GREY_WARDEN) == FALSE)
+                {
+                    // Player does not have the lowest achievement: GREY WARDEN
+                    // Increment the count for that achievement and automatically
+                    // grant it if the right count has been reached
+                    WR_IncrementAndMaybeGrantAchievement(ACH_FEAT_GREY_WARDEN);
+                }
+                else
+                {
+                    if (GetHasAchievementByID(ACH_FEAT_MASTER_WARDEN) == FALSE)
+                    {
+                        // Player has GREY WARDEN, but does not have MASTER WARDEN
+                        WR_IncrementAndMaybeGrantAchievement(ACH_FEAT_MASTER_WARDEN);
+                    }
+                    else
+                    {
+
+                        if (GetHasAchievementByID(ACH_FEAT_BLIGHT_QUELLER) == FALSE)
+                        {
+                            // Player has MASTER WARDEN, but does not have BLIGHT QUELLER
+                            WR_IncrementAndMaybeGrantAchievement(ACH_FEAT_BLIGHT_QUELLER);
+                        }
+                    }
+                }
+            }
+
+            int nAbilityID = GetEffectAbilityID(eEffect);
+            int nAchievementID = -1;
+            #ifdef DEBUG
+            ACH_LogTrace(LOG_CHANNEL_REWARDS, "Other Achievement? Ability used is: "+IntToString(nAbilityID));
+            #endif
+            switch (nAbilityID)
+            {
+
+
+                case ABILITY_TALENT_PUNISHER: nAchievementID = ACH_STATS_THE_PUNISHER; break;
+                case ABILITY_TALENT_DUAL_WEAPON_WHIRLWIND: nAchievementID = ACH_STATS_WHIRLING_DERVISH; break;
+                case ABILITY_TALENT_ARROW_OF_SLAYING: nAchievementID = ACH_STATS_CALL_ME_CRITICLES; break;
+                case ABILITY_TALENT_MIGHTY_BLOW: nAchievementID = ACH_STATS_CRUSHER; break;
+                case ABILITY_TALENT_ASSAULT: nAchievementID = ACH_STATS_BATTERY; break;
+            }
+
+            if (nAchievementID != -1)
+            {
+                if (GetHasAchievementByID(nAchievementID) == FALSE)
+                {
+                    WR_IncrementAndMaybeGrantAchievement(nAchievementID);
+                }
+            }
+
+            // All other achievements must be done by the Hero himself
+            if (IsHero(oKiller) == TRUE)
+            {
+                int bDamagedTheHero = GetLocalInt(oTarget, CREATURE_DAMAGED_THE_HERO); // set in effect_damage_h
+
+                if (bDamagedTheHero == FALSE)
+                {
+
+                    // the Hero killed this creature without the creature damaging the hero
+                    if (GetHasAchievementByID(ACH_FEAT_TACTICIAN) == FALSE)
+                    {
+                        #ifdef DEBUG
+                        ACH_LogTrace(LOG_CHANNEL_REWARDS, "Tactician achievement: This creature has been killed by the hero without damaging the hero...");
+                        #endif
+                        WR_IncrementAndMaybeGrantAchievement(ACH_FEAT_TACTICIAN);
+                    }
+
+                }
+
+                int nDamage = GetEffectInteger(eEffect, ACH_EFFECT_DEATH_DAMAGE_INDEX);
+
+                if (nDamage &gt;= ACH_PARAM_HEAVY_HITTER_THRESHOLD)
+                {
+                    #ifdef DEBUG
+                    ACH_LogTrace(LOG_CHANNEL_REWARDS, "Achievement HEAVY Hitter? Damage caused is: "+IntToString(nDamage));
+                    #endif
+
+                    if (GetHasAchievementByID(ACH_FEAT_HEAVY_HITTER) == FALSE)
+                    {
+                        WR_UnlockAchievement(ACH_FEAT_HEAVY_HITTER);
+                    }
+                }
+            }
+
+        }
+
+    }
+
+
+}
+
+
+void ACH_ProcessAchievementModuleEvent(event ev);
+void ACH_ProcessAchievementModuleEvent(event ev)
+{
+/*
+
+    int nEventCount = GetEventInteger(ev, 0);
+    ACH_LogTrace(LOG_CHANNEL_REWARDS, "Received an achievement event containing " + IntToString(nEventCount) + " achievements.");
+
+    if (nEventCount &gt; 0)
+    {
+
+
+        int nAchievementID = 0;
+
+        int nIndex = 1;
+        while (nIndex &lt;= nEventCount)
+        {
+            nAchievementID = GetEventInteger(ev, nIndex);
+
+            ACH_LogTrace(LOG_CHANNEL_REWARDS, "Now processing achievement #"+IntToString(nIndex)+" with ID = "+IntToString(nAchievementID));
+
+            switch (nAchievementID)
+            {
+                case ACH_FEAT_GREY_WARDEN:
+                case ACH_FEAT_MASTER_WARDEN:
+                case ACH_FEAT_BLIGHT_QUELLER:
+                case ACH_FEAT_TACTICIAN:
+                case ACH_FEAT_HEAVY_HITTER:
+                case ACH_STATS_THE_PUNISHER:
+                case ACH_STATS_WHIRLING_DERVISH:
+                case ACH_STATS_CALL_ME_CRITICLES:
+                case ACH_STATS_CRUSHER:
+                case ACH_STATS_BATTERY:
+                {
+                    WR_UnlockAchievement(nAchievementID);
+                }
+                break;
+
+                default:
+                {
+                    Warning("ACHIEVEMENT EVENT NOT_HANDLED! " + IntToString(nAchievementID) + " (" + Log_GetAbilityNameById(nAchievementID) + ").  + Contact Emmanuel or Georg");
+                    ACH_LogTrace(LOG_CHANNEL_REWARDS, "ACHIEVEMENT EVENT NOT_HANDLED! " + IntToString(nAchievementID) + " (" + Log_GetAbilityNameById(nAchievementID) + ").  + Contact Emmanuel or Georg");
+                    Log_Trace_Scripting_Error("achievement_core_h.ACH_ProcessAchievementModuleEvent", "ABIlITY ID NOT HANDLED! " + IntToString(nAchievementID) + " (" + Log_GetAbilityNameById(nAchievementID) + ")" , OBJECT_SELF);
+                }
+
+            }
+
+            nIndex++;
+        }
+    }
+    else
+    {
+        // Received an event but no data stored on it? Something bad happened. Log it.
+        ACH_LogTrace(LOG_CHANNEL_REWARDS, "Received an event but no data stored on it? Something bad happened...");
+
+    }
+*/
+}
+
+void ACH_ProcessAchievementImpactDamageAndEffects(struct EventSpellScriptImpactStruct stEvent, object [] oTargets);
+void ACH_ProcessAchievementImpactDamageAndEffects(struct EventSpellScriptImpactStruct stEvent, object [] oTargets)
+{
+    /* CUT
+    // only do test for certain abilities
+    if ( (stEvent.nAbility == ABILITY_TALENT_DUAL_WEAPON_SWEEP) || (stEvent.nAbility == ABILITY_TALENT_WEAPON_SWEEP) )
+    {
+        // cycle through objects
+        int nMax = GetArraySize(oTargets);
+        #ifdef DEBUG
+        ACH_LogTrace(LOG_CHANNEL_REWARDS, "The Hero has potentially killed " + IntToString(nMax) + " creatures in one blow!");
+        #endif
+        // only if there's a chance that there will be enough killed enemies
+        if (nMax &gt;= ACH_PARAM_STREET_SWEEPER_COUNT)
+        {
+            // only if the achievement hasn't been obtained yet
+            if (GetHasAchievementByID(ACH_FEAT_STREET_SWEEPER) == FALSE)
+            {
+                int nDeadCount = 0;
+
+                int nIndex = 0;
+                while (nIndex &lt; nMax)
+                {
+                    // count the dead
+                    if (IsDeadOrDying(oTargets[nIndex]) == TRUE)
+                    {
+                        nDeadCount++;
+
+                        // stop as soon as we have enough death to qualify
+                        if (nDeadCount &gt;= ACH_PARAM_STREET_SWEEPER_COUNT)
+                        {
+                            // grant the achievement
+                            WR_UnlockAchievement(ACH_FEAT_STREET_SWEEPER);
+
+                            // break the loop
+                            nIndex = nMax;
+                        }
+                    }
+                    nIndex++;
+                }
+                #ifdef DEBUG
+                ACH_LogTrace(LOG_CHANNEL_REWARDS, "In fact, the Hero has actually killed " + IntToString(nDeadCount) + " creatures in one blow...");
+                #endif
+
+            }
+        }
+    }
+    */
+}
+
+// If the player hasn't died yet, grant the relevant achievement (Bloodied, veteran, general, kind of big deal)
+void ACH_CheckForSurvivalAchievement(int nAchievementToGrant);
+void ACH_CheckForSurvivalAchievement(int nAchievementToGrant)
+{
+    if ( WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, PLT_CORE_BOOKKEEPING_HERO_DIED) == FALSE)
+    {
+        // If the Player hasn't died, grant achievement: Bloodied
+        WR_UnlockAchievement(nAchievementToGrant);
+    }
+    else
+    {
+        ACH_LogTrace(LOG_CHANNEL_REWARDS, "The Hero has died at least once... no achievement for you.");
+    }
+}
+
+
+// Check if the player should receive a minor or a major plot-counter based achievement
+void _CheckMinorMajorPlotCountAchievements(object oActor, int nBaseIndex, int nMinorAchievementID, int nMajorAchievementID, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE, int nCounterSize = 8);
+void _CheckMinorMajorPlotCountAchievements(object oActor, int nBaseIndex, int nMinorAchievementID, int nMajorAchievementID, int bTakeScreenshot, int bGrantAchievement, int nCounterSize)
+{
+    if(IsFollower(oActor))
+    {
+        int nAchievementID = -1;
+        //DisplayFloatyMessage(oActor, GetTag(oActor), FLOATY_MESSAGE, 16777215, 5.0f);
+        // if the player already has the major achievment, no need to do anything else
+        if (GetHasAchievementByID(nMajorAchievementID) == FALSE)
+        {
+            // finding out how many successes the Hero has with the skill
+            int nNeededMajorCount = GetM2DAInt(TABLE_ACHIEVEMENTS, "UnlockedAt", nMajorAchievementID);
+            int nCount = ACH_IncrementPlotCounter(PLT_GENPT_CORE_ACHIEVEMENTS, nBaseIndex, nCounterSize);
+
+            ACH_LogTrace(LOG_CHANNEL_REWARDS, "Skill Successes = " + IntToString(nCount) +"; baseindex = " + IntToString(nBaseIndex));
+
+            // if enough to get the major achievement, "grant" it
+            if (nCount &gt;= nNeededMajorCount) nAchievementID = nMajorAchievementID;
+            else
+            {
+                // if the player already has the minor achievement, no need to go further
+                if (GetHasAchievementByID(nMinorAchievementID) == TRUE) return;
+                else
+                {
+                    int nNeededMinorCount = GetM2DAInt(TABLE_ACHIEVEMENTS, "UnlockedAt", nMinorAchievementID);
+
+                    // if enough to get the minor achievement, "grant" it
+                    if (nCount &gt;= nNeededMinorCount) nAchievementID = nMinorAchievementID;
+                }
+            }
+        }
+
+        // if we found an achivement, grant it for real.
+        if (nAchievementID != -1)
+        {
+            WR_UnlockAchievement(nAchievementID);
+        }
+    }
+}
+
+// Check if the player should receive a plot-counter based achievement
+void _CheckPlotCountAchievement(object oActor, int nBaseIndex, int nAchievementID, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE, int nCounterSize = 8);
+void _CheckPlotCountAchievement(object oActor, int nBaseIndex, int nAchievementID, int bTakeScreenshot, int bGrantAchievement, int nCounterSize)
+{
+    if (IsHero(oActor) == TRUE)
+    {
+        if (GetHasAchievementByID(nAchievementID) == FALSE)
+        {
+            int nNeededCount = GetM2DAInt(TABLE_ACHIEVEMENTS, "UnlockedAt", nAchievementID);
+
+            // finding out how many successes the Hero has with the skill and increment it
+            int nCount = ACH_IncrementPlotCounter(PLT_GENPT_CORE_ACHIEVEMENTS, nBaseIndex, nCounterSize);
+            ACH_LogTrace(LOG_CHANNEL_REWARDS, "Skill Successes = " + IntToString(nCount) +"; baseindex = " + IntToString(nBaseIndex));
+
+            // if enough to get the achievement, "grant" it
+            if (nCount &gt;= nNeededCount) WR_UnlockAchievement(nAchievementID);
+        }
+    }
+}
+
+// Check if crafter is player; if so, grant (increment) achievement
+void ACH_CraftAchievement(object oActor, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE);
+void ACH_CraftAchievement(object oActor, int bTakeScreenshot, int bGrantAchievement)
+{
+    _CheckMinorMajorPlotCountAchievements(oActor, ACH_PARAM_CRAFTING_BASE_INDEX, ACH_STATS_TINKERER, ACH_STATS_CRAFTY, bTakeScreenshot, bGrantAchievement);
+}
+
+// Check if trap creator is player; if so, grant (increment) achievement
+void ACH_TrapAchievement(object oActor, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE);
+void ACH_TrapAchievement(object oActor, int bTakeScreenshot, int bGrantAchievement)
+{
+    _CheckMinorMajorPlotCountAchievements(oActor, ACH_PARAM_TRAP_SKILL_BASE_INDEX, ACH_STATS_CLEVER, ACH_STATS_INSIDIOUS, bTakeScreenshot, bGrantAchievement);
+}
+
+// Check if trap creator is player; if so, grant (increment) achievement
+void ACH_DisarmAchievement(object oActor, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE);
+void ACH_DisarmAchievement(object oActor, int bTakeScreenshot, int bGrantAchievement)
+{
+    _CheckMinorMajorPlotCountAchievements(oActor, ACH_PARAM_DISARM_SKILL_BASE_INDEX, ACH_STATS_NIMBLE, ACH_STATS_LIGHTNING, bTakeScreenshot, bGrantAchievement);
+}
+
+// grant (increment) achievement
+void ACH_LockpickAchievement(object oActor, int bTakeScreenshot = TRUE, int bGrantAchievement = TRUE);
+void ACH_LockpickAchievement(object oActor, int bTakeScreenshot, int bGrantAchievement)
+{
+    _CheckMinorMajorPlotCountAchievements(oActor, ACH_PARAM_UNLOCK_BASE_INDEX, ACH_STATS_LOCKPICKER, ACH_STATS_MASTER_LOCKPICKER, bTakeScreenshot, bGrantAchievement);
+}
+
+// grant achievement
+void ACH_MuggerAchievement();
+void ACH_MuggerAchievement()
+{
+    if(!GetHasAchievementByID(ACH_STATS_MUGGER))
+    {
+        WR_UnlockAchievement(ACH_STATS_MUGGER);
+    }
+}
+
+
+// Check if the player has enough codex entries; if so, grant (increment) achievement
+void ACH_CodexAchievement(object oActor);
+void ACH_CodexAchievement(object oActor)
+{
+    _CheckPlotCountAchievement(oActor, ACH_PARAM_CODEX_BASE_INDEX, ACH_COLLECT_LORE_MASTER, TRUE, TRUE, ACH_PARAM_CODEX_COUNTER_SIZE);
+}
+
+// Check if the player has enough codex entries; if so, grant (increment) achievement
+void ACH_MercAchievement(object oActor);
+void ACH_MercAchievement(object oActor)
+{
+    _CheckPlotCountAchievement(oActor, ACH_PARAM_BOARD_BASE_INDEX, ACH_COLLECT_MERCENARY, TRUE, TRUE, ACH_PARAM_BOARD_COUNTER_SIZE);
+}
+
+// grant achievement
+void ACH_PilgrimAchievement();
+void ACH_PilgrimAchievement()
+{
+    if(!GetHasAchievementByID(ACH_PILGRIM))
+    {
+        WR_UnlockAchievement(ACH_PILGRIM);
+    }
+}
+
+// grant achievement
+void ACH_StreetwiseAchievement();
+void ACH_StreetwiseAchievement()
+{
+    if(!GetHasAchievementByID(ACH_STREETWISE))
+    {
+        WR_UnlockAchievement(ACH_STREETWISE);
+    }
+}
+
+// grant achievement
+void ACH_CollectiveAchievement();
+void ACH_CollectiveAchievement()
+{
+    if(!GetHasAchievementByID(ACH_COLLECTIVE))
+    {
+        WR_UnlockAchievement(ACH_COLLECTIVE);
+    }
+}
+
+// grant achievement
+void ACH_FighterAchievement();
+void ACH_FighterAchievement()
+{
+    if(!GetHasAchievementByID(ACH_BLACKSTONE))
+    {
+        WR_UnlockAchievement(ACH_BLACKSTONE);
+    }
+}
+
+// grant achievement
+void ACH_Educated();
+void ACH_Educated()
+{
+    WR_UnlockAchievement(ACH_ABI_EDUCATED);
+}
+
+// Check if the player has discovered a specially flagged area; if so, increment the count for such areas (and possibly grant the achievement)
+// The flag is stored on the column labeled AchievementFlag in areadata.xls
+void ACH_TravelerAchievement(int n2DA, int nAreaID);
+void ACH_TravelerAchievement(int n2DA, int nAreaID)
+{
+    int bAchievementFlag = GetM2DAInt(n2DA,"AchievementFlag",nAreaID);
+
+    if ( bAchievementFlag == TRUE)
+    {
+        ACH_LogTrace(LOG_CHANNEL_REWARDS, "Entered area flagged for Traveler achievement for the first time! AreaID="+ToString(nAreaID));
+
+        object oActor = GetHero();
+        _CheckPlotCountAchievement(oActor, ACH_PARAM_TRAVELER_BASE_INDEX, ACH_FEAT_TRAVELER, TRUE, TRUE);
+    }
+}
+
+// Check if the player has enough Persuade successes; if so, grant (increment) achievement
+void ACH_CheckPersuadeAchievement(object oPC, int bResult, int nSkill, int nNeededSkill);
+void ACH_CheckPersuadeAchievement(object oPC, int bResult, int nSkill, int nNeededSkill)
+{
+    if (bResult == TRUE)
+    {
+        if (nSkill == nNeededSkill)
+        {
+            _CheckMinorMajorPlotCountAchievements(oPC, ACH_PARAM_PERSUADE_SKILL_BASE_INDEX, ACH_STATS_PERSUASIVE, ACH_STATS_SILVER_TONGUED, TRUE, TRUE);
+            ACH_LogTrace(LOG_CHANNEL_REWARDS, "Persuade success sent.");
+        }
+    }
+}
+
+// Check if the player has enough Intimidate successes; if so, grant (increment) achievement
+void ACH_CheckIntimidateAchievement(object oPC, int bResult, int nSkill, int nNeededSkill);
+void ACH_CheckIntimidateAchievement(object oPC, int bResult, int nSkill, int nNeededSkill)
+{
+    if (bResult == TRUE)
+    {
+        if (nSkill == nNeededSkill)
+        {
+            _CheckMinorMajorPlotCountAchievements(oPC,ACH_PARAM_INTIMIDATE_SKILL_BASE_INDEX, ACH_STATS_BULLY, ACH_STATS_MENACING, TRUE, TRUE);
+            ACH_LogTrace(LOG_CHANNEL_REWARDS, "Intimidate success sent.");
+        }
+    }
+}
+
+// Checks the game "plot marker assist" setting and sets a plot flag when it is turned on
+void ACH_CheckPlotMarkers();
+void ACH_CheckPlotMarkers()
+{
+    if (GetGamePlotAssist() != GAME_PLOT_ASSIST_OFF)
+    {
+        WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, PLT_CORE_BOOKKEEPING_PLOT_MARKERS, TRUE);
+        ACH_LogTrace(LOG_CHANNEL_REWARDS, "Plot assist markers turned ON. No achievement for you...");
+    }
+}
+
+// Checks for the "plot marker assist" plot flag and grants the achievement if it's not set
+void ACH_CheckAndGrantWorldly();
+void ACH_CheckAndGrantWorldly()
+{
+    int bEZMode = WR_GetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, PLT_CORE_BOOKKEEPING_PLOT_MARKERS);
+    if (!bEZMode) WR_UnlockAchievement(ACH_FEAT_WORLDLY);
+}
+
+/**
+* @brief                Function to route the death incurred when entering the camp for the purpose of preserving the "survivor" achievements.
+                        TRUE means the player is in camp and death should be ignored.
+                        FALSE means the player is out of camp and death is counted.
+* @param bFlag          The state of the plot flag: TRUE or FALSE
+*
+* @author               Austin Peckenpaugh
+*
+**/
+void ACH_SetCampingState(int bFlag);
+void ACH_SetCampingState(int bFlag)
+{
+    WR_SetPlotFlag(PLT_GENPT_CORE_ACHIEVEMENTS, PLT_CORE_BOOKKEEPING_CAMP, bFlag);
+}
+
+// Increments quest completion counter for Easily Sidetracked achievement
+void ACH_TrackCompletedQuests();
+void ACH_TrackCompletedQuests()
+{
+    int nCount = ACH_IncrementPlotCounter(PLT_GENPT_CORE_ACHIEVEMENTS, ACH_PARAM_EASILY_SIDETRACKED_BASE_INDEX, 10);
+    int nNeededCount = GetM2DAInt(TABLE_ACHIEVEMENTS, "UnlockedAt", ACH_COLLECT_EASILY_SIDETRACKED);
+    ACH_LogTrace(LOG_CHANNEL_REWARDS, "Quests completed = " + IntToString(nCount) +"; baseindex = " + IntToString(ACH_PARAM_EASILY_SIDETRACKED_BASE_INDEX));
+    // if enough to get the achievement, "grant" it
+    if (nCount &gt;= nNeededCount) WR_UnlockAchievement(ACH_COLLECT_EASILY_SIDETRACKED);
+}</text>
+	</Agent>
+</Resource>

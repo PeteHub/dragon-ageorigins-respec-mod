@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="7" ResRefID="7979" Folder="\WRK_RESPEC\Merchant\" ResRefName="wrk_respec_vendor_npc" IsCore="1" OwnerIsCore="0" Type="3" State="0" ObjectName="Raven" Relationship="" ResType="utc" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\wrk_respec_vendor_npc.utc?moduleid=1&amp;resrefid=7979" Requested="1">
+	<Agent type="empty">
+		<ResRefName>wrk_respec_vendor_npc</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<Variable2da>var_creature</Variable2da>
+		<VariableList>Variables</VariableList>
+		<InventoryList>Inventory</InventoryList>
+		<name>Raven</name>
+		<NameStringID type="i4">1089623112</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<Description/>
+		<DescriptionStringID type="i4">1089623113</DescriptionStringID>
+		<DescriptionRequiresReTranslation type="bool">False</DescriptionRequiresReTranslation>
+		<Tag>wrk_respec_vendor_npc</Tag>
+		<Race type="i4">3</Race>
+		<Gender type="i4">1</Gender>
+		<Group type="i4">2</Group>
+		<Team type="i4">-1</Team>
+		<Selectable type="bool">True</Selectable>
+		<PlotGiver type="bool">False</PlotGiver>
+		<Class type="i4">1</Class>
+		<PackageType type="i4">6</PackageType>
+		<Package type="i4">1</Package>
+		<PackageAI type="i4">0</PackageAI>
+		<ConversationURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7982</ConversationURI>
+		<ScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=2</ScriptURI>
+		<Gold type="i4">0</Gold>
+		<PerceptionRange type="i4">9</PerceptionRange>
+		<Comments/>
+		<CharacterURI/>
+		<Appearance type="i4">84</Appearance>
+		<Head type="i4">0</Head>
+		<Hair type="i4">1</Hair>
+		<HairTint type="i4">0</HairTint>
+		<Eyes type="i4">1</Eyes>
+		<EyeTint type="i4">0</EyeTint>
+		<Beard type="i4">0</Beard>
+		<BodyTintMask type="i4">0</BodyTintMask>
+		<BodyTint type="i4">0</BodyTint>
+		<SkinTint type="i4">0</SkinTint>
+		<TattooTint type="i4">0</TattooTint>
+		<HeadMorph>ef_bed200_female2</HeadMorph>
+		<Tattoo type="i4">0</Tattoo>
+		<Rank type="i4">1</Rank>
+		<ArtFidelity type="i4">2</ArtFidelity>
+		<TreasureCategory type="i4">0</TreasureCategory>
+		<Combatant type="i4">1</Combatant>
+		<Immortal type="bool">True</Immortal>
+		<Plot type="bool">False</Plot>
+		<NoPermanentDeath type="bool">True</NoPermanentDeath>
+		<MinLevel type="i4">0</MinLevel>
+		<MaxLevel type="i4">0</MaxLevel>
+		<SkillList>Skill<Agent type="empty">
+				<Skill type="i4">100071</Skill>
+				<Level type="i4">0</Level>
+			</Agent>
+		</SkillList>
+		<TalentList>Talents</TalentList>
+		<SpellList>Spell<Agent type="empty">
+				<Spell type="i4">10002</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">10003</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">10211</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">10504</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">10506</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">10507</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">10509</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">11116</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">12004</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">13000</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">13002</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">14002</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">17007</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">17008</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">17009</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">17010</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">200254</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">200255</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">200256</Spell>
+			</Agent>
+			<Agent type="empty">
+				<Spell type="i4">200257</Spell>
+			</Agent>
+		</SpellList>
+	</Agent>
+</Resource>

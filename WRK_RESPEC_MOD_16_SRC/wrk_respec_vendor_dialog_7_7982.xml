@@ -1,0 +1,1240 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="7" OwnerModuleID="7" ResRefID="7982" Folder="\WRK_RESPEC\Merchant\" ResRefName="wrk_respec_vendor_dialog" IsCore="0" OwnerIsCore="0" Type="3" State="0" ObjectName="" Relationship="" ResType="dlg" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\wrk_respec_vendor_dialog.dlg?moduleid=7&amp;resrefid=7982" Requested="1">
+	<Agent type="empty">
+		<ResRefName>wrk_respec_vendor_dialog</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<EndConversationScriptURI/>
+		<EndConversationParameter type="i4">0</EndConversationParameter>
+		<EndConversationParameterText/>
+		<EndConversationPlotURI/>
+		<EndConversationPlotFlag type="i4">-1</EndConversationPlotFlag>
+		<EndConversationResult type="bool">True</EndConversationResult>
+		<Comment/>
+		<DefaultNPCSpeaker>OWNER</DefaultNPCSpeaker>
+		<DefaultNPCListener>OWNER</DefaultNPCListener>
+		<DefaultPCListener>PLAYER</DefaultPCListener>
+		<StageURI/>
+		<StageTag/>
+		<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+		<AllGesturesLocked type="bool">False</AllGesturesLocked>
+		<AllPosesLocked type="bool">False</AllPosesLocked>
+		<AllRoboBradLocked type="bool">False</AllRoboBradLocked>
+		<AllCameraLocked type="bool">False</AllCameraLocked>
+		<AmbientSoundSetType type="bool">False</AmbientSoundSetType>
+		<OwnerIsHenchman type="bool">False</OwnerIsHenchman>
+		<VOHardTimeRestriction type="bool">False</VOHardTimeRestriction>
+		<PreviewAreaURI/>
+		<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+		<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+		<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+		<IsSoundset type="bool">False</IsSoundset>
+		<StartList type="empty">
+			<Agent type="empty">
+				<LineIndex type="i4">0</LineIndex>
+			</Agent>
+		</StartList>
+		<NPCLineList type="empty">
+			<Agent type="empty">
+				<StringID type="i4">1089623114</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>...</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker/>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty">
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">0</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">1</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">12</LineIndex>
+					</Agent>
+				</TransitionList>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623117</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Suddenly, you seem to know a lot more about ...</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker/>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty">
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">2</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">5</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">8</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">True</IsLink>
+						<LineIndex type="i4">12</LineIndex>
+					</Agent>
+				</TransitionList>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623126</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>... especially the ways of the ...</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker/>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty">
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">3</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">4</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">True</IsLink>
+						<LineIndex type="i4">12</LineIndex>
+					</Agent>
+				</TransitionList>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623127</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>... especially the ways of the ...</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker/>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty">
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">6</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">7</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">True</IsLink>
+						<LineIndex type="i4">12</LineIndex>
+					</Agent>
+				</TransitionList>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623128</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>... especially the ways of the ...</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker/>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty">
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">9</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">10</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">11</LineIndex>
+					</Agent>
+					<Agent type="empty">
+						<IsLink type="bool">True</IsLink>
+						<LineIndex type="i4">12</LineIndex>
+					</Agent>
+				</TransitionList>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+		</NPCLineList>
+		<PlayerLineList type="empty">
+			<Agent type="empty">
+				<StringID type="i4">1089623115</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7987</ConditionScriptURI>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7985</ActionScriptURI>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText>0</ActionParameterText>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>There is a vial tied to the birds leg... &lt;act&gt;Try to take it!&lt;/act&gt;</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty"/>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623118</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>&lt;act&gt;Look into the raven's eyes&lt;/act&gt;</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty">
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">1</LineIndex>
+					</Agent>
+				</TransitionList>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623129</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Warriors</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty">
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">2</LineIndex>
+					</Agent>
+				</TransitionList>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623121</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7990</ActionScriptURI>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Berserker</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty"/>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623125</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7994</ActionScriptURI>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Templar</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty"/>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623130</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Mages</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty">
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">3</LineIndex>
+					</Agent>
+				</TransitionList>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623123</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7992</ActionScriptURI>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Shapeshifter</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty"/>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623124</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7993</ActionScriptURI>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Spirit Healer</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty"/>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623131</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Rogues</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty">
+					<Agent type="empty">
+						<IsLink type="bool">False</IsLink>
+						<LineIndex type="i4">4</LineIndex>
+					</Agent>
+				</TransitionList>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623119</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7988</ActionScriptURI>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Assassin</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty"/>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623120</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7989</ActionScriptURI>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Bard</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty"/>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623122</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7991</ActionScriptURI>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>Ranger</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty"/>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<StringID type="i4">1089623116</StringID>
+				<LanguageID type="i4">0</LanguageID>
+				<ConditionScriptURI/>
+				<ConditionParameter type="i4">0</ConditionParameter>
+				<ConditionParameterText/>
+				<ConditionPlotURI/>
+				<ConditionPlotFlag type="i4">-1</ConditionPlotFlag>
+				<ConditionResult type="bool">True</ConditionResult>
+				<ActionScriptURI/>
+				<ActionParameter type="i4">0</ActionParameter>
+				<ActionParameterText/>
+				<ActionPlotURI/>
+				<ActionPlotFlag type="i4">-1</ActionPlotFlag>
+				<ActionResult type="bool">True</ActionResult>
+				<text>&lt;act&gt;Leave the bird alone.&lt;/act&gt;</text>
+				<TextRequiresReTranslation type="bool">False</TextRequiresReTranslation>
+				<TextRequiresReRecording type="bool">False</TextRequiresReRecording>
+				<Speaker>PLAYER</Speaker>
+				<PreviousSpeaker/>
+				<Listener/>
+				<icon type="i4">0</icon>
+				<Comment/>
+				<FastPath type="i4">0</FastPath>
+				<SlideShowTexture/>
+				<VoiceOverTag/>
+				<VoiceOverComment/>
+				<EditorComment/>
+				<LineVisibility type="i4">0</LineVisibility>
+				<Ambient type="bool">False</Ambient>
+				<SkipLine type="bool">False</SkipLine>
+				<StageURI/>
+				<StageTag/>
+				<StageAtCurrentLocation type="bool">False</StageAtCurrentLocation>
+				<CameraTag/>
+				<CameraLocked type="bool">False</CameraLocked>
+				<SecondaryCameratag/>
+				<SecondaryCameraDelay type="r4">0</SecondaryCameraDelay>
+				<Emotion type="i4">0</Emotion>
+				<CustomCutsceneURI/>
+				<SpeakerAnimation/>
+				<RevertAnimation type="bool">False</RevertAnimation>
+				<LockAnimations type="bool">False</LockAnimations>
+				<PlaySoundEvents type="bool">True</PlaySoundEvents>
+				<RoboBradSeed type="ui4">0</RoboBradSeed>
+				<RoboBradSeedOverride type="bool">False</RoboBradSeedOverride>
+				<RoboBradLocked type="bool">False</RoboBradLocked>
+				<PreviewAreaURI/>
+				<PreviewStageUseFirstMatch type="bool">True</PreviewStageUseFirstMatch>
+				<PreviewStagePosition type="vector">0,0,0</PreviewStagePosition>
+				<PreviewStageOrientation type="vector">0,0,0</PreviewStageOrientation>
+				<UseAnimationDuration type="bool">False</UseAnimationDuration>
+				<NoVOInGame type="bool">False</NoVOInGame>
+				<Narration type="bool">False</Narration>
+				<PreCacheVO type="bool">False</PreCacheVO>
+				<TransitionList type="empty"/>
+				<CinematicsInfoList type="empty"/>
+				<AnimationListList type="empty"/>
+				<CustomCutsceneParameterList type="empty"/>
+				<PreviewTagMappingList type="empty"/>
+			</Agent>
+		</PlayerLineList>
+		<CinematicsInfoList type="empty"/>
+		<PreviewTagMappingList type="empty">
+			<Agent type="empty">
+				<Key>OWNER</Key>
+				<Val>wrk_respec_vendor_npc</Val>
+				<URI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7979</URI>
+			</Agent>
+		</PreviewTagMappingList>
+	</Agent>
+</Resource>

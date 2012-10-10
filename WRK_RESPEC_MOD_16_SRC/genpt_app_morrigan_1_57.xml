@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="57" Folder="\_Global\Approval\" ResRefName="genpt_app_morrigan" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="plo" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\genpt_app_morrigan.plo?moduleid=1&amp;resrefid=57" Requested="0">
+	<Agent type="empty">
+		<ResRefName>genpt_app_morrigan</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<name/>
+		<NameStringID type="i4">5418</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<GUID>B02A8C69112643C9AF5F0274B28AE773</GUID>
+		<ScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=65</ScriptURI>
+		<Priority type="i4">1</Priority>
+		<JournalImage/>
+		<ParentPlotURI/>
+		<EntryType type="i4">1</EntryType>
+		<AllowPausing type="bool">False</AllowPausing>
+		<StatusList type="empty">
+			<Agent type="empty">
+				<Flag type="i4">0</Flag>
+				<name>APP_MORRIGAN_INC_VLOW</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5382</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">1</Flag>
+				<name>APP_MORRIGAN_INC_LOW</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5383</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">2</Flag>
+				<name>APP_MORRIGAN_INC_MED</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5384</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">3</Flag>
+				<name>APP_MORRIGAN_INC_HIGH</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5385</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">4</Flag>
+				<name>APP_MORRIGAN_INC_VHIGH</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5386</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">5</Flag>
+				<name>APP_MORRIGAN_INC_EXTREME</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5387</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">6</Flag>
+				<name>APP_MORRIGAN_DEC_VLOW</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5388</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">7</Flag>
+				<name>APP_MORRIGAN_DEC_LOW</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5389</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">8</Flag>
+				<name>APP_MORRIGAN_DEC_MED</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5390</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">9</Flag>
+				<name>APP_MORRIGAN_DEC_HIGH</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5391</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">10</Flag>
+				<name>APP_MORRIGAN_DEC_VHIGH</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5392</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">11</Flag>
+				<name>APP_MORRIGAN_DEC_EXTREME</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5393</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">12</Flag>
+				<name>APP_MORRIGAN_OFFENDED</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5394</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">13</Flag>
+				<name>APP_MORRIGAN_ROMANCE_DUMPED</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5395</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">21</Flag>
+				<name>APP_MORRIGAN_ROMANCE_ACTIVE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5396</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">22</Flag>
+				<name>APP_MORRIGAN_FRIENDLY_ELIGIBLE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5397</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">23</Flag>
+				<name>APP_MORRIGAN_LOVE_ELIGIBLE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5398</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">24</Flag>
+				<name>APP_MORRIGAN_PRE_FRIENDLY_ELIGIBLE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5399</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">25</Flag>
+				<name>APP_MORRIGAN_PRE_LOVE_ELIGIBLE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5400</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">27</Flag>
+				<name>APP_MORRIGAN_ROMANCE_CUT_OFF</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5401</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">28</Flag>
+				<name>APP_MORRIGAN_TURNED_DOWN</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5402</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">29</Flag>
+				<name>APP_MORRIGAN_MAKE_LOVE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5403</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">30</Flag>
+				<name>APP_MORRIGAN_BACKED_OUT</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5404</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">31</Flag>
+				<name>APP_MORRIGAN_SET_TO_0</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5405</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">32</Flag>
+				<name>APP_MORRIGAN_STILL_IN_LOVE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5406</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">33</Flag>
+				<name>APP_MORRIGAN_HARDENED</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5407</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">34</Flag>
+				<name>APP_MORRIGAN_ROMANCE_CAN_NOT_RESTART</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5408</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">256</Flag>
+				<name>APP_MORRIGAN_IS_CRISIS</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5409</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">257</Flag>
+				<name>APP_MORRIGAN_IS_NEUTRAL</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5410</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">258</Flag>
+				<name>APP_MORRIGAN_IS_WARM</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5411</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">259</Flag>
+				<name>APP_MORRIGAN_IS_FRIENDLY</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5412</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">260</Flag>
+				<name>APP_MORRIGAN_IS_IN_LOVE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5413</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">261</Flag>
+				<name>APP_MORRIGAN_IS_HOSTILE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5414</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">262</Flag>
+				<name>APP_MORRIGAN_IS_CARE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5415</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">263</Flag>
+				<name>APP_MORRIGAN_IS_ADORE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5416</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">264</Flag>
+				<name>APP_MORRIGAN_IS_INTERESTED</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">5417</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+		</StatusList>
+	</Agent>
+</Resource>

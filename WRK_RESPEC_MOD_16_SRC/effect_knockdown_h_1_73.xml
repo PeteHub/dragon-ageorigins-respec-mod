@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="73" Folder="\_Game Effects\Effects\" ResRefName="effect_knockdown_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_knockdown_h.nss?moduleid=1&amp;resrefid=73" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_knockdown_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_modify_stamina
+// -----------------------------------------------------------------------------
+/*
+    Effect: Modify Stamina
+
+            When applied to a creature, this effect increase or decreases the
+            creature’s current stamina. The creature’s  current stamina will not
+            be raised above its maximum stamina nor will it be lowered bellow 0.
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "2da_constants_h"
+#include "wrappers_h"
+#include "events_h"
+#include "effect_constants_h"
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Created By: Yaron Jakobs
+//  Created On: Sep 13, 2006
+///////////////////////////////////////////////////////////////////////////////
+effect EffectKnockdown(object oAttacker, int nDefensePenalty, int nAbility = ABILITY_TALENT_SHIELD_BASH)
+{
+    effect eEffect = Effect(EFFECT_TYPE_KNOCKDOWN);
+    eEffect = SetEffectObject(eEffect, 0, oAttacker);
+    eEffect = SetEffectInteger(eEffect, 0, nDefensePenalty);
+    eEffect = SetEffectInteger(eEffect,1, nAbility);
+
+    return eEffect;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//  Created By: Yaron Jakobs
+//  Created On: Sep 13, 2006
+///////////////////////////////////////////////////////////////////////////////
+int Effects_HandleApplyEffectKnockdown(effect eEffect)
+{
+
+    if (GetArraySize(GetEffects(OBJECT_SELF, EFFECT_TYPE_KNOCKDOWN)) &gt; 1  )
+    {
+        Log_Trace(LOG_CHANNEL_EFFECTS,"ApplyKnockdown","NOT applying knockdown, target already knocked down!");
+        return FALSE;
+    }
+
+    // This ie being removed because of possible corruption issues.
+    //UpdateCreatureProperty(OBJECT_SELF,PROPERTY_ATTRIBUTE_DEFENSE,-25.0f,PROPERTY_VALUE_MODIFIER);
+
+
+
+    return TRUE;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//  Created By: Yaron Jakobs
+//  Created On: Sep 13, 2006
+///////////////////////////////////////////////////////////////////////////////
+int Effects_HandleRemoveEffectKnockdown(effect eEffect)
+{
+
+    // This ie being removed because of possible corruption issues.
+    //UpdateCreatureProperty(OBJECT_SELF,PROPERTY_ATTRIBUTE_DEFENSE,25.0f,PROPERTY_VALUE_MODIFIER);
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

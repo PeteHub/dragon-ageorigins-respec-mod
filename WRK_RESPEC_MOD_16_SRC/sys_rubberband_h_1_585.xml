@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="585" Folder="\_Systems\_Includes\" ResRefName="sys_rubberband_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\sys_rubberband_h.nss?moduleid=1&amp;resrefid=585" Requested="0">
+	<Agent type="empty">
+		<ResRefName>sys_rubberband_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//::///////////////////////////////////////////////
+//:: sys_rubberband_h
+//:: Copyright (c) 2007 Bioware Corp.
+//:://////////////////////////////////////////////
+/*
+    Implementation of the homing 'rubberband' system for creature AI.
+*/
+//:://////////////////////////////////////////////
+//:: Created By: Ferret Baudoin
+//:: Created On: Aug. 27, 2007
+//:://////////////////////////////////////////////                       
+
+#include "wrappers_h"
+
+const string RUBBER_HOME_ENABLED         = "RUBBER_HOME_ENABLED";
+const string RUBBER_HOME_LOCATION_X      = "RUBBER_HOME_LOCATION_X";
+const string RUBBER_HOME_LOCATION_Y      = "RUBBER_HOME_LOCATION_Y";
+const string RUBBER_HOME_LOCATION_Z      = "RUBBER_HOME_LOCATION_Z";
+const string RUBBER_HOME_LOCATION_FACING = "RUBBER_HOME_LOCATION_FACING";
+
+/** @brief Sets a creature's home location.
+*
+* The home location of a creature is where it was placed on the level. 
+* The home lcoation is updated after any QuickMove or LocalJump commands.
+*
+* @param oTarget The creature being assigned a new home.
+* @param oNewHome The object whose location is to be oTarget's new home location. 
+*                 If oNewHome is invalid, the new home location is set to the 
+*                 current location of oTarget. 
+* @author Ferret
+**/
+void Rubber_SetHome(object oTarget = OBJECT_SELF, object oNewHome = OBJECT_INVALID)
+{
+    object oTargetLoc = oTarget;
+    if (IsObjectValid(oNewHome))
+        oTargetLoc = oNewHome;
+
+    vector vStartPosition = GetPosition(oTargetLoc);
+    SetLocalFloat(oTarget, RUBBER_HOME_LOCATION_X, vStartPosition.x);
+    SetLocalFloat(oTarget, RUBBER_HOME_LOCATION_Y, vStartPosition.y);
+    SetLocalFloat(oTarget, RUBBER_HOME_LOCATION_Z, vStartPosition.z);
+
+    float fStartFacing = GetFacing(oTargetLoc);
+    SetLocalFloat(oTarget, RUBBER_HOME_LOCATION_FACING, fStartFacing);
+}
+
+
+/** @brief Gets a creature's home location.
+*
+* @param oTarget The creature whose home location to fetch.
+**/
+location Rubber_GetHome(object oTarget = OBJECT_SELF)
+{
+    float fX = GetLocalFloat(oTarget, RUBBER_HOME_LOCATION_X);
+    float fY = GetLocalFloat(oTarget, RUBBER_HOME_LOCATION_Y);
+    float fZ = GetLocalFloat(oTarget, RUBBER_HOME_LOCATION_Z);
+    float fFacing = GetLocalFloat(oTarget, RUBBER_HOME_LOCATION_FACING);
+
+    return Location(GetArea(GetHero()), Vector(fX, fY, fZ), fFacing);
+}
+
+  
+/** @brief Causes oTarget to go to its home location.
+*
+* The home lcoation of a creature is the location of where it was placed on the level. 
+* The home location is updated after any QuickMove or LocalJump command.
+*
+* @param oTarget    The creature being sent home.        
+* @param bRun       TRUE/FALSE to make oTarget run/walk home.
+* @author Ferret
+**/
+void Rubber_GoHome(object oTarget = OBJECT_SELF, int bRun = FALSE)
+{
+    if (GetObjectActive(oTarget)
+        &amp;&amp; !IsDead(oTarget)
+        &amp;&amp; GetLocalInt(oTarget, RUBBER_HOME_ENABLED))
+    {
+        // Walk/run to home location
+        location lHome = Rubber_GetHome(oTarget);
+        WR_AddCommand(oTarget, CommandWait(RandomF(3,1)));
+        WR_AddCommand(oTarget, CommandMoveToLocation(lHome, bRun));
+    }
+}
+                        
+
+/** @brief Causes oTarget to jump instantly to its home location.
+*
+* The home location of a creature is where it was placed on the level. 
+* The home location is updated after a QuickMove or LocalJump command.
+*
+* @param oTarget    The creature being sent home. 
+* @author Ferret
+**/
+void Rubber_JumpHome(object oTarget = OBJECT_SELF)
+{
+    if (GetObjectActive(oTarget)
+        &amp;&amp; !IsDead(oTarget)
+        &amp;&amp; GetLocalInt(oTarget, RUBBER_HOME_ENABLED))
+    {
+        // Jump object to home location
+        location lHome = Rubber_GetHome(oTarget);
+        WR_AddCommand(oTarget, CommandJumpToLocation(lHome));
+    }
+}</text>
+	</Agent>
+</Resource>

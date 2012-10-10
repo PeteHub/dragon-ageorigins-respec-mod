@@ -1,0 +1,1549 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="4596" Folder="\_Global\Generic\" ResRefName="genpt_core_achievements" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="plo" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\genpt_core_achievements.plo?moduleid=1&amp;resrefid=4596" Requested="0">
+	<Agent type="empty">
+		<ResRefName>genpt_core_achievements</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<name/>
+		<NameStringID type="i4">50623</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<GUID>A16CCBD948424EAEBE75166A26E8C1C2</GUID>
+		<ScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7</ScriptURI>
+		<Priority type="i4">1</Priority>
+		<JournalImage/>
+		<ParentPlotURI/>
+		<EntryType type="i4">1</EntryType>
+		<AllowPausing type="bool">False</AllowPausing>
+		<StatusList type="empty">
+			<Agent type="empty">
+				<Flag type="i4">0</Flag>
+				<name>PLT_CORE_BOOKKEEPING_HERO_DIED</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50521</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">1</Flag>
+				<name>PERSUADE_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50522</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">2</Flag>
+				<name>PERSUADE_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50523</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">3</Flag>
+				<name>PERSUADE_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50524</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">4</Flag>
+				<name>PERSUADE_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50525</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">5</Flag>
+				<name>PERSUADE_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50526</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">6</Flag>
+				<name>PERSUADE_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50527</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">7</Flag>
+				<name>PERSUADE_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50528</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">8</Flag>
+				<name>PERSUADE_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50529</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">9</Flag>
+				<name>INTIMIDATE_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50530</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">10</Flag>
+				<name>INTIMIDATE_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50531</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">11</Flag>
+				<name>INTIMIDATE_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50532</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">12</Flag>
+				<name>INTIMIDATE_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50533</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">13</Flag>
+				<name>INTIMIDATE_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50534</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">14</Flag>
+				<name>INTIMIDATE_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50535</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">15</Flag>
+				<name>INTIMIDATE_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50536</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">16</Flag>
+				<name>INTIMIDATE_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50537</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">17</Flag>
+				<name>DISARM_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50538</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">18</Flag>
+				<name>DISARM_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50539</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">19</Flag>
+				<name>DISARM_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50540</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">20</Flag>
+				<name>DISARM_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50541</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">21</Flag>
+				<name>DISARM_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50542</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">22</Flag>
+				<name>DISARM_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50543</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">23</Flag>
+				<name>DISARM_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50544</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">24</Flag>
+				<name>DISARM_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50545</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">25</Flag>
+				<name>TRAP_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50546</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">26</Flag>
+				<name>TRAP_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50547</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">27</Flag>
+				<name>TRAP_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50548</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">28</Flag>
+				<name>TRAP_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50549</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">29</Flag>
+				<name>TRAP_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50550</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">30</Flag>
+				<name>TRAP_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50551</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">31</Flag>
+				<name>TRAP_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50552</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">32</Flag>
+				<name>TRAP_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50553</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">33</Flag>
+				<name>CODEX_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50554</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">34</Flag>
+				<name>CODEX_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50555</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">35</Flag>
+				<name>CODEX_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50556</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">36</Flag>
+				<name>CODEX_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50557</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">37</Flag>
+				<name>CODEX_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50558</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">38</Flag>
+				<name>CODEX_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50559</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">39</Flag>
+				<name>CODEX_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50560</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">40</Flag>
+				<name>CODEX_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50561</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">41</Flag>
+				<name>CODEX_COUNTER_BIT_9</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50562</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">42</Flag>
+				<name>CODEX_COUNTER_BIT_10</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50563</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">43</Flag>
+				<name>TRAVELER_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50564</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">44</Flag>
+				<name>TRAVELER_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50565</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">45</Flag>
+				<name>TRAVELER_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50566</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">46</Flag>
+				<name>TRAVELER_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50567</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">47</Flag>
+				<name>TRAVELER_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50568</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">48</Flag>
+				<name>TRAVELER_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50569</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">49</Flag>
+				<name>TRAVELER_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50570</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">50</Flag>
+				<name>TRAVELER_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50571</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">51</Flag>
+				<name>PLT_CORE_BOOKKEEPING_GAME_DIFFICULTY</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50572</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">52</Flag>
+				<name>PLT_CORE_BOOKKEEPING_PLOT_MARKERS</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50573</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">53</Flag>
+				<name>PLT_CORE_BOOKKEEPING_CAMP</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50574</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">54</Flag>
+				<name>QUEST_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50575</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">55</Flag>
+				<name>QUEST_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50576</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">56</Flag>
+				<name>QUEST_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50577</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">57</Flag>
+				<name>QUEST_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50578</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">58</Flag>
+				<name>QUEST_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50579</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">59</Flag>
+				<name>QUEST_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50580</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">60</Flag>
+				<name>QUEST_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50581</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">61</Flag>
+				<name>QUEST_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50582</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">62</Flag>
+				<name>QUEST_COUNTER_BIT_9</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50583</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">63</Flag>
+				<name>QUEST_COUNTER_BIT_10</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50584</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">64</Flag>
+				<name>CRAFT_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50585</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">65</Flag>
+				<name>CRAFT_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50586</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">66</Flag>
+				<name>CRAFT_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50587</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">67</Flag>
+				<name>CRAFT_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50588</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">68</Flag>
+				<name>CRAFT_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50589</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">69</Flag>
+				<name>CRAFT_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50590</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">70</Flag>
+				<name>CRAFT_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50591</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">71</Flag>
+				<name>CRAFT_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50592</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">72</Flag>
+				<name>ACH_HAS_BLOODMAGE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50593</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">73</Flag>
+				<name>ACH_HAS_SHAPESHIFTER</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50594</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">74</Flag>
+				<name>ACH_HAS_ARCANEWARRIOR</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50595</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">75</Flag>
+				<name>ACH_HAS_SPIRITHEALER</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50596</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">76</Flag>
+				<name>ACH_HAS_DUELIST</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50597</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">77</Flag>
+				<name>ACH_HAS_ASSASSIN</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50598</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">78</Flag>
+				<name>ACH_HAS_RANGER</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50599</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">79</Flag>
+				<name>ACH_HAS_BARD</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50600</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">80</Flag>
+				<name>ACH_HAS_REAVER</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50601</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">81</Flag>
+				<name>ACH_HAS_BERSERKER</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50602</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">82</Flag>
+				<name>ACH_HAS_TEMPLAR</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50603</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">83</Flag>
+				<name>ACH_HAS_CHAMPION</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50604</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">84</Flag>
+				<name>ACH_HAS_ONE_SPEC</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50605</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">85</Flag>
+				<name>ACH_HAS_TWO_SPECS</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50606</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">86</Flag>
+				<name>UNLOCK_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50607</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">87</Flag>
+				<name>UNLOCK_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50608</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">88</Flag>
+				<name>UNLOCK_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50609</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">89</Flag>
+				<name>UNLOCK_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50610</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">90</Flag>
+				<name>UNLOCK_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50611</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">91</Flag>
+				<name>UNLOCK_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50612</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">92</Flag>
+				<name>UNLOCK_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50613</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">93</Flag>
+				<name>UNLOCK_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50614</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">94</Flag>
+				<name>BOARD_COUNTER_BIT_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50615</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">95</Flag>
+				<name>BOARD_COUNTER_BIT_2</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50616</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">96</Flag>
+				<name>BOARD_COUNTER_BIT_3</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50617</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">97</Flag>
+				<name>BOARD_COUNTER_BIT_4</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50618</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">98</Flag>
+				<name>BOARD_COUNTER_BIT_5</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50619</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">99</Flag>
+				<name>BOARD_COUNTER_BIT_6</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50620</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">100</Flag>
+				<name>BOARD_COUNTER_BIT_7</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50621</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+			<Agent type="empty">
+				<Flag type="i4">101</Flag>
+				<name>BOARD_COUNTER_BIT_8</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText/>
+				<JournalTextStringID type="i4">50622</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+		</StatusList>
+	</Agent>
+</Resource>

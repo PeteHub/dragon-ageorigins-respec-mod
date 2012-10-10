@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="7604" Folder="\_Tutorial\General\" ResRefName="tut_approval_warm" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="plo" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\tut_approval_warm.plo?moduleid=1&amp;resrefid=7604" Requested="0">
+	<Agent type="empty">
+		<ResRefName>tut_approval_warm</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<name>Party Approval</name>
+		<NameStringID type="i4">50978</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<GUID>621E860FC6C74659B5AD790071651593</GUID>
+		<ScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7</ScriptURI>
+		<Priority type="i4">1</Priority>
+		<JournalImage/>
+		<ParentPlotURI/>
+		<EntryType type="i4">13</EntryType>
+		<AllowPausing type="bool">False</AllowPausing>
+		<StatusList type="empty">
+			<Agent type="empty">
+				<Flag type="i4">0</Flag>
+				<name>TUT_APPROVAL_WARM_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText>One of your party members has begun to genuinely like you and respect your leadership. As you improve your relationships with party members, head back to camp to speak with them. They'll be much more willing to open up when they don't have to worry about death around every corner--and you'll need to talk to them more if you want to continue to improve your relationship. You can track party members' approval ratings using the orange bar at the bottom of their character records (&lt;CharacterRecordKey/&gt;).</JournalText>
+				<JournalTextStringID type="i4">50977</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+		</StatusList>
+	</Agent>
+</Resource>

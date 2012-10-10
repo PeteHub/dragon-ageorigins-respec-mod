@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="1867" Folder="\_Tutorial\Controls\" ResRefName="tut_control_followers" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="plo" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\tut_control_followers.plo?moduleid=1&amp;resrefid=1867" Requested="0">
+	<Agent type="empty">
+		<ResRefName>tut_control_followers</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<name>Controlling Party Members</name>
+		<NameStringID type="i4">33257</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<GUID>3F3AD0CE68084CF99B6C4C185EB93099</GUID>
+		<ScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7</ScriptURI>
+		<Priority type="i4">1</Priority>
+		<JournalImage/>
+		<ParentPlotURI/>
+		<EntryType type="i4">13</EntryType>
+		<AllowPausing type="bool">False</AllowPausing>
+		<StatusList type="empty">
+			<Agent type="empty">
+				<Flag type="i4">0</Flag>
+				<name>TUT_CONTROL_FOLLOWERS_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText>A new party member has joined you. You can take control of this character directly by &lt;LeftClickingDefault/&gt; on his or her portrait or body. Alternately, you can use the tactics menu (&lt;TacticsKey/&gt;) to adjust how the AI controls them.</JournalText>
+				<JournalTextStringID type="i4">33256</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+		</StatusList>
+	</Agent>
+</Resource>

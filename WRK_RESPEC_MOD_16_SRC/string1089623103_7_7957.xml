@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="7" OwnerModuleID="7" ResRefID="7957" Folder="\" ResRefName="string1089623103" IsCore="0" OwnerIsCore="0" Type="3" State="0" ObjectName="" Relationship="" ResType="str" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\string1089623103.str?moduleid=7&amp;resrefid=7957" Requested="1">
+	<Agent compactmode="1">
+		<StringID>1089623103</StringID>
+		<VersionID>11194</VersionID>
+		<StringTypeID>24</StringTypeID>
+		<StringTableID>7</StringTableID>
+		<OwnerModuleID>7</OwnerModuleID>
+		<LanguageVariantID>1</LanguageVariantID>
+		<OwnerResRefID>7</OwnerResRefID>
+		<MinorUpdateCount>0</MinorUpdateCount>
+		<State>0</State>
+		<Owner>None</Owner>
+		<text>Character Respec Addon v1.6</text>
+		<Description>Mod Name</Description>
+		<StringTableName>Character Respec Mod Talk Table</StringTableName>
+		<OwnerModuleName>Character Respec Mod</OwnerModuleName>
+		<CreatedBy>TRUST\Peter</CreatedBy>
+		<MajorUpdateBy>TRUST\Peter</MajorUpdateBy>
+		<MinorUpdateBy>TRUST\Peter</MinorUpdateBy>
+	</Agent>
+</Resource>

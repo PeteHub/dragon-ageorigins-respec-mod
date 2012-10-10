@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="3567" Folder="\_Codex\Art of War\" ResRefName="cod_aow_spellcombo1" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="plo" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\cod_aow_spellcombo1.plo?moduleid=1&amp;resrefid=3567" Requested="0">
+	<Agent type="empty">
+		<ResRefName>cod_aow_spellcombo1</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<name>Grease Fire</name>
+		<NameStringID type="i4">49678</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<GUID>6D726F3E57754BE589EBDCAC9D968763</GUID>
+		<ScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7</ScriptURI>
+		<Priority type="i4">1</Priority>
+		<JournalImage/>
+		<ParentPlotURI/>
+		<EntryType type="i4">11</EntryType>
+		<AllowPausing type="bool">False</AllowPausing>
+		<StatusList type="empty">
+			<Agent type="empty">
+				<Flag type="i4">0</Flag>
+				<name>COD_AOW_SPELLCOMBO_1_GREASE_FIRE</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText>&lt;summary&gt;On the Grease Fire spell combination.&lt;/summary&gt;
+Most forms of grease, magical or otherwise, are highly flammable. When grease comes into contact with an open flame, it ignites, resulting in a sea of burning grease that is deadly to any creature passing through it. Once the grease has burned up, the fire subsides.</JournalText>
+				<JournalTextStringID type="i4">49677</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment>Spell Combo:
+
+Grease and any fire impact results in big burning puddle of grease.</Comment>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+		</StatusList>
+	</Agent>
+</Resource>

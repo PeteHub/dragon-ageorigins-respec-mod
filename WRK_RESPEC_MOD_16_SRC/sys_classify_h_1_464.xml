@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="464" Folder="\_Systems\_Includes\" ResRefName="sys_classify_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\sys_classify_h.nss?moduleid=1&amp;resrefid=464" Requested="0">
+	<Agent type="empty">
+		<ResRefName>sys_classify_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// sys_classify_h
+// -----------------------------------------------------------------------------
+/*
+    Classification system
+    
+    The classification system is used to provide 
+    by various other systems 
+
+
+    *** WORK IN PROGRESS ***
+   
+        
+*/
+// -----------------------------------------------------------------------------
+// owner: georg zoeller
+// -----------------------------------------------------------------------------
+
+const int POWER_INVALID    = 0;
+const int POWER_VERY_LOW   = 1;
+const int POWER_LOW        = 2;
+const int POWER_MEDIUM     = 3;
+const int POWER_HIGH       = 4;
+const int POWER_VERY_HIGH  = 5;</text>
+	</Agent>
+</Resource>

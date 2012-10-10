@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="29" Folder="\_Core Includes\" ResRefName="plot_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\plot_h.nss?moduleid=1&amp;resrefid=29" Requested="0">
+	<Agent type="empty">
+		<ResRefName>plot_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>/** @addtogroup scripting_plot Scripting Plot
+*
+* Generic plot handling functions
+*/
+/** @{*/
+
+#include "log_h"
+#include "wrappers_h"
+#include "sys_rewards_h"
+
+//void main() {}
+
+/** @brief Handles global plot flag events
+*
+* This function handles any global procedures regarding plots in the game.
+* Currently this includes only debug messages.
+*
+* @param ePlotEvent the plot event to be handled
+* @author Yaron
+*/
+void plot_GlobalPlotHandler(event ePlotEvent);
+
+/** @brief Output defined flag information
+*
+*
+* @param ePlotEvent the plot event to be handled
+* @param nResult the value of the defined flag
+* @author Yaron
+*/
+void plot_OutputDefinedFlag(event ePlotEvent, int nResult);
+
+void plot_GlobalPlotHandler(event ePlotEvent)
+{
+    int nType = GetEventType(ePlotEvent);               // GET or SET call
+    string strPlot = GetEventString(ePlotEvent, 0);         // Plot GUID
+    int nFlag = GetEventInteger(ePlotEvent, 1);          // The bit flag # being affected
+    int nValue = GetEventInteger(ePlotEvent, 2);        // On SET call, the value about to be written (on a normal SET that should be '1', and on a 'clear' it should be '0')
+    int nOldValue = GetEventInteger(ePlotEvent, 3);     // On SET call, the current flag value (can be either 1 or 0 regardless if it's a set or clear event)
+    int nDefined = GetEventInteger(ePlotEvent, 4); // 1 -&gt; defined, 0 -&gt; not defined
+    object oParty = GetEventCreator(ePlotEvent);      // The owner of the plot table for this script
+    object oConversationOwner = GetEventObject(ePlotEvent, 0); // Owner on the conversation, if any
+    string sPlotResRef = GetEventString(ePlotEvent, 2);
+
+    int nGetResult = FALSE;
+    object oPC = OBJECT_SELF;
+    string sPlotName = GetPlotResRef(strPlot);
+    string sFlagName = GetPlotFlagName(strPlot, nFlag);
+
+    if(nType == EVENT_TYPE_SET_PLOT) // SET
+    {                 
+        
+
+        if (IsObjectValid(oConversationOwner) &amp;&amp; GetObjectType(oConversationOwner) == OBJECT_TYPE_ITEM)
+        {
+            Warning("Ugh. The owner for this conversation is an ITEM. This is bad. Please call Yaron over right now...");               
+        }
+        
+        LogTrace(LOG_CHANNEL_PLOT, "SetPlot [" + sPlotName + "] ["
+            + sFlagName + "] [" + ToString(nOldValue) + " -&gt; " + ToString(nValue) + "]");
+        //Log_Trace_Plot("plot_h.plot_GlobalPlotHandler", sPlotResRef, nFlag, nOldValue, nValue);
+
+        RewardDistibuteByPlotFlag(strPlot, nFlag);
+
+        TrackPlotEvent(nType, oConversationOwner, oParty, nValue, nOldValue, sPlotName, sFlagName);
+    }
+    else // GET
+    {
+        string sFlagValue;
+        if(!nDefined) // get the real current flag value
+        {
+            nGetResult = WR_GetPlotFlag(strPlot, nFlag);
+            sFlagValue = IntToString(nGetResult);
+
+            // No need to print anything since the wrapper above will take care of that
+
+            //LogTrace(LOG_CHANNEL_PLOT, "GetPlot [" + sPlotName + "] ["
+            //    + sFlagName + "] = [" + ToString(nGetResult) + "]");
+            //Log_Trace_Plot("plot_h.plot_GlobalPlotHandler", sPlotResRef , nFlag, nGetResult);
+        }
+        else
+        {
+
+            // Now print the Deja Log message
+            string sState = "FALSE";
+            if (nGetResult) sState = "TRUE";
+
+            sFlagValue = "(DEFINED FLAG)";
+            LogTrace(LOG_CHANNEL_PLOT, "GetPlot [" + sPlotName + "] ["
+                + sFlagName + "] = [ DEFINED ]");
+            //Log_Trace_Plot("plot_h.plot_GlobalPlotHandler", sPlotResRef + " " + sFlagValue , nFlag, nGetResult);
+
+        }
+
+
+    }
+}
+
+void plot_OutputDefinedFlag(event ePlotEvent, int nResult)
+{
+    int nType = GetEventType(ePlotEvent);               // GET or SET call
+    string strPlot = GetEventString(ePlotEvent, 0);         // Plot GUID
+    int nFlag = GetEventInteger(ePlotEvent, 1);          // The bit flag # being affected
+    int nValue = GetEventInteger(ePlotEvent, 2);        // On SET call, the value about to be written (on a normal SET that should be '1', and on a 'clear' it should be '0')
+    int nOldValue = GetEventInteger(ePlotEvent, 3);     // On SET call, the current flag value (can be either 1 or 0 regardless if it's a set or clear event)
+    int nDefined = GetEventInteger(ePlotEvent, 4); // 1 -&gt; defined, 0 -&gt; not defined
+    object oParty = GetEventCreator(ePlotEvent);      // The owner of the plot table for this script
+    object oConversationOwner = GetEventObject(ePlotEvent, 0); // Owner on the conversation, if any
+    string sPlotResRef = GetEventString(ePlotEvent, 2);
+
+    string sPlotName = GetPlotResRef(strPlot);
+    string sFlagName = GetPlotFlagName(strPlot, nFlag);
+
+    if(nDefined &amp;&amp; nType == EVENT_TYPE_GET_PLOT) // printing only for defined flags
+    {
+        LogTrace(LOG_CHANNEL_PLOT, "GetPlot *DEFINED* [" + sPlotName + "] ["
+                + sFlagName + "] [value of DEFINED flag after evaluation: " + IntToString(nResult) + "]");
+    }
+}
+
+/** @} */</text>
+	</Agent>
+</Resource>

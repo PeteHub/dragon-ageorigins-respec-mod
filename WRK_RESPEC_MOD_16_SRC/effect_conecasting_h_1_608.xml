@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="608" Folder="\_Game Effects\Effects\" ResRefName="effect_conecasting_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_conecasting_h.nss?moduleid=1&amp;resrefid=608" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_conecasting_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>#include "effect_constants_h"
+
+effect EffectConeCasting(int nVfx)
+{
+    effect e = Effect(EFFECT_TYPE_CONECASTING);
+    e = SetEffectEngineInteger(e,EFFECT_INTEGER_VFX,nVfx);
+    return e;
+
+}</text>
+	</Agent>
+</Resource>

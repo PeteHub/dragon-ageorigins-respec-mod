@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="81" Folder="\_Core Includes\" ResRefName="attributes_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\attributes_h.nss?moduleid=1&amp;resrefid=81" Requested="0">
+	<Agent type="empty">
+		<ResRefName>attributes_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//------------------------------------------------------------------------------
+// attributes_h: Functions dealing with getting and setting player stats
+//------------------------------------------------------------------------------
+/*
+
+    Accessor functions to creature stats and attributes.
+
+    Many of these functions are temporary placeholders in script that should
+    be moved into the engine once the system has been tested and balanced
+    sufficiently.
+
+    These functions should be the only functions in the game that write or
+    read attribute values from creatures.
+
+    The concepts I am using for storing changes to attributes is to leave the
+    actual base values untouched and instead store modifiers in a seperate variable.
+
+    This means nobody is every allowed to write the real attribute values directly,
+    instead all effects and changes write into the modifier variable which is then
+    added on top of the base value and returned by the Attribute_Get* function
+
+
+    Example:
+
+        Base Modifier Displayed  Comment
+        10   0        10
+        10   2        12           +2 effect, eg. from beneficial spell
+        10   -5       9            -5 effect, eg. from curse
+
+
+    Note: In case the above isn't clear, the following is NOT ALLOWED in any script
+
+    int n = Attribute_GetStrength(oPlayer);
+    n = n+10
+    Attribute_SetStrength(oPlayer, n);  // &lt;-- that's why this function doesn't exist!
+
+
+    When in doubt, please contact Georg.
+
+
+*/
+//------------------------------------------------------------------------------
+// Owner: Georg Zoeller
+//------------------------------------------------------------------------------
+
+
+#include "2da_constants_h"
+#include "var_constants_h"
+#include "log_h"
+#include "core_h"
+#include "config_h"
+#include "events_h"
+
+
+const int ATTRIBUTE_STR = PROPERTY_ATTRIBUTE_STRENGTH;
+const int ATTRIBUTE_DEX = PROPERTY_ATTRIBUTE_DEXTERITY;
+const int ATTRIBUTE_INT = PROPERTY_ATTRIBUTE_INTELLIGENCE;
+const int ATTRIBUTE_CON = PROPERTY_ATTRIBUTE_CONSTITUTION;
+const int ATTRIBUTE_MAG = PROPERTY_ATTRIBUTE_MAGIC;
+const int ATTRIBUTE_WIL = PROPERTY_ATTRIBUTE_WILLPOWER;
+/*
+
+
+void Attribute_ChangeAttributeModifier(object oCreature,int nAttribute,int nAmount)
+{
+//    Log_Systems( "+++ changing attribute " + IntToString(nAttribute) + " by " + IntToString(nAmount));
+    UpdateCreatureProperty(oCreature, nAttribute, IntToFloat(nAmount), PROPERTY_VALUE_MODIFIER);
+}
+
+
+
+
+
+void Attribute_UpdateMaxManaStamina(object oCreature, int nAmount)
+{
+    float fMana = IntToFloat(nAmount);
+
+    // to change the MAX stamina/mana (TOTAL) on a creature, we need to change the modifier
+    // which, in turn, will affect both current and total.
+    UpdateCreatureProperty(oCreature, PROPERTY_MANA_STAMINA,fMana, PROPERTY_VALUE_MODIFIER);
+
+}
+
+int Attribute_GetSpellPower(object oCreature)
+{
+    float fSpellPower = GetCreatureProperty(oCreature, PROPERTY_SPELLPOWER, PROPERTY_VALUE_TOTAL);
+    return (FloatToInt(fSpellPower));
+}
+
+float Attribute_CalcAttributeBonus(int nAmount)
+{
+     return ((nAmount &gt; 10)? nAmount-10.0 : 0.0);
+}
+
+
+// -----------------------------------------------------------------------------
+// Attribute Accessors
+// -----------------------------------------------------------------------------
+
+int Attribute_GetDexterity(object oCreature)
+{
+    return GetCreatureAttribute(oCreature, PROPERTY_ATTRIBUTE_DEXTERITY);
+}
+
+int Attribute_GetIntelligence(object oCreature)
+{
+    return GetCreatureAttribute(oCreature, PROPERTY_ATTRIBUTE_INTELLIGENCE);
+}
+
+int Attribute_GetMagic(object oCreature)
+{
+    return GetCreatureAttribute(oCreature, PROPERTY_ATTRIBUTE_MAGIC);
+}
+
+int Attribute_GetConstitution(object oCreature)
+{
+    return GetCreatureAttribute(oCreature, PROPERTY_ATTRIBUTE_CONSTITUTION);
+}
+
+int Attribute_GetStrength(object oCreature)
+{
+    return GetCreatureAttribute(oCreature, PROPERTY_ATTRIBUTE_STRENGTH);
+}
+
+int Attribute_GetWillpower(object oCreature)
+{
+    return GetCreatureAttribute(oCreature, PROPERTY_ATTRIBUTE_WILLPOWER);
+}
+
+int Attribute_GetLevel(object oCreature)
+{
+  return FloatToInt(GetCreatureProperty(oCreature, PROPERTY_LEVEL));
+}
+
+
+// -----------------------------------------------------------------------------
+// Depleteables
+// -----------------------------------------------------------------------------
+
+
+float Attribute_GetMaxManaStamina (object oCreature)
+{
+    float fMana = GetCreatureProperty(oCreature, PROPERTY_MANA_STAMINA, PROPERTY_VALUE_TOTAL);
+    return fMana;
+}
+
+float Attribute_GetManaStamina(object oCreature)
+{
+    float fMana = GetCreatureProperty(oCreature, PROPERTY_MANA_STAMINA, PROPERTY_VALUE_CURRENT);
+    return fMana;
+}
+
+
+void Attribute_UpdateManaStamina (object oCreature, int nAmount)
+{
+    float fMana = IntToFloat(nAmount);
+    UpdateCreatureProperty(oCreature, PROPERTY_MANA_STAMINA,fMana, PROPERTY_VALUE_CURRENT);
+}
+
+
+
+*/
+
+// -----------------------------------------------------------------------------
+// Little Funct
+// -----------------------------------------------------------------------------
+int Attribute_LoadFrom2DA(object oCreature)
+{
+    int bArea = FALSE;
+    int i;
+
+    string sTag = GetTag (oCreature);
+    string sAreaTag = GetTag(GetArea(oCreature));
+    float fValue;
+
+    if (GetM2DAFloat(TABLE_CHARACTERS,sAreaTag + "_" + sTag,0) &gt;= 1.0)
+    {
+        bArea = TRUE;
+    }
+    else if (GetM2DAFloat(TABLE_CHARACTERS,sTag,0) &lt; 1.0)
+    {
+        Log_Trace(LOG_CHANNEL_CHARACTER,"attributes_h.LoadFrom2DA","Not loading character stats from 2da", oCreature);
+        return FALSE;
+    }
+
+    Log_Trace(LOG_CHANNEL_CHARACTER,"attributes_h.LoadFrom2DA","Loading character stats from 2da", oCreature);
+
+    for (i = 1; i &lt;= 24; i++)
+    {
+        sTag = GetTag(oCreature);
+
+        if (bArea)
+        {
+            sTag = GetTag(GetArea(oCreature)) + "_" + sTag;
+        }
+        else
+        {
+            fValue = GetM2DAFloat(TABLE_CHARACTERS,sTag,i);
+        }
+
+        Log_Trace(LOG_CHANNEL_CHARACTER,"attributes_h.LoadFrom2DA",GetM2DAString(TABLE_CHARACTERS,"Label",i) + " = " + ToString(fValue), oCreature);
+
+        if (GetCreaturePropertyType(oCreature,i) == PROPERTY_TYPE_DERIVED)
+        {
+            UpdateCreatureProperty(oCreature,i,fValue, PROPERTY_VALUE_MODIFIER);
+        }
+        else
+        {
+            SetCreatureProperty(oCreature,i,fValue);
+        }
+
+        if (GetCreaturePropertyType(oCreature,i) == PROPERTY_TYPE_DEPLETABLE)
+        {
+            SetCreatureProperty(oCreature,i,fValue, PROPERTY_VALUE_CURRENT);
+        }
+
+
+
+
+
+
+    }
+    return TRUE;
+
+}</text>
+	</Agent>
+</Resource>

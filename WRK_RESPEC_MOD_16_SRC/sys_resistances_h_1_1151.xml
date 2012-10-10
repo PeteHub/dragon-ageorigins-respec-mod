@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="1151" Folder="\_Systems\_Includes\" ResRefName="sys_resistances_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\sys_resistances_h.nss?moduleid=1&amp;resrefid=1151" Requested="0">
+	<Agent type="empty">
+		<ResRefName>sys_resistances_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//------------------------------------------------------------------------------
+// Resistance System
+//------------------------------------------------------------------------------
+/*
+    Low level script for resistance checks, included in Effect_Damage
+    and ability_h
+
+*/
+//------------------------------------------------------------------------------
+// georg zoeller
+//------------------------------------------------------------------------------
+
+#include "core_h"
+#include "ui_h"
+
+const int RESISTANCE_MENTAL     = PROPERTY_ATTRIBUTE_RESISTANCE_MENTAL;
+const int RESISTANCE_PHYSICAL   = PROPERTY_ATTRIBUTE_RESISTANCE_PHYSICAL;
+const int RESISTANCE_INVALID = 0;
+
+
+
+
+const int DAMAGE_RESISTANCE_FIRE        = PROPERTY_ATTRIBUTE_DAMAGE_RESISTANCE_FIRE;
+const int DAMAGE_RESISTANCE_COLD        = PROPERTY_ATTRIBUTE_DAMAGE_RESISTANCE_COLD;
+const int DAMAGE_RESISTANCE_ELECTRICITY = PROPERTY_ATTRIBUTE_DAMAGE_RESISTANCE_ELEC;
+const int DAMAGE_RESISTANCE_NATURE      = PROPERTY_ATTRIBUTE_DAMAGE_RESISTANCE_NATURE;
+const int DAMAGE_RESISTANCE_SPIRIT      = PROPERTY_ATTRIBUTE_DAMAGE_RESISTANCE_SPIRIT;
+
+
+
+float RESISTANCE_CUTOFF = 0.45;
+float RESISTANCE_CEILING = 0.95;
+
+float EFFECTIVENESS_RESISTED = 0.0f;
+float EFFECTIVENESS_MAXIMUM  = 1.0;
+
+
+const int PROPERTY_ATTRIBUTE_SPELLRESISTANCE = 52;
+
+const int CLASS_MONSTER_SPELLCASTER = 25;
+// -----------------------------------------------------------------------------
+// Spell resistance is 'ignore hostile magic'
+// -----------------------------------------------------------------------------
+int CheckSpellResistance(object oTarget, object oCaster, int nAbility)
+{
+
+    if (!IsObjectValid(oCaster))
+    {
+        return FALSE;
+    }
+
+    int nType = GetAbilityType(nAbility);
+
+    // Only resist spells or talents originating from monster spellcasters.
+    if (nType != ABILITY_TYPE_SPELL)
+    {
+        int nClass =GetCreatureCoreClass(oCaster);
+        if ( nClass !=CLASS_MONSTER_SPELLCASTER &amp;&amp; nClass != CLASS_WIZARD)
+        {
+            return FALSE;
+        }
+        else
+        {
+            if (nType != ABILITY_TYPE_TALENT)
+            {
+                return FALSE;
+            }
+        }
+
+    }
+
+
+
+    // Only resist spells comnig from hostile targets.
+    if (IsObjectHostile(oCaster, oTarget))
+    {
+            float fResist = GetCreatureProperty(oTarget, PROPERTY_ATTRIBUTE_SPELLRESISTANCE);
+
+            // -----------------------------------------------------------------
+            // Game difficulty scales Spell resistance too.
+            // -----------------------------------------------------------------
+            fResist += Diff_GetSRMod(oTarget);
+
+            float fCheck =    RandomFloat()*100.0;
+
+            // -----------------------------------------------------------------
+            // actual resistance check
+            // -----------------------------------------------------------------
+            if (fCheck &lt;fResist)
+            {
+                // -------------------------------------------------------------
+                // SpellShield:
+                // Since spellshield increases magic resistance, we just need
+                // to check here if it active...
+                // -------------------------------------------------------------
+                if (IsModalAbilityActive(oTarget, ABILITY_SPELL_SPELL_SHIELD))
+                {
+                    // ---------------------------------------------------------
+                    // ... and if it contributed to resisting the spell,...
+                    // ---------------------------------------------------------
+                    if (fCheck &lt; 75.0 /* spellshield effectiveness */)
+                    {
+                         // ----------------------------------------------------
+                         // we determine the cost of absorbing it to the users
+                         // mana supply (10+ 2da cost) and...
+                         // ----------------------------------------------------
+                         int   nAbilityType = Ability_GetAbilityType(nAbility);
+                         float fCost = (GetM2DAFloat(TABLE_ABILITIES_SPELLS, "Cost", nAbility) + 10.0) * -1;
+                         float fCurrentMana = GetCreatureProperty(oTarget,PROPERTY_DEPLETABLE_MANA_STAMINA,PROPERTY_VALUE_CURRENT);
+
+                         // ----------------------------------------------------
+                         // ... subtract that amount of mana from the users mana...
+                         // ----------------------------------------------------
+                         UpdateCreatureProperty(oTarget, PROPERTY_DEPLETABLE_MANA_STAMINA,fCost,PROPERTY_VALUE_CURRENT);
+
+                         // ----------------------------------------------------
+                         // ... if the cost exceeded the available mana, the
+                         // spell is not resisted.
+                         //
+                         // Note: Mana reaching 0 causes the oom event to fire
+                         // on the creature, which will shut down spellshield
+                         // as it has flag 0x40 - end on oom set.
+                         // ----------------------------------------------------
+                         if (fCost&gt;fCurrentMana)
+                         {
+                            return FALSE;
+                         }
+                    }
+                }
+                return TRUE;
+            }
+    }
+
+    return FALSE;
+}
+
+
+
+float GetResistanceCutoff()
+{
+    return RESISTANCE_CUTOFF;
+
+}
+
+int DamageIsImmuneToType(object oTarget, int nDamageType)
+{
+
+    int nAbility = GetM2DAInt(TABLE_DAMAGETYPES,"Immunity",nDamageType);
+    if (nAbility)
+        return HasAbility(oTarget,nAbility);
+
+    return FALSE;
+}
+
+
+
+
+float ResistDamage(object oAttacker, object oTarget, int nAbility, float fDamageRoll, int nDamageType)
+{
+
+    int nResistance = 0;
+
+    // -------------------------------------------------------------------------
+    // Damage below 1.0 is always reduced to 0.
+    // -------------------------------------------------------------------------
+    if (fDamageRoll &lt; 1.0f)
+    {
+        Log_Trace(LOG_CHANNEL_RESISTANCES,"sys_resistances_h.ResistDamage", ToString(oTarget) +" DAMAGE ZEROED"   + ToString(fDamageRoll) + " dmg by " + ToString(oAttacker) + " type " + ToString(nDamageType) + " because damage was less than 1.0") ;
+
+        return 0.0f;
+    }
+
+
+    if (GetObjectType(oTarget) != OBJECT_TYPE_CREATURE)
+    {
+         Log_Trace(LOG_CHANNEL_RESISTANCES,"sys_resistances_h.ResistDamage", ToString(oTarget) +" NOT RESISTING "   + ToString(fDamageRoll) + " dmg by " + ToString(oAttacker) + " type " + ToString(nDamageType) + " because we are not a creature") ;
+
+        return fDamageRoll;
+    }
+
+    // -------------------------------------------------------------------------
+    // Plot damage is unresistable.
+    // -------------------------------------------------------------------------
+    if (nDamageType == DAMAGE_TYPE_PLOT || nDamageType == DAMAGE_TYPE_DOT)
+    {
+        Log_Trace(LOG_CHANNEL_RESISTANCES,"sys_resistances_h.ResistDamage", ToString(oTarget) +" NOT RESISTING "   + ToString(fDamageRoll) + " dmg by " + ToString(oAttacker) + " type PLOT/DOT");
+        return fDamageRoll;
+    }
+    else if (nDamageType == DAMAGE_TYPE_PHYSICAL)
+    {
+
+        return fDamageRoll;
+    }
+    else if (nDamageType ==  DAMAGE_TYPE_TBD)
+    {
+
+        return fDamageRoll;
+    }
+    else                                
+    {                               
+        
+        nResistance = GetM2DAInt(TABLE_DAMAGETYPES,"Resistance",nDamageType);
+
+        if (nResistance)
+        {
+            float fResistance = GetCreatureProperty(oTarget,nResistance);
+
+            // -----------------------------------------------------------------
+            // Include game difficulty based runtime modifiers.
+            // -----------------------------------------------------------------
+            float fDiffModifier = Diff_GetDRMod(oTarget);
+            fResistance = MinF(fResistance + fDiffModifier, 75.0f) / 100.0f;
+            float fModifier =  1.0 - fResistance;
+
+            float fDamage = MaxF(fDamageRoll * fModifier,1.0f);
+
+
+            #ifdef DEBUG
+            Log_Trace(LOG_CHANNEL_RESISTANCES,"sys_resistances_h.ResistDamage", ToString(oTarget) +" resisting "   + ToString(fDamageRoll) + " dmg by " + ToString(oAttacker) + " type " + ToString(nDamageType) + " Resistance score:" + ToString(fResistance) +": " + ToString(fDamage) );
+            #endif
+            return fDamage;
+        }
+        else
+        {
+            Warning("Damage applied with invalid type. Please keep the game as it is and call georg over to look at the callstack");
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+    return fDamageRoll * 1.0f;
+
+}
+
+
+// LEGACY
+float AbiScaleEffect(object oCaster, object oTarget, int nResistance, float fMaxValue, int nAttackingStat = PROPERTY_ATTRIBUTE_SPELLPOWER, int bShowUIFeeback = TRUE, float fResistanceAttributeValue = -1.0f, float fAttackingAttributeValue = -1.0f)
+{
+    // check override first
+    float fResistance = fResistanceAttributeValue;
+
+    // if override is not used
+    if (fResistance &lt; 0.0f)
+    {
+        // are resistances used?
+        if (nResistance == RESISTANCE_INVALID)
+        {
+            Log_Trace(LOG_CHANNEL_DESIGN_SCRIPTERROR,"sys_resistances_h.AbiScaleEffect", "Resistance check with RESISTANCE_INVALID resistance attribute, might be unintended." + GetCurrentScriptName());
+            return fMaxValue;
+        }
+
+        // get creature resistance property
+        fResistance = GetCreatureProperty(oTarget, nResistance);
+    }
+
+    float F_CUTOFF  = GetResistanceCutoff();
+
+    float fSpellPower;
+
+    // add level to resistance
+    fResistance += IntToFloat(GetLevel(oTarget));
+
+    // Placeables don't resist... ever.
+    if (GetObjectType(oTarget) != OBJECT_TYPE_CREATURE)
+    {
+        return fMaxValue;
+    }
+
+
+
+    // For traps have an owner - use their stats for the check
+    if (GetObjectType(oCaster) == OBJECT_TYPE_PLACEABLE)
+    {
+       if (GetLocalInt(oCaster, PLC_TRAP_TYPE) &gt; 0)
+       {
+            object oOwner = GetLocalObject(oCaster, PLC_TRAP_OWNER);
+            if (GetObjectType(oOwner) == OBJECT_TYPE_CREATURE)
+            {
+                oCaster = oOwner;
+            }
+            fSpellPower = 10.0 + GetLevel(oCaster) * 3.0;
+       }
+    }
+
+
+    if (GetObjectType(oCaster) == OBJECT_TYPE_CREATURE)
+    {
+        {
+            // if value is overidden
+            if (fAttackingAttributeValue &gt;= 0.0f)
+            {
+                fSpellPower = fAttackingAttributeValue;
+            }
+            else // else use creature's property
+            {
+                fSpellPower = GetCreatureProperty(oCaster, nAttackingStat);
+            }
+            fSpellPower = (fSpellPower * 0.8) +  (RandomFloat() * (fSpellPower * 0.1 * 2)) + IntToFloat((GetLevel(oCaster)));
+        }
+    }
+
+
+    // Attack is 80% spellpower + (0-40% spellpower);
+    // (fSpellPower * 0.8) + (RandomFloat() * (fSpellPower * 0.2 * 2) );
+
+
+
+    float fScaledValue = fMaxValue;
+
+    LogTrace(LOG_CHANNEL_RESISTANCES,ToString(oTarget) + "[" + ToString(GetLevel(oTarget))  + "] resisting " + ToString(oCaster) + ":");
+
+
+    if (fSpellPower &gt; 0.0f)
+    {
+
+        fScaledValue  = (fSpellPower - fResistance) / fSpellPower;
+        fScaledValue  = (fScaledValue &gt;= F_CUTOFF) ? fScaledValue : EFFECTIVENESS_RESISTED  ;
+        fScaledValue = ((fScaledValue &gt;= RESISTANCE_CEILING) ? fMaxValue : (fScaledValue * fMaxValue));
+
+
+
+
+        LogTrace(LOG_CHANNEL_RESISTANCES,ToString(fResistance) + " resisting " + ToString(fSpellPower) + " - MaxVal: " + ToString(fMaxValue) + " Result: " + ToString(fScaledValue));
+
+
+        if (bShowUIFeeback)
+        {
+            if (fScaledValue == EFFECTIVENESS_RESISTED )
+            {
+                UI_DisplayMessage(oTarget, UI_MESSAGE_RESISTED);
+            }
+            else if (fScaledValue == fMaxValue)
+            {
+                    // max value.
+            }
+        }
+
+        return fScaledValue;
+
+    }
+    else
+    {
+        if (bShowUIFeeback)
+        {
+            UI_DisplayMessage(oTarget, UI_MESSAGE_RESISTED);
+        }
+
+        return EFFECTIVENESS_RESISTED  ;
+    }
+
+
+}
+
+const float RESISTANCE_LEVEL_MODIFIER = 5.0f;
+
+// returns TRUE if target resists
+int ResistanceCheck(object oAttacker, object oDefender, int nAttackingAttribute, int nDefendingResistance)
+{
+    if (nDefendingResistance == RESISTANCE_PHYSICAL)
+    {
+        if (GetHasEffects(oDefender, EFFECT_TYPE_DAMAGE_WARD) == TRUE)
+        {
+            UI_DisplayMessage(oDefender, UI_MESSAGE_IMMUNE);
+
+            return TRUE;
+        }
+    }
+
+    // get base resistance value
+    float fResistance = GetCreatureProperty(oDefender, nDefendingResistance);
+    Log_Trace(LOG_CHANNEL_RESISTANCES, "sys_resistances_h.ResistanceCheck", "Base resistance (" + ToString(nDefendingResistance) + ") = " + ToString(fResistance));
+
+    // subtract attacking attribute
+    fResistance -= GetAttributeModifier(oAttacker, nAttackingAttribute);
+    Log_Trace(LOG_CHANNEL_RESISTANCES, "sys_resistances_h.ResistanceCheck", "  Modified by attacking attribute (" + ToString(nAttackingAttribute) + ") = " + ToString(fResistance));
+
+    // level modifier
+    int nLevelDifference = GetLevel(oAttacker) - GetLevel(oDefender);
+    fResistance -= RESISTANCE_LEVEL_MODIFIER * nLevelDifference;
+    Log_Trace(LOG_CHANNEL_RESISTANCES, "sys_resistances_h.ResistanceCheck", "  Modified by level difference (" + ToString(nLevelDifference) + ") = " + ToString(fResistance));
+
+    // rank modifier
+    int nDefenderRank = GetCreatureRank(oDefender);
+    float fRankModifier = GetM2DAFloat(Diff_GetAutoScaleTable(), "fResistanceModifier", nDefenderRank);
+    fResistance += fRankModifier;
+    Log_Trace(LOG_CHANNEL_RESISTANCES, "sys_resistances_h.ResistanceCheck", "  Modified by rank (" + ToString(nDefenderRank) + ", " + ToString(fRankModifier) + ") = " + ToString(fResistance));
+
+    // rank maximum
+    float fRankMaximum = GetM2DAFloat(Diff_GetAutoScaleTable(), "fResistanceMaximum", nDefenderRank);
+    float fFinalResistance = MinF(fResistance, fRankMaximum);
+    Log_Trace(LOG_CHANNEL_RESISTANCES, "sys_resistances_h.ResistanceCheck", "  Final resistance (" + ToString(fRankMaximum) + ") = " + ToString(fFinalResistance));
+
+    float fResistanceRoll = RandomFloat() * 100.0f;
+    Log_Trace(LOG_CHANNEL_RESISTANCES, "sys_resistances_h.ResistanceCheck", "Resistance roll " + ToString(fResistanceRoll) + " vs " + ToString(fFinalResistance));
+
+    if (fResistanceRoll &lt; fFinalResistance)
+    {
+        UI_DisplayMessage(oDefender, UI_MESSAGE_RESISTED);
+
+        return TRUE;
+    } else
+    {
+        return FALSE;
+    }
+}
+
+// @brief Returns an effect duration scaled by rank of oCreature and game difficulty
+// @author Georg
+float GetRankAdjustedEffectDuration(object oCreature, float fDur)
+{
+
+    // -------------------------------------------------------------------------
+    // Georg: This deserves some explanation:
+    //
+    //        One of the core issues when designing the combat system was always
+    //        the fact that the story called for sequences during the game in which
+    //        your main character acts solo.
+    //
+    //        Characters reliant on special abilities, such as rogues, would require
+    //        them to be very effective in order to beat enemies that a standard tank
+    //        can plow through. However, if these abilities would maintain the same
+    //        effectiveness in a full party, most encounters would turn into a stunfest
+    //
+    //        The solution is to add 1 second flat to each detrimental effect duration
+    //        lasting at least 1 second for each unoccupied slot in the party - before applying
+    //        rank and difficulty modifiers.
+    //
+    // -------------------------------------------------------------------------
+    if (!IsPartyMember(oCreature))
+    {
+        float fPartySizeModifier = IntToFloat(Max(0,4 - GetArraySize(GetPartyList())));
+
+        if (fDur &gt;= 1.0f)
+        {
+            fDur += fPartySizeModifier;
+        }
+    }
+
+    float fRankDurMod = Diff_GetDurationModifier(oCreature);
+    if (fRankDurMod &gt;0.0f)
+    {
+        return (fDur * fRankDurMod);
+    }
+    else
+    {
+     return fDur;
+    }
+}</text>
+	</Agent>
+</Resource>

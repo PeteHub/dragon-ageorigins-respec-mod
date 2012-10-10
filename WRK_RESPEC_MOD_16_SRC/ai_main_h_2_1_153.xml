@@ -1,0 +1,3756 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="153" Folder="\_Core Includes\" ResRefName="ai_main_h_2" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\ai_main_h_2.nss?moduleid=1&amp;resrefid=153" Requested="0">
+	<Agent type="empty">
+		<ResRefName>ai_main_h_2</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//////////////////////////////////////////////
+// ai_main_h
+//
+// This script includes all general AI functions
+//
+// Owner: Yaron Jakobs
+//
+/////////////////////////////////////////////
+
+/** @addtogroup scripting_ai2 Scripting AI handling
+*
+* Main AI interface functions
+*/
+/** @{*/
+
+#include "log_h"
+#include "wrappers_h"
+#include "ai_threat_h"
+#include "events_h"
+#include "effects_h"
+#include "items_h"
+#include "ability_h"
+#include "ai_conditions_h"
+#include "ai_constants_h"
+#include "ai_ballista_h"
+#include "ai_behaviors_h"
+
+
+/** @brief Determines the exact action to take when an object is blocking the way
+*
+* A few examples are bashing a container or door, lockpicking and then opening a gate, etc.
+*
+* @param oBlockingObject the object blocking the path
+* @returns TRUE if the AI found a solution to deal with the blocking object
+* @author Jose
+*/
+int AI_DeterminePathBlockedAction(object oBlockingObject);
+
+/** @brief Determines the exact action to take for the next combat round for the current creature
+*
+* This also includes acquiring a hostile target for offensive attacks and acquiring a friendly target
+* for buffs and heals. The function assumes we handle OBJECT_SELF as the attacking object
+* This function will run for all creature types: enemy, controlled follower and non-controlled follower
+* This function does NOT care about combat mode. It can run with or without it.
+* Some cases might check the combat mode, but no code should try to enable to disable combat mode.
+* It is assumed that some other external check were made to make sure that OBJECT_SELF can run this function.
+*
+* @param oLastTarget the target the attacker attacked last round (if valid)
+* @param nLastCommand the last command executed
+* @param nLastCommandStatus COMMAND_SUCCESSFUL or COMMAND_FAILURE - used mostly to detect movement failures
+* @param nLastSubCommand last sub command (ability ID for use ability commands)
+* @author Yaron
+*/
+void AI_DetermineCombatRound(object oLastTarget = OBJECT_INVALID, int nLastCommand = -1, int nLastCommandStatus = COMMAND_SUCCESSFUL, int nLastSubCommand = -1);
+
+// Light AI for creatures fighting other creatures away from the player
+void AI_DetermineCombatRound_Light(object oLastTarget = OBJECT_INVALID, int nLastCommand = -1, int nLastCommandStatus = COMMAND_SUCCESSFUL, int nLastSubCommand = -1);
+
+// Executes the AI default action for DetermineCombatRound
+void AI_ExecuteDefaultAction(object oLastTarget = OBJECT_INVALID, int nLastCommand = 0, int nLastCommandStatus = COMMAND_SUCCESSFUL, int nLastSubCommand = -1);
+
+/** @brief Determines the exact action to take for the next combat round for a controlled party member
+*
+* This includes minimal AI handling
+*
+* @param oLastTarget the target the attacker attacked last round (if valid)
+* @param nLastCommand the command the attacker used last round
+* @param nLastCommandStatus COMMAND_SUCCESSFUL or COMMAND_FAILURE - used mostly to detect movement failures
+* @param nLastSubCommand last sub command (ability ID for use ability commands)
+* @author Yaron
+*/
+void AI_DetermineCombatRound_Partial(object oLastTarget = OBJECT_INVALID, int nLastCommand = -1, int nLastCommandStatus = COMMAND_SUCCESSFUL, int nLastSubCommand = -1);
+
+/** @brief Returns the number of tactics the creature has in it's package
+*
+* The number of tactics is basically the number of rows in the package 2da
+*
+* @param rPackageTable the package table for which we want the number of tactics in
+* @returns Number of tactics the creature has in the associated package file
+* @author Yaron
+*/
+int _AI_GetTacticsNum(int nPackageTable);
+
+/** @brief Checks if a tactic is valid and executes it if valid
+*
+* @param nPackageTable the package table for the specified tactic
+* @param nTacticID the tactic ID that we are trying to execute
+* @param nLastCommandStatus used in AI_ExecuteAttack
+* @returns TRUE if the tactic was executed, FALSE otherwise
+* @author Yaron
+*/
+int _AI_ExecuteTactic(int nPackageTable, int nTacticID, int nLastCommandStatus, int nUseGUITables);
+
+/** @brief Returns the package table name ID that was set for the current creature
+*
+* @returns The name of the ID of table attached to the creature, or the default one if the creature has none
+* @author Yaron
+*/
+int _AI_GetPackageTable();
+
+/** @brief Verifies that a creature can execute a specific command
+*
+* The exact conditions depend on the command itself, but they include resources check (mana/stamina) equipment check (weapons) etc'
+*
+* @param nCommand the main command being checked
+* @param nSubCommand the sub-command being checked
+* @returns TRUE if the command can be executed, FALSE otherwise
+* @author Yaron
+*/
+int _AI_IsCommandValid(int nCommand, int nSubCommand, int nTacticTargetType = -1);
+
+
+void _AI_SetMoveTimer();
+
+int _AI_GetWeaponSetEquipped(object oTarget=OBJECT_SELF);
+
+/** @brief Check if the specified target is within melee range
+*
+* @param oTarget the target we check melee range for
+* @returns TRUE if oTarget is within melee range, FALSE otherwise
+* @author Yaron
+*/
+int _AI_IsTargetInMeleeRange(object oTarget);
+
+/** @brief Check if the current creature has a specific weapon set available (non-equipped)
+*
+* @param nWeaponSetType the weapon set we are looking for, assming it is the non-equipped weapon set
+* @returns TRUE if the current creature has the weapon set, FALSE otherwise
+* @author Yaron
+*/
+int _AI_HasWeaponSet(int nWeaponSetType);
+
+/** @brief Switches the weapon set of the current creature to a weapon set of the specified type
+*
+* @param nWeaponSetType the weapon set we want to switch to
+* @returns a command to switch the weapons
+* @author Yaron
+*/
+command _AI_SwitchWeaponSet(int nWeaponSetType);
+
+/** @brief Gets the value of a specific AI flag on the current creature
+*
+* @param nFlag the flag we check for
+* @returns TRUE if the flag is set on the current creature, FALSE otherwise
+* @author Yaron
+*/
+int _AI_GetFlag(string sFlag, object oCreature = OBJECT_SELF);
+
+/** @brief Sets the value of a specific AI flag on the current creature
+*
+* @param sFlag the flag we check for
+* @author Yaron
+*/
+void _AI_SetFlag(string sFlag, int nValue);
+
+/** @brief Executes an attack command including possible weapon switching
+*
+* @param oTarget the target being attacked
+* @param nLastCommandStatus used to determine what to do in case of failed movement or weapon switch
+* @returns an attack or weapon switch command
+* @author Yaron
+*/
+command _AI_ExecuteAttack(object oTarget, int nLastCommandStatus);
+
+string _AI_GetCommandString(int nAICommand);
+
+int _AI_IsAbilityValid(int nAbilityID);
+
+// checks for AI-specifics conditions for using this ability on the required target
+int _AI_CanUseAbility(int nAbility, object oTarget);
+
+
+// Returns the range of the currently equipped ranged weapon
+float _AI_GetEquippedWeaponRange();
+
+// Returns TRUE if GUI tables should be used, FALSE if 2da tables should be used
+int _AI_UseGUITables();
+
+// Handles any AI-related routines for the player's party for when combat is over
+void _AI_HandlePartyCombatEnd();
+
+// returns a command to wait or play a taunt animation
+command _AI_DoNothing(int nLastTacticID, int nLastCommandStatus, int nAllowTaunts = FALSE, int bQuick = FALSE, object oTarget = OBJECT_INVALID, int nClearThreat = TRUE);
+
+
+// Loads a table currently assigned to this creature into his GUI table
+void _AI_LoadTacticsIntoGUI();
+
+// Move to main controlled follower in formation
+command _AI_MoveToControlled(int nLastCommandStatus);
+
+command _AI_GetFlyCommand(object oTurnTo, int bMoveTo = FALSE);
+
+// returns TRUE if cooldown is clear to run again, FALSE otherwise
+int _AI_CheckMoveTimer();
+
+// returns a potion based on cretiria
+object _AI_GetPotionByFilter(int nPotionType, int nPotionPower);
+
+// returns a return value for using a potion
+command _AI_GetPotionUseCommand(object oItem);
+
+int AI_GetPartyAllowedToAttack();
+void AI_SetPartyAllowedToAttack(int nStatus);
+
+void AI_HandleCowardFollower(object oAppear = OBJECT_INVALID);
+
+/** @brief Calculates what percentage of a team is using ranged weapons
+*
+* @param oTarget member of the group to check
+* @returns percentage as a float [0.0,1.0]
+* @author Noel
+*/
+float _AI_GetTeamUsingRangedPct(object oTarget=OBJECT_SELF);
+
+/**
+* @brief Sets Custom AI on a creature
+*
+* Used to set all Custom AI on creature oCreature.
+* If bInstant is set, the creature will stop all he is doing to start the
+* Custom AI; otherwise it will finish its current command.
+*
+* @param oCreature the creature to activate the custom ai on
+* @param nCustomAI the custom ai to activate
+* @param bInstant if the custom ai should occur immediately
+* @returns new nCustomAI value
+*
+* @author   Joshua Stiksma
+*
+**/
+int CAI_SetCustomAI( object oCreature, int nCustomAI, int bInstant = FALSE );
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//                            FUNCTIONS DEFINITIONS
+//
+////////////////////////////////////////////////////////////////////////////////
+
+int AI_DeterminePathBlockedAction(object oBlockingObject)
+{
+    // Check that we have a valid object
+    if (!IsObjectValid(oBlockingObject))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DeterminePathBlockedAction", "INVALID BLOCKING OBJECT");
+        #endif
+        return FALSE;
+    }
+
+    // Attempt to find an action to unblock the path
+    #ifdef DEBUG
+    Log_Trace_AI("AI_DeterminePathBlockedAction", "***** START ***** , blocking object: " + ObjectToString(oBlockingObject));
+    #endif
+    command cPathAction;
+    command cPathActionContinue;
+
+    // DOOR - Locked
+    if (GetPlaceableState(oBlockingObject) == PLC_STATE_DOOR_LOCKED)
+    {
+        if(!IsControlled(OBJECT_SELF))
+        {
+            cPathAction = _AI_DoNothing(-1, -1, FALSE, TRUE);
+        }
+        // Other interesting cases to consider are:
+        //   if rogue has lockpicking
+        //   if ranged combatant has shatteting shot
+        //   if mage has spell for breaking a placeable
+        //   ... etc
+    }
+    // DOOR - Unlocked
+    else if (GetPlaceableState(oBlockingObject) == PLC_STATE_DOOR_UNLOCKED)
+    {
+        cPathAction = CommandUseObject(oBlockingObject, PLACEABLE_ACTION_OPEN);
+
+        // Other interesting cases to consider are:
+        //   hostile creatures might still decide to break the door to make this more aggresive?
+        //   I don't see hurlocks or ogres gently pushing the door...
+    }
+    // Add more cases here as necessary
+    // ...
+
+    // If we found a valid way to unblock the path, add it to the AI queue
+    if (GetCommandType(cPathAction) != COMMAND_TYPE_INVALID)
+    {
+        // This action should unblock the path
+        WR_AddCommand(OBJECT_SELF, cPathAction, FALSE, FALSE, -1, AI_COMMAND_TIMER);
+
+        // After that, the character can resume the previous action
+        command cPreviousCommand = GetPreviousCommand(OBJECT_SELF);
+        WR_AddCommand(OBJECT_SELF, cPreviousCommand, FALSE, FALSE, COMMAND_ADDBEHAVIOR_DONTCLEAR, AI_COMMAND_TIMER);
+
+        return TRUE;
+    }
+    // If not, just report a warning and return failure
+    else
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DeterminePathBlockedAction", "Couldn't find a solution for dealing with the blocking object", LOG_SEVERITY_WARNING);
+        #endif
+        return FALSE;
+    }
+}
+
+void AI_DetermineCombatRound(object oLastTarget = OBJECT_INVALID, int nLastCommand = 0, int nLastCommandStatus = COMMAND_SUCCESSFUL, int nLastSubCommand = -1)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("AI_DetermineCombatRound", "***** START ***** , last command status: " + IntToString(nLastCommandStatus));
+    #endif
+
+    // -------------------------------------------------------------------------
+    // Non combatant
+    // -------------------------------------------------------------------------
+    if(GetCombatantType(OBJECT_SELF) == CREATURE_TYPE_NON_COMBATANT)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound", "NON COMBATANT CREATURE - running away");
+        #endif
+        return;
+    }
+
+    // make stealthed creature get out of stealth if alone and not at the start of combat
+    if(!IsFollower(OBJECT_SELF) &amp;&amp; IsStealthy(OBJECT_SELF) &amp;&amp; GetGameMode() == GM_COMBAT)
+    {
+        object [] arAllies = _AI_GetAllies(-1, -1);
+        int nSize = GetArraySize(arAllies);
+        if(nSize == 0)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_DetermineCombatRound", "No allies left dropping out of stealth and continueing with AI");
+            #endif
+            DropStealth(OBJECT_SELF);
+        }
+        else // some allies alive -&gt; if one of them is not in stealth then we're good
+        {
+            int i;
+            object oCurrent;
+            int bRemoveStealth = TRUE;
+            for(i = 0; i &lt; nSize; i++)
+            {
+                oCurrent = arAllies[i];
+                if(!IsStealthy(oCurrent))
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("AI_DetermineCombatRound", "Found at least one non-stealth ally - clear to keep stealth");
+                    #endif
+                    bRemoveStealth = FALSE;
+                    break;
+                }
+
+            }
+            if(bRemoveStealth)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("AI_DetermineCombatRound", "All allies are stealthy - dropping stealth");
+                #endif
+                DropStealth(OBJECT_SELF);
+            }
+        }
+    }
+
+    if(GetGameMode() != GM_COMBAT &amp;&amp; GetGameMode() != GM_EXPLORE)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound", "Not combat or explore game mode - WAITING");
+        #endif
+        if(!IsControlled(OBJECT_SELF))
+        {
+            command cWait = _AI_DoNothing(-1, nLastCommandStatus, FALSE, FALSE);
+            WR_AddCommand(OBJECT_SELF, cWait);
+        }
+        return;
+    }
+
+    SetObjectInteractive(OBJECT_SELF, TRUE);
+
+    // Do not run any AI if the creature is doing something right now
+    command cCurrent = GetCurrentCommand(OBJECT_SELF);
+    int nCurrentType = GetCommandType(cCurrent);
+    int nQueueSize = GetCommandQueueSize(OBJECT_SELF);
+    if(nCurrentType != COMMAND_TYPE_INVALID || nQueueSize &gt; 0)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound", "Do nothing - creature running command already: " + Log_GetCommandNameById(nCurrentType), LOG_SEVERITY_WARNING);
+        #endif
+        return;
+    }
+
+    // -------------------------------------------------------------------------
+    // Ability usage disabled - Master off switch per creature
+    // -------------------------------------------------------------------------
+    else if(GetCreatureFlag(OBJECT_SELF,CREATURE_RULES_FLAG_AI_OFF) )
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound", "ABORT: CREATURE_RULES_FLAG_AI_OFF was set");
+        #endif
+        if(IsFollower(OBJECT_SELF))
+        {
+            Warning("IMPORTANT! follower has ability use by AI disabled! This should never happen without debug scripts! - please contact YARON");
+        }
+        return;
+    }
+    else if(!IsFollower(OBJECT_SELF) &amp;&amp; GetLocalInt(OBJECT_SELF, AI_LIGHT_ACTIVE) == TRUE)
+    {
+        //object [] oNearestFollowers = GetNearestObjectByGroup(OBJECT_SELF, GROUP_PC, OBJECT_TYPE_CREATURE, 1, TRUE, TRUE);
+        //object oNearestFollower = oNearestFollowers[0];
+        //float fDistance = GetDistanceBetween(OBJECT_SELF, oNearestFollower);
+
+        //if(!IsObjectValid(oNearestFollower) || fDistance &gt; LIGHT_AI_MIN_DISTANCE)
+        AI_DetermineCombatRound_Light(oLastTarget, nLastCommand, nLastCommandStatus, nLastSubCommand);
+        return;
+
+    }
+
+    // AOE check
+    int nCheckChance = 0; // chance to try and avoid AOE if actually inside
+    if(!IsFollower(OBJECT_SELF))
+    {
+        int nAppearance = GetAppearanceType(OBJECT_SELF);
+        nCheckChance = GetM2DAInt(TABLE_APPEARANCE, "AvoidAOEChance", nAppearance);
+    }
+    else if(!IsControlled(OBJECT_SELF))// follower - chance based on behavior
+    {
+        if(AI_BehaviorCheck_AvoidAOE())
+            nCheckChance = AI_FOLLOWER_AVOID_AOE_CHANCE;
+    }
+
+    if(nCheckChance &gt; 0 &amp;&amp; GetLocalInt(OBJECT_SELF, AI_FLAG_STATIONARY) != AI_STATIONARY_STATE_HARD)
+    {
+        int [] AbilityAOEs = GetAbilitiesDueToAOEs(OBJECT_SELF);
+        int nArraySize = GetArraySize(AbilityAOEs);
+        if(nArraySize &gt; 0) // in ability AOEs
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_DetermineCombatRound", "Creature is in an ability AOE");
+            #endif
+            int i;
+            int nAOE;
+            int nRand;
+            for(i = 0; i &lt; nArraySize; i++)
+            {
+                if(GetM2DAInt(TABLE_AI_ABILITY_COND, "HostileAOE", AbilityAOEs[i]) == 1)
+                {
+                    // in hostile AOE
+
+                    // random chance to try and exit
+                    nRand = Random(100);
+                    #ifdef DEBUG
+                    Log_Trace_AI("AI_DetermineCombatRound", "Hostile AOE ability: " + IntToString(AbilityAOEs[i]) + ", escape chance: " + IntToString(nCheckChance) +
+                        ", roll: " + IntToString(nRand));
+                    #endif
+                    if(nRand &lt;= nCheckChance)
+                    {
+                        // use the regular movement cooldown
+                        if(_AI_CheckMoveTimer() == TRUE)
+                        {
+                            #ifdef DEBUG
+                            Log_Trace_AI("AI_DetermineCombatRound", "Escaping AOE!");
+                            #endif
+                            location lLoc = GetLocation(OBJECT_SELF);
+                            vector vPos = GetPositionFromLocation(lLoc);
+                            int nRandX = Random(16) - 8;
+                            int nRandY = Random(16) - 8;
+                            vPos.x += nRandX;
+                            vPos.y += nRandY;
+                            location lNewLoc = Location(GetArea(OBJECT_SELF), vPos, GetFacing(OBJECT_SELF));
+                            //command cMove = CommandMoveToLocation(lNewLoc, TRUE);
+                            command cMove = CommandMoveAwayFromObject(OBJECT_SELF, AI_AOE_FLEE_DISTANCE, TRUE);
+                            WR_AddCommand(OBJECT_SELF, cMove, FALSE, FALSE, -1, AI_COMMAND_TIMER);
+                            _AI_SetMoveTimer();
+                            return;
+                        }
+                        else
+                            break; // exit loop
+
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    // -------------------------------------------------------------------------
+    // AI disabled (followers only)
+    // -------------------------------------------------------------------------
+    if(IsFollower(OBJECT_SELF) &amp;&amp; !IsPartyAIEnabled(OBJECT_SELF))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound", "FOLLOWER AI DISABLED - will run partial AI instead");
+        #endif
+        AI_DetermineCombatRound_Partial(oLastTarget, nLastCommand, nLastCommandStatus, nLastSubCommand);
+        return;
+    }
+
+
+
+    // We assume that whoever called AI_DetermineCombatRound has validated that the creature is valid for combat
+    if(Effects_HasAIModifier(OBJECT_SELF, AI_MODIFIER_IGNORE))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound", "I have the IGNORE flag set - doing nothing", LOG_SEVERITY_WARNING);
+        #endif
+        return;
+    }
+
+    if(IsFollower(OBJECT_SELF) &amp;&amp; !IsControlled(OBJECT_SELF)) // check hidden tactics based on behavior
+    {
+        if(AI_BehaviorCheck_PreferRange() &amp;&amp; _AI_GetWeaponSetEquipped() != AI_WEAPON_SET_RANGED
+            &amp;&amp; _AI_HasWeaponSet(AI_WEAPON_SET_RANGED) &amp;&amp;
+            _AI_Condition_BeingAttackedByAttackType(AI_TARGET_TYPE_SELF, AI_ATTACK_TYPE_MELEE, -1, -1, -1) == OBJECT_INVALID)
+        {
+            object [] arEnemies = GetCreaturesInMeleeRing(OBJECT_SELF, 0.0, 360.0, TRUE);
+            if(GetArraySize(arEnemies) == 0)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("AI_DetermineCombatRound", "Follower prefering RANGED weapon - switching");
+                #endif
+                command cSwitch = _AI_SwitchWeaponSet(AI_WEAPON_SET_RANGED);
+                WR_AddCommand(OBJECT_SELF, cSwitch);
+                return;
+            }
+        }
+        else if(AI_BehaviorCheck_PreferMelee() &amp;&amp; _AI_GetWeaponSetEquipped() != AI_WEAPON_SET_MELEE
+            &amp;&amp; _AI_HasWeaponSet(AI_WEAPON_SET_MELEE))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_DetermineCombatRound", "Follower prefering MELEE weapon - switching");
+            #endif
+            command cSwitch = _AI_SwitchWeaponSet(AI_WEAPON_SET_MELEE);
+            WR_AddCommand(OBJECT_SELF, cSwitch);
+            return;
+        }
+        else if(AI_BehaviorCheck_AvoidNearbyEnemies())
+        {
+            if((nLastCommand == COMMAND_TYPE_MOVE_TO_OBJECT || nLastCommand == COMMAND_TYPE_MOVE_TO_LOCATION) &amp;&amp;
+                nLastCommandStatus &lt; 0)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("AI_DetermineCombatRound", "Last command was movement and failed - not evaluating Avoid Enemies behavior");
+                #endif
+            }
+            else
+            {
+                object [] arEnemies = _AI_GetEnemies(-1, -1);
+                int nSize = GetArraySize(arEnemies);
+                if(nSize &gt; 0)
+                {
+                    object oEnemy = arEnemies[0];
+                    float fDistance = GetDistanceBetween(OBJECT_SELF, oEnemy);
+                    if(fDistance &lt; AI_RANGE_SHORT)
+                    {
+                        #ifdef DEBUG
+                        Log_Trace_AI("AI_DetermineCombatRound", "Follower avoiding nearby enemies - moving away");
+                        #endif
+                        command cMove = CommandMoveAwayFromObject(oEnemy, AI_MOVE_AWAY_DISTANCE_SHORT, TRUE);
+                        WR_AddCommand(OBJECT_SELF, cMove, FALSE, FALSE, -1, AI_COMMAND_TIMER);
+                    }
+                }
+            }
+        }
+        else if(AI_BehaviorCheck_AvoidMelee())
+        {
+            if((nLastCommand == COMMAND_TYPE_MOVE_TO_OBJECT || nLastCommand == COMMAND_TYPE_MOVE_TO_LOCATION) &amp;&amp;
+                nLastCommandStatus &lt; 0)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("AI_DetermineCombatRound", "Last command was movement and failed - not evaluating Avoid Melee Enemies behavior");
+                #endif
+            }
+            else
+            {
+                object [] arEnemies = GetCreaturesInMeleeRing(OBJECT_SELF, 0.0, 360.0, TRUE);
+                int nSize = GetArraySize(arEnemies);
+                int i;
+                object oCurrent;
+                for(i = 0; i &lt; nSize; i++)
+                {
+                    oCurrent = arEnemies[i];
+                    if(IsUsingMeleeWeapon(oCurrent) &amp;&amp; GetAttackTarget(oCurrent) == OBJECT_SELF)
+                    {
+                        #ifdef DEBUG
+                        Log_Trace_AI("AI_DetermineCombatRound", "Follower avoiding melee enemies - moving away");
+                        #endif
+                        command cMove = CommandMoveToObject(oCurrent, TRUE, AI_MOVE_AWAY_DISTANCE_SHORT, TRUE);
+                        WR_AddCommand(OBJECT_SELF, cMove, FALSE, FALSE, -1, AI_COMMAND_TIMER);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    // Check if the creature should bring his team to help
+    int nTeamHelpStatus = GetLocalInt(OBJECT_SELF, AI_HELP_TEAM_STATUS);
+    #ifdef DEBUG
+    Log_Trace_AI("AI_DetermineCombatRound", "Team Help Status: " + IntToString(nTeamHelpStatus), LOG_SEVERITY_WARNING);
+    #endif
+    if(nTeamHelpStatus == AI_HELP_TEAM_STATUS_ACTIVE)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound", "Calling team for help", LOG_SEVERITY_WARNING);
+        #endif
+        SetLocalInt(OBJECT_SELF, AI_HELP_TEAM_STATUS, AI_HELP_TEAM_STATUS_CALLED_FOR_HELP);
+        command cMove = CommandMoveToLocation(GetLocation(OBJECT_SELF));
+        int nTeamID = GetTeamId(OBJECT_SELF);
+        if(nTeamID &gt; 0)
+        {
+            object [] arTeam = GetTeam(nTeamID);
+            int nSize = GetArraySize(arTeam);
+            int i;
+            object oCurrent;
+            float fHelpDistance;
+            for(i = 0; i &lt; nSize; i++)
+            {
+                oCurrent = arTeam[i];
+                // Sending only if the creature is not in combat yet and not helping yet
+                if(GetCombatState(oCurrent)== FALSE &amp;&amp;  GetLocalInt(oCurrent, AI_HELP_TEAM_STATUS) == AI_HELP_TEAM_STATUS_ACTIVE)
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("AI_DetermineCombatRound", "Bring creature to help: " + GetTag(oCurrent));
+                    #endif
+                    SetLocalInt(oCurrent, AI_HELP_TEAM_STATUS, AI_HELP_TEAM_STATUS_HELPING);
+                    WR_ClearAllCommands(oCurrent);
+                    WR_AddCommand(oCurrent, cMove, FALSE, FALSE, -1, 0.0); // No timeout so they won't stop too soon
+                }
+            }
+        }
+    }
+
+    // controlled party member -&gt; use partial AI
+    if(IsControlled(OBJECT_SELF))
+    {
+        if(GetCombatState(OBJECT_SELF) == FALSE)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_DetermineCombatRound", "Follower not in combat state - aborting AI", LOG_SEVERITY_WARNING);
+            #endif
+            return;
+        }
+        AI_DetermineCombatRound_Partial(oLastTarget, nLastCommand, nLastCommandStatus, nLastSubCommand);
+    }
+    // enemy OR non-controlled party member -&gt; let the AI rules table determine the round
+    else
+    {
+        if(GetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS) &gt; 0)
+        {
+            if(AI_Ballista_HandleAI() == TRUE)
+                return;
+        }
+
+        if(!IsFollower(OBJECT_SELF) &amp;&amp; GetLocalInt(OBJECT_SELF, AI_FLAG_STATIONARY) == AI_STATIONARY_STATE_VERY_SOFT)
+        {
+            // clear state if there is an enemy nearby
+            object [] arEnemies = _AI_GetEnemies(-1, -1);
+            if(GetArraySize(arEnemies) &gt; 0)
+            {
+                float fDistance = GetDistanceBetween(OBJECT_SELF, arEnemies[0]);
+                if(fDistance &gt; AI_MELEE_RANGE)
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("AI_DetermineCombatRound", "Found nearby enemy - clearing stationary flag");
+                    #endif
+                    SetLocalInt(OBJECT_SELF, AI_FLAG_STATIONARY, AI_STATIONARY_STATE_DISABLED);
+                }
+            }
+        }
+        // Iterate the AI rules table, until executing a valid rule
+        // First we get the first tactic ID/Priority. This can be any positive number since
+        // the package 2da includes tactics which may not apply to the current level of the creature
+
+        int nPackageTable = _AI_GetPackageTable();
+        int nTacticsNum;
+        if(_AI_UseGUITables())
+            nTacticsNum = GetNumTactics(OBJECT_SELF);
+        else
+            nTacticsNum = _AI_GetTacticsNum(nPackageTable);
+        if(nTacticsNum &gt; AI_MAX_TACTICS)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_DetermineCombatRound", "Too many tactics: " + IntToString(nTacticsNum));
+            #endif
+            return;
+        }
+        int i = 1;
+        int nLastTactic = GetLocalInt(OBJECT_SELF, AI_LAST_TACTIC);
+        int nTablesDisabled = GetLocalInt(GetModule(), AI_DISABLE_TABLES);
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound", "tactics num: " + IntToString(nTacticsNum));
+        Log_Trace_AI("AI_DetermineCombatRound", "Last Tactic ID: " + IntToString(nLastTactic));
+        #endif
+        // If the last tactic failed then resume from the tactic after it
+        if(nLastCommandStatus &lt; 0 &amp;&amp; nLastTactic &gt;= 0)
+        {
+            i = nLastTactic;
+            i++;
+            if(IsFollower(OBJECT_SELF) &amp;&amp; i == nTacticsNum)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("AI_DetermineCombatRound", "Last tactic failed for follower and failed tactic was last at table: WAITING");
+                #endif
+                command cWait = _AI_DoNothing(nLastTactic, nLastCommandStatus, TRUE);
+                WR_AddCommand(OBJECT_SELF, cWait);
+                return;
+            }
+            else
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("AI_DetermineCombatRound", "Last tactic failed, resuming from the next tactic: " + IntToString(i));
+                #endif
+            }
+        }
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound", "nTablesDisabled= " + IntToString(nTablesDisabled));
+        Log_Trace_AI("AI_DetermineCombatRound", "i= " + IntToString(i));
+        #endif
+
+        // If a default action failed - we would try the entire table again
+        int nExecuteRet;
+        int nUseGUITables = _AI_UseGUITables();
+
+        if(!nTablesDisabled)
+        {
+            for(i; i &lt;= nTacticsNum; i++)
+            {
+                // For every rule: evaluate condition - if valid -&gt; execute
+                nExecuteRet = _AI_ExecuteTactic(nPackageTable, i, nLastCommandStatus, nUseGUITables);
+                // if TRUE/1 =&gt; return (tactic executed)
+                // if FALSE/0 =&gt; continue normally (tactic not executed)
+                // if -1 =&gt; jump to default action
+                // if greater then 1 =&gt; jump to specific tactic
+                if(nExecuteRet == TRUE)
+                    return;
+                else if(nExecuteRet == -1)
+                    break;
+                else if(nExecuteRet &gt; 1 &amp;&amp; nExecuteRet &gt; i)
+                    i = nExecuteRet - 1; // it will be increased by 1 by the for loop
+            }
+        }
+
+        if(GetObjectActive(OBJECT_SELF) == FALSE)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_DetermineCombatRound", "Object inactive - exiting");
+            #endif
+            return;
+        }
+
+        // Continue from this point only if in combat state
+        if(GetCombatState(OBJECT_SELF) == FALSE)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_DetermineCombatRound", "Not in combat. Not evaluating default action (attack)");
+            #endif
+            // IMPORTANT: can't put here any wait or move commands as they will conflict with the engine follow
+            // commands, especially if the user selected the GUI option to disable party following.
+            return;
+        }
+
+        AI_ExecuteDefaultAction(oLastTarget, nLastCommand, nLastCommandStatus, nLastSubCommand);
+
+
+    }  // END else (non-controlled follower OR enemy)
+
+}
+
+void AI_DetermineCombatRound_Light(object oLastTarget = OBJECT_INVALID, int nLastCommand = -1, int nLastCommandStatus = COMMAND_SUCCESSFUL, int nLastSubCommand = -1)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("AI_DetermineCombatRound_Light", "Last target: " + GetTag(oLastTarget));
+    #endif
+    object oTarget = oLastTarget;
+    if(!_AI_IsHostileTargetValid(oTarget))
+    {
+        //object [] arTargets = GetNearestObjectByHostility(OBJECT_SELF, TRUE, OBJECT_TYPE_CREATURE, 1, TRUE, TRUE);
+        //oTarget = arTargets[0];
+        //oTarget = AI_Threat_GetThreatTarget(OBJECT_SELF, TRUE);
+
+        // Yaron, Jan 2 2009: removed the above threat call as it grabbed sometimes targets that were not percevied
+        // Instead, we'll call the engine threat target directly
+        // Yaron, Jan 5, 2009: some climax armies were getting stuck on the most hated target and trying to attack
+        // it even when it was surrounded by enemies already and thus continually failing. Instead, they would now
+        // pick a random target from their threat array.
+        int nThreatArraySize = GetThreatTableSize(OBJECT_SELF);
+        int nEnemy = Random(nThreatArraySize);
+        oTarget = GetThreatEnemy(OBJECT_SELF, nEnemy);
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound_Light", "Threat target: " + GetTag(oTarget));
+        #endif
+    }
+
+    if((nLastCommandStatus != COMMAND_SUCCESSFUL &amp;&amp; nLastCommandStatus != COMMAND_FAILED_TARGET_DESTROYED &amp;&amp;
+        nLastCommandStatus != COMMAND_FAILED_TIMEOUT)|| !_AI_IsHostileTargetValid(oTarget))
+    {
+        command cWait = CommandWait(AI_DO_NOTHING_DELAY);
+        WR_AddCommand(OBJECT_SELF, cWait);
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound_Light", "No valid target - waiting");
+        #endif
+    }
+    else
+    {
+        //command cAttack = _AI_ExecuteAttack(oTarget, nLastCommandStatus);
+        command cAttack = CommandAttack(oTarget);
+        WR_AddCommand(OBJECT_SELF, cAttack, FALSE, FALSE, -1, AI_COMMAND_TIMER_QUICK);
+    }
+}
+
+void AI_ExecuteDefaultAction(object oLastTarget = OBJECT_INVALID, int nLastCommand = 0, int nLastCommandStatus = COMMAND_SUCCESSFUL, int nLastSubCommand = -1)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("AI_ExecuteDefaultAction", "START");
+    #endif
+    object oNewTarget;
+
+    // Finished checking all rules and nothing got executed
+    // -&gt; Execute default attack
+    object oSelectedTarget = GetAttackTarget(OBJECT_SELF);
+
+    #ifdef DEBUG
+    Log_Trace_AI("AI_ExecuteDefaultAction", "Could not assign any AI tactic - creature will try to attack normally");
+    #endif
+
+    if(IsFollower(OBJECT_SELF))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_ExecuteDefaultAction", "Follower selected target: " + GetTag(oSelectedTarget));
+        #endif
+        float fDistanceToPlayer = GetDistanceBetween(OBJECT_SELF, GetMainControlled());
+
+        if(nLastCommand == COMMAND_TYPE_ATTACK)
+        {
+            object oTargetOverride = _AI_GetTargetOverride();
+            if(_AI_IsHostileTargetValid(oTargetOverride))
+            {
+                 #ifdef DEBUG
+                 Log_Trace_AI("AI_ExecuteDefaultAction", "Follower picking override target (probably a summon): " + GetTag(oTargetOverride));
+                 #endif
+                 oNewTarget = oTargetOverride;
+            }
+            // A follower can NOT switch target by himself
+            else if(_AI_IsHostileTargetValid(oSelectedTarget))
+                oNewTarget = oSelectedTarget;
+            else // no valid target -&gt; try to find a new target
+            {
+                oNewTarget = _AI_Condition_GetNearestVisibleCreature(AI_TARGET_TYPE_ENEMY, 1, -1, -1, -1);
+                if(!_AI_IsHostileTargetValid(oNewTarget))
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("AI_ExecuteDefaultAction", "Follower: could not find a new target - moving to player or waiting");
+                    #endif
+                    if(fDistanceToPlayer &gt; AI_FOLLOWER_PLAYER_DISTANCE &amp;&amp; nLastCommandStatus == COMMAND_SUCCESSFUL)
+                    {
+                        location lLoc = GetFollowerWouldBeLocation(OBJECT_SELF);
+                        command cMove = CommandMoveToLocation(lLoc, TRUE);
+                        WR_AddCommand(OBJECT_SELF, cMove, FALSE, FALSE, -1, AI_COMMAND_TIMER);
+                        return;
+                    }
+                    else
+                    {
+                        command cWait = _AI_DoNothing(-1, nLastCommandStatus, FALSE, TRUE);
+                        WR_AddCommand(OBJECT_SELF, cWait);
+                        return;
+                    }
+                }
+                #ifdef DEBUG
+                Log_Trace_AI("AI_ExecuteDefaultAction", "Follower: acquired new target: " + GetTag(oNewTarget));
+                #endif
+            }
+            // Follower allowed to continue attacking
+            #ifdef DEBUG
+            Log_Trace_AI("AI_ExecuteDefaultAction", "Follower: continue attacking current target");
+            #endif
+            command cFollowerAttack = _AI_ExecuteAttack(oNewTarget, nLastCommandStatus);
+            WR_AddCommand(OBJECT_SELF, cFollowerAttack);
+            return;
+        }
+        else if(AI_BehaviorCheck_DefaultAttack() == FALSE) // last command not attack
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_ExecuteDefaultAction", "Follower: last command wasn't attack - moving or doing nothing (follower not allowed to pick a target)");
+            #endif
+            command cMoveOrWait = _AI_MoveToControlled(nLastCommandStatus);
+            WR_AddCommand(OBJECT_SELF, cMoveOrWait, FALSE, FALSE, -1, AI_COMMAND_TIMER);
+            return;
+        }
+        else if(!AI_GetPartyAllowedToAttack() &amp;&amp; AI_BehaviorCheck_AttackOnCombatStart() == FALSE)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_ExecuteDefaultAction", "Follower: not allowed to attack - moving or doing nothing (follower not allowed to pick a target)");
+            #endif
+            command cMoveOrWait = _AI_MoveToControlled(nLastCommandStatus);
+            WR_AddCommand(OBJECT_SELF, cMoveOrWait, FALSE, FALSE, -1, AI_COMMAND_TIMER);
+            return;
+        }
+
+    }
+    else // not a follower, can switch a target
+    {
+        oNewTarget = _AI_Condition_GetMostHatedEnemy(1, COMMAND_TYPE_ATTACK, -1, -1);
+        #ifdef DEBUG
+        Log_Trace_AI("AI_ExecuteDefaultAction", "Not a follower picking new target (most hated): " + GetTag(oNewTarget));
+        #endif
+    }
+
+    if(IsFollower(OBJECT_SELF))
+    {
+        // A follower that is allowed to pick a target by himself
+        #ifdef DEBUG
+        Log_Trace_AI("AI_ExecuteDefaultAction", "Follower: behavior allows picking new target - attacking nearest visible");
+        #endif
+        oNewTarget = _AI_Condition_GetNearestVisibleCreature(AI_TARGET_TYPE_ENEMY, 1, -1, -1, -1);
+        if(!IsObjectValid(oNewTarget) &amp;&amp; GetGameMode() == GM_COMBAT)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_ExecuteDefaultAction", "Follower: could not find valid target (room connection error OR enemy too far away) - trying to move to leader");
+            #endif
+            command cMoveOrWait = _AI_MoveToControlled(nLastCommandStatus);
+            WR_AddCommand(OBJECT_SELF, cMoveOrWait, FALSE, FALSE, -1, AI_COMMAND_TIMER);
+            return;
+        }
+    }
+
+    command cAttack;
+
+    if(_AI_IsHostileTargetValid(oNewTarget))
+    {
+        cAttack = _AI_ExecuteAttack(oNewTarget, nLastCommandStatus);
+        if(GetCommandType(cAttack) == COMMAND_TYPE_INVALID)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_ExecuteDefaultAction", "INVALID TACTIC COMMAND - WAITING", LOG_SEVERITY_CRITICAL);
+            #endif
+            cAttack = _AI_DoNothing(-1, -1, TRUE);
+        }
+    }
+    else // new target
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_ExecuteDefaultAction", "COULD NOT FIND A NEW TARGET - WAITING", LOG_SEVERITY_CRITICAL);
+        #endif
+        cAttack = _AI_DoNothing(-1, -1, TRUE);
+    }
+
+    WR_AddCommand(OBJECT_SELF, cAttack, FALSE, FALSE, -1, AI_COMMAND_TIMER);
+
+}
+
+void AI_DetermineCombatRound_Partial(object oLastTarget = OBJECT_INVALID, int nLastCommand = -1, int nLastCommandStatus = COMMAND_SUCCESSFUL, int nLastSubCommand = -1)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("AI_DetermineCombatRound_Partial", "START, last target: " + GetTag(oLastTarget));
+    #endif
+    if(GetCombatState(OBJECT_SELF) == FALSE)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound_Partial", "Follower not in combat - aborting partial AI");
+        #endif
+        return;
+    }
+
+    command cCommand;
+
+    object oSelectedTarget = GetAttackTarget(OBJECT_SELF);
+    #ifdef DEBUG
+    Log_Trace_AI("AI_DetermineCombatRound_Partial", "Selected target: " + GetTag(oSelectedTarget));
+    #endif
+
+    object oTarget = oSelectedTarget;
+    if(!_AI_IsHostileTargetValid(oTarget))
+        oTarget = oLastTarget;
+
+    #ifdef DEBUG
+    if(!_AI_IsHostileTargetValid(oTarget))
+        Log_Trace_AI("AI_DetermineCombatRound_Partial", "COULD NOT FIND VALID TARGET");
+    else
+        Log_Trace_AI("AI_DetermineCombatRound_Partial", "FINAL target: " + GetTag(oTarget));
+    #endif
+
+    object oCurrent;
+    int i;
+    float fRangeToSelected = GetDistanceBetween(OBJECT_SELF, oTarget);
+
+    // If enemy is in melee range and has melee weapon -&gt; attack
+    if(_AI_IsHostileTargetValid(oTarget) &amp;&amp; _AI_IsTargetInMeleeRange(oTarget) &amp;&amp; IsUsingMeleeWeapon(OBJECT_SELF))
+    {
+        cCommand = CommandAttack(oTarget);
+    }
+    // If has ranged weapon and has ammo and is within the range of my ranged weapon -&gt; attack
+    else if(_AI_IsHostileTargetValid(oTarget) &amp;&amp; IsUsingRangedWeapon(OBJECT_SELF)
+            &amp;&amp; fRangeToSelected &lt;= _AI_GetEquippedWeaponRange() &amp;&amp;
+            (nLastCommand == COMMAND_TYPE_ATTACK || nLastCommand == COMMAND_TYPE_USE_ABILITY))
+    {
+        if(AI_BehaviorCheck_AttackBack() == FALSE)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_DetermineCombatRound_Partial", "Creature behavior set to NOT attack back - aborting");
+            #endif
+        }
+        else
+            cCommand = CommandAttack(oTarget);
+    }
+
+    // NOTE: there is another part of the player attack logic that does not go here, but to the attack event in rules_core
+    // This deals with any creatures that attack me while I don't have any target
+
+    if(GetCommandType(cCommand) == COMMAND_TYPE_INVALID)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("AI_DetermineCombatRound_Partial", "NO VALID ACTION - DOING NOTHING (waiting)", LOG_SEVERITY_CRITICAL);
+        #endif
+        if(IsControlled(OBJECT_SELF))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("AI_DetermineCombatRound_Partial", "Controlled follower - aborting wait - keeping queue empty", LOG_SEVERITY_CRITICAL);
+            #endif
+            return;
+        }
+        cCommand = _AI_DoNothing(-1, nLastCommandStatus, FALSE, TRUE);
+    }
+
+    if(IsObjectValid(oTarget) &amp;&amp; IsObjectHostile(OBJECT_SELF, oTarget))
+    {
+         #ifdef DEBUG
+         Log_Trace_AI("AI_DetermineCombatRound_Partial", "Attacking hostile target: allowing rest of party to attack");
+         #endif
+         AI_SetPartyAllowedToAttack(TRUE);
+    }
+
+    WR_AddCommand(OBJECT_SELF, cCommand);
+}
+
+// MGB - March 9, 2009 - Exposed hash values to speed up evaluation of AI Tactics.
+const int HASH_TYPE                = 0x12A02374; // "Type"
+const int HASH_USECHANCE           = 0x36032F31; // "UseChance"
+const int HASH_SUBCOMMAND          = 0x20804179; // "SubCommand"
+const int HASH_COMMAND             = 0x0DF6E88A; // "Command"
+const int HASH_CONDITION           = 0x03C7F222; // "Condition"
+const int HASH_TARGETTYPE          = 0x0F642429; // "TargetType"
+const int HASH_CONDITIONBASE       = 0x56BB2EC7; // "ConditionBase"
+const int HASH_VALIDFORTARGET      = 0x77485DB5; // "ValidForTarget"
+const int HASH_CONDITIONPARAMETER  = 0x706DADFC; // "ConditionParameter"
+const int HASH_CONDITIONPARAMETER2 = 0xBCC74707; // "ConditionParameter2"
+
+int _AI_ExecuteTactic(int nPackageTable, int nTacticID, int nLastCommandStatus, int nUseGUITables)
+{
+    //Log_Trace_AI("_AI_ExecuteTactic", "START [Package Table: " + IntToString(nPackageTable) + "], TacticID: [" + IntToString(nTacticID) + "]");
+    // read the package and retrieve the condition, target type and action
+
+    // First checking if the tactic is enabled (followers only)
+    if(nUseGUITables != 0 &amp;&amp; !IsTacticEnabled(OBJECT_SELF, nTacticID))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "Tactic not enabled - moving to next tactic");
+        #endif
+        return FALSE;
+    }
+
+    // MGB - March 9, 2009
+    // Only evaluate the random trigger chance if we are using an AI Package table.
+    // This should be done before retrieving the other numbers to trivially reject
+    // rules that have extremely low chances of being fired.
+    if(nUseGUITables == 0)
+    {
+        int nTacticTriggerChance = GetHashedM2DAInt(nPackageTable, HASH_USECHANCE, nTacticID);
+
+        int nDifficulty = GetGameDifficulty();
+        if(nDifficulty == GAME_DIFFICULTY_CASUAL)
+        {
+            // should not affect 100% tactics
+            if(nTacticTriggerChance &lt; 100 &amp;&amp; nTacticTriggerChance &gt;= 80)
+                nTacticTriggerChance = 50;
+            else if(nTacticTriggerChance &gt;= 50 &amp;&amp; nTacticTriggerChance &lt; 80)
+                nTacticTriggerChance = 25;
+            else if(nTacticTriggerChance &gt;= 20 &amp;&amp; nTacticTriggerChance &lt; 50)
+                nTacticTriggerChance = 10;
+            else if(nTacticTriggerChance &gt;= 10 &amp;&amp; nTacticTriggerChance &lt; 20)
+                nTacticTriggerChance = 5;
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteTactic", "Adjusted trigger chance (casual difficulty): " + IntToString(nTacticTriggerChance));
+            #endif
+        }
+
+        // Verifying random chance
+        int nRandom = Random(100) + 1;
+        //Log_Trace_AI("_AI_ExecuteTactic", "RANDOM: " + IntToString(nRandom) + ", Tactic Trigger Chance:" + IntToString(nTacticTriggerChance));
+        if(nRandom &gt; nTacticTriggerChance)
+        {
+            #ifdef DEBUG
+            //Log_Trace_AI("_AI_ExecuteTactic", "Tactic did not pass random check");
+            #endif
+            return FALSE;
+        }
+    }
+
+    if (GetObjectActive(OBJECT_SELF) == FALSE)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "Object Inactive - exiting");
+        #endif
+        return FALSE;
+    }
+
+    int nRet;
+    int nTacticTargetType;
+    int nTacticTargetBitField;
+    int nTacticCondition;
+    int nTacticCommand;
+    int nTacticSubCommand;
+    int nLastTacticID = GetLocalInt(OBJECT_SELF, AI_LAST_TACTIC);
+    string sTacticItemTag = GetTacticCommandItemTag(OBJECT_SELF, nTacticID);
+
+    if(nUseGUITables != 0)
+    {
+        nTacticTargetType = GetTacticTargetType(OBJECT_SELF, nTacticID);
+        nTacticCondition = GetTacticCondition(OBJECT_SELF, nTacticID);
+        nTacticCommand = GetTacticCommand(OBJECT_SELF, nTacticID);
+        nTacticSubCommand = GetTacticCommandParam(OBJECT_SELF, nTacticID);
+    }
+    else
+    {
+        nTacticTargetType = GetHashedM2DAInt(nPackageTable, HASH_TARGETTYPE, nTacticID);
+        nTacticCondition = GetHashedM2DAInt(nPackageTable, HASH_CONDITION, nTacticID);
+        nTacticCommand = GetHashedM2DAInt(nPackageTable, HASH_COMMAND, nTacticID);
+        nTacticSubCommand = GetHashedM2DAInt(nPackageTable, HASH_SUBCOMMAND, nTacticID);
+    }
+
+    nTacticTargetBitField = GetHashedM2DAInt(TABLE_AI_TACTICS_TARGET_TYPE, HASH_TYPE, nTacticTargetType);
+
+    #ifdef DEBUG
+    string sTacticSubCommand = IntToString(nTacticSubCommand);
+    string sTacticCommand = _AI_GetCommandString(nTacticCommand);
+
+    if(nTacticCommand == AI_COMMAND_USE_ABILITY || nTacticCommand == AI_COMMAND_ACTIVATE_MODE || nTacticCommand == AI_COMMAND_DEACTIVATE_MODE)
+        sTacticSubCommand = Log_GetAbilityNameById(nTacticSubCommand);
+
+    Log_Trace_AI("_AI_ExecuteTactic", "["+ IntToString(nTacticID) + "]" +
+                                      "[Target: " + IntToString(nTacticTargetType) + "] " +
+                                      "[Cond: " + IntToString(nTacticCondition) + "] " +
+                                      "[" + sTacticCommand + "] " +
+                                      "[" + sTacticSubCommand + "] ");
+
+    if(sTacticItemTag != "")
+        Log_Trace_AI("_AI_ExecuteTactic", "[Item Tag]: " + sTacticItemTag);
+    #endif
+
+    int nTacticCondition_Base = GetHashedM2DAInt(TABLE_TACTICS_CONDITIONS, HASH_CONDITIONBASE, nTacticCondition);
+
+    // Retrieve condition details
+    int nTacticCondition_ValidTarget = GetHashedM2DAInt(TABLE_TACTICS_BASE_CONDITIONS, HASH_VALIDFORTARGET, nTacticCondition_Base);
+    int nTacticCondition_Parameter = GetHashedM2DAInt(TABLE_TACTICS_CONDITIONS, HASH_CONDITIONPARAMETER, nTacticCondition);
+    int nTacticCondition_Parameter2 = GetHashedM2DAInt(TABLE_TACTICS_CONDITIONS, HASH_CONDITIONPARAMETER2, nTacticCondition);
+
+    //Log_Trace_AI("_AI_ExecuteTactic", "[Condition Valid for Target: " + IntToString(nTacticCondition_ValidTarget) + "] " +
+    //                                  "[Condition Base: " + IntToString(nTacticCondition_Base) + "] " +
+    //                                  "[Condition Parameter: " + IntToString(nTacticCondition_Parameter) + "] ");
+
+    // Verify that the target is valid
+    if( (nTacticTargetBitField &amp; nTacticCondition_ValidTarget) == 0)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "Tactic target type is not valid for the specified condition!", LOG_SEVERITY_CRITICAL);
+        #endif
+        return FALSE;
+    }
+
+    // Verify that the ability can be executed (ignoring any possible target)
+
+    if(!_AI_IsCommandValid(nTacticCommand, nTacticSubCommand, nTacticTargetType))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "Tactic command can not be executed");
+        #endif
+        return FALSE;
+    }
+
+    // Handling the tactic based on the base condition
+
+    object oTarget = OBJECT_INVALID; // Any tactic action will be applied to this object
+    location lTarget;
+    object oFollowerSelectedTarget = OBJECT_INVALID; // for tracking follower targets
+    if(IsFollower(OBJECT_SELF))
+        oFollowerSelectedTarget = GetAttackTarget(OBJECT_SELF); // last target - hostile or not
+
+    if (GetHasEffects(OBJECT_SELF, EFFECT_TYPE_CONFUSION) &amp;&amp; nTacticTargetType == AI_TARGET_TYPE_SELF)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "Confused creature trying to target SELF - aborting tactic");
+        #endif
+        return FALSE;
+    }
+
+    switch(nTacticCondition_Base)
+    {
+        case AI_BASE_CONDITION_HAS_EFFECT_APPLIED:
+        {
+            oTarget = _AI_Condition_GetCreatureWithAIStatus(nTacticCondition_Parameter, nTacticTargetType, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_HP_LEVEL:
+        {
+            oTarget = _AI_Condition_GetCreatureWithHPLevel(nTacticCondition_Parameter, nTacticTargetType, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_MANA_OR_STAMINA_LEVEL:
+        {
+            oTarget = _AI_Condition_GetCreatureWithManaOrStaminaLevel(nTacticCondition_Parameter, nTacticTargetType, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_MOST_DAMAGED_IN_PARTY:
+        {
+            oTarget = _AI_Condition_GetNthMostDamagedCreatureInGroup(nTacticCondition_Parameter, nTacticTargetType, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_CLUSTERED_WITH_SAME_GROUP:
+        {
+            lTarget = _AI_Condition_GetEnemyClusteredWithSameGroup(nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_MOST_HATED_ENEMY:
+        {
+            oTarget = _AI_Condition_GetMostHatedEnemy(nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_NEAREST_VISIBLE:
+        {
+            oTarget = _AI_Condition_GetNearestVisibleCreature(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_NEAREST_RACE:
+        {
+            oTarget = _AI_Condition_GetNearestVisibleCreatureByRace(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_NEAREST_CLASS:
+        {
+            oTarget = _AI_Condition_GetNearestVisibleCreatureByClass(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_NEAREST_GENDER:
+        {
+            oTarget = _AI_Condition_GetNearestVisibleCreatureByGender(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_ATTACKING_PARTY_MEMBER:
+        {
+            oTarget = _AI_Condition_GetNearestEnemyAttackingPartyMember(nTacticCommand, nTacticSubCommand, nTacticCondition_Parameter, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_HAS_ANY_BUFF_EFFECT:
+        {
+            oTarget = _AI_Condition_GetNearestEnemyWithAnyBuffEffect(nTacticCommand, nTacticSubCommand, nTacticCondition_Parameter, nTacticID, nTacticTargetType);
+            break;
+        }
+        case AI_BASE_CONDITION_FLIP_COVER_STATE:
+        {
+            oTarget = _AI_Condition_GetNearestFlipCoverByState(nTacticCondition_Parameter, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_VULNERABLE_TO_DAMAGE:
+        {
+            oTarget = _AI_Condition_GetEnemyVulnerableToDamage(nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_ANY:
+        {
+            oTarget = _AI_Condition_GetAnyTarget(nTacticTargetType, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_HAS_AMMO_LEVEL:
+        {
+            oTarget = _AI_Condition_SelfHasAmmoLevel(nTacticCondition_Parameter);
+            break;
+        }
+        case AI_BASE_CONDITION_HAS_ARMOR_TYPE:
+        {
+            oTarget = _AI_Condition_HasArmorType(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand);
+            break;
+        }
+        case AI_BASE_CONDITION_MOST_ENEMIES_HAVE_ARMOR_TYPE:
+        {
+            oTarget = _AI_Condition_MostEnemiesHaveArmorType(nTacticCondition_Parameter);
+            break;
+        }
+        case AI_BASE_CONDITION_ALL_ENEMIES_HAVE_ARMOR_TYPE:
+        {
+            oTarget = _AI_Condition_AllEnemiesHaveArmorType(nTacticCondition_Parameter);
+            break;
+        }
+        case AI_BASE_CONDITION_TARGET_HAS_RANK:
+        {
+            oTarget = _AI_Condition_TargetHasRank(nTacticTargetType, nTacticCondition_Parameter, nTacticID, nTacticCommand, nTacticSubCommand);
+            break;
+        }
+        case AI_BASE_CONDITION_BEING_ATTACKED_BY_ATTACK_TYPE:
+        {
+            oTarget = _AI_Condition_BeingAttackedByAttackType(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_USING_ATTACK_TYPE:
+        case AI_BASE_CONDITION_TARGET_USING_ATTACK_TYPE_FOLLOWER:
+        {
+            oTarget = _AI_Condition_UsingAttackType(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand);
+            break;
+        }
+        case AI_BASE_CONDITION_MOST_ENEMIES_USING_ATTACK_TYPE:
+        {
+            oTarget = _AI_Condition_MostEnemiesUsingAttackType(nTacticCondition_Parameter);
+            break;
+        }
+        case AI_BASE_CONDITION_ALL_ENEMIES_USING_ATTACK_TYPE:
+        {
+            oTarget = _AI_Condition_AllEnemiesUsingAttackType(nTacticCondition_Parameter);
+            break;
+        }
+        case AI_BASE_CONDITION_AT_LEAST_X_ENEMIES_ARE_ALIVE:
+        {
+            oTarget = _AI_Condition_AtLeastXEnemiesAreAlive(nTacticTargetType, nTacticCondition_Parameter);
+            break;
+        }
+        case AI_BASE_CONDITION_AT_LEAST_X_CREATURES_ARE_DEAD:
+        {
+            oTarget = _AI_Condition_AtLeastXCreaturesAreDead(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand);
+            break;
+        }
+        case AI_BASE_CONDITION_AT_LEAST_X_ALLIES_ARE_ALIVE:
+        {
+            oTarget = _AI_Condition_AtLeastXAlliesAreAlive(nTacticTargetType, nTacticCondition_Parameter, nTacticCondition_Parameter2);
+            break;
+        }
+        case AI_BASE_CONDITION_ENEMY_AI_TARGET_AT_RANGE:
+        {
+            oTarget = _AI_Condition_GetTargetAtRange(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand);
+            break;
+        }
+        case AI_BASE_CONDITION_TARGET_AT_FLANK_LOCATION:
+        {
+            oTarget = _AI_Condition_GetTargetAtFlankLocation(nTacticCondition_Parameter, nTacticTargetType);
+            break;
+        }
+        case AI_BASE_CONDITION_SURROUNDED_BY_TARGETS:
+        {
+            oTarget = _AI_Condition_SurroundedByAtLeastXEnemies(nTacticCommand, nTacticSubCommand, nTacticCondition_Parameter, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_USING_RANGED_ATTACKS_AT_RANGE:
+        {
+            oTarget = _AI_Condition_GetTargetUsingRangedWeaponsAtRange(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand);
+            break;
+        }
+        case AI_BASE_CONDITION_PARTY_MEMBERS_TARGET:
+        {
+            oTarget = _AI_Condition_GetPartyMemberTarget(nTacticCommand, nTacticSubCommand, nTacticCondition_Parameter, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_SELF_HP_LEVEL:
+        {
+            oTarget = _AI_Condition_SelfHPLevel(nTacticCondition_Parameter, nTacticTargetType, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_SELF_MANA_STAMINA_LEVEL:
+        {
+            oTarget = _AI_Condition_SelfManaStaminaLevel(nTacticCondition_Parameter, nTacticTargetType, nTacticCommand, nTacticSubCommand, nTacticID);
+            break;
+        }
+        case AI_BASE_CONDITION_FOLLOWER_AI_TARGET_AT_RANGE:
+        {
+            oTarget = _AI_Condition_GetTargetAtRange(nTacticTargetType, nTacticCondition_Parameter, nTacticCommand, nTacticSubCommand);
+            break;
+        }
+
+
+    }
+
+    // If target type is SELF: fail in case was tryng to trigger an ability that tries to cure something SELF doesn't have
+    // For example: casting 'remove poison' while SELF does not have any poison effect
+    // NOTE: this is handled for allies in _AIGetAllies
+    if(nTacticTargetType == AI_TARGET_TYPE_SELF &amp;&amp; nTacticCommand == AI_COMMAND_USE_ABILITY)
+    {
+        if(!_AI_IsTargetValidForBeneficialAbility(OBJECT_SELF, nTacticSubCommand))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteTactic", "Trying to apply a beneficial ability to SELF, but SELF does not need it");
+            #endif
+            oTarget = OBJECT_INVALID;
+        }
+    }
+
+    if(!IsLocationValid(lTarget) &amp;&amp; !IsObjectValid(oTarget))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "No valid target for condition");
+        #endif
+        return FALSE;
+    }
+    if(IsLocationValid(lTarget))
+    {
+        vector vDebug = GetPositionFromLocation(lTarget);
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "VALID LOCATION: " + VectorToString(vDebug));
+        #endif
+    }
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_ExecuteTactic", "GOT TARGET: " + GetTag(oTarget));
+    #endif
+
+
+    // Check if the command is valid on the target and execute the command
+    command cTacticCommand;
+    int nAbilityTargetType;
+    int nStationary = GetLocalInt(OBJECT_SELF, AI_FLAG_STATIONARY);
+    if(IsFollower(OBJECT_SELF)) nStationary = FALSE;
+
+    //Log_Trace_AI("_AI_ExecuteTactic", "Creature stationary state: " + IntToString(nStationary));
+
+    switch(nTacticCommand)
+    {
+        case AI_COMMAND_USE_HEALTH_POTION_MOST:
+        {
+            float fCurrentHealth = GetCurrentHealth(OBJECT_SELF);
+            float fMaxHealth = GetMaxHealth(OBJECT_SELF);
+            if(fCurrentHealth == fMaxHealth)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "health full, not using health potion");
+                #endif
+                return FALSE;
+            }
+            object oItem = _AI_GetPotionByFilter(AI_POTION_TYPE_HEALTH, AI_POTION_LEVEL_MOST_POWERFUL);
+            cTacticCommand = _AI_GetPotionUseCommand(oItem);
+
+            if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID)
+                return FALSE;
+
+            break;
+        }
+        case AI_COMMAND_USE_HEALTH_POTION_LEAST:
+        {
+            float fCurrentHealth = GetCurrentHealth(OBJECT_SELF);
+            float fMaxHealth = GetMaxHealth(OBJECT_SELF);
+            if(fCurrentHealth == fMaxHealth)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "health full, not using health potion");
+                #endif
+                return FALSE;
+            }
+            object oItem = _AI_GetPotionByFilter(AI_POTION_TYPE_HEALTH, AI_POTION_LEVEL_LEAST_POWERFUL);
+            cTacticCommand = _AI_GetPotionUseCommand(oItem);
+
+            if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID)
+                return FALSE;
+            break;
+        }
+        case AI_COMMAND_USE_LYRIUM_POTION_MOST:
+        {
+            float fCurrentMana = GetCurrentManaStamina(OBJECT_SELF);
+            float fMaxMana = IntToFloat(GetCreatureMaxMana(OBJECT_SELF));
+            if(fCurrentMana == fMaxMana)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "mana full, not using mana potion");
+                #endif
+                return FALSE;
+            }
+            object oItem = _AI_GetPotionByFilter(AI_POTION_TYPE_MANA, AI_POTION_LEVEL_MOST_POWERFUL);
+            cTacticCommand = _AI_GetPotionUseCommand(oItem);
+
+            if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID)
+                return FALSE;
+
+            break;
+        }
+        case AI_COMMAND_USE_LYRIUM_POTION_LEAST:
+        {
+            float fCurrentMana = GetCurrentManaStamina(OBJECT_SELF);
+            float fMaxMana = IntToFloat(GetCreatureMaxMana(OBJECT_SELF));
+            if(fCurrentMana == fMaxMana)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "mana full, not using mana potion");
+                #endif
+                return FALSE;
+            }
+            object oItem = _AI_GetPotionByFilter(AI_POTION_TYPE_MANA, AI_POTION_LEVEL_LEAST_POWERFUL);
+            cTacticCommand = _AI_GetPotionUseCommand(oItem);
+
+            if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID)
+                return FALSE;
+            break;
+        }
+        case AI_COMMAND_RUN_SCRIPT:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteTactic", "Running custom script (custom AI event)");
+            #endif
+            event evCustomAI = Event(EVENT_TYPE_HANDLE_CUSTOM_AI);
+            command cLast = GetPreviousCommand(OBJECT_SELF);
+            int nLastCommand = GetCommandType(cLast);
+            SendEventHandleCustomAI(OBJECT_SELF, OBJECT_INVALID, nLastCommand, nLastCommandStatus,
+                -1, nTacticTargetType, nTacticSubCommand, nTacticID);
+
+            return TRUE;
+        }
+        case AI_COMMAND_SWITCH_TO_MELEE:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteTactic", "Switching to melee weapon set");
+            #endif
+            if(_AI_GetWeaponSetEquipped() == AI_WEAPON_SET_MELEE)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Creature already has melee weapons equipped - aborting command");
+                #endif
+                return FALSE;
+            }
+            cTacticCommand = _AI_SwitchWeaponSet(AI_WEAPON_SET_MELEE);
+            break;
+        }
+        case AI_COMMAND_SWITCH_TO_RANGED:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteTactic", "Switching to ranged weapon set");
+            #endif
+            if(_AI_GetWeaponSetEquipped() == AI_WEAPON_SET_RANGED)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Creature already has ranged weapons equipped - aborting command");
+                #endif
+                return FALSE;
+            }
+            cTacticCommand = _AI_SwitchWeaponSet(AI_WEAPON_SET_RANGED);
+            break;
+        }
+        case AI_COMMAND_JUMP_TO_LATER_TACTIC:
+        {
+            if(nTacticSubCommand != -1 &amp;&amp; nTacticSubCommand &lt;= nTacticID)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Jump to later tactic: invalid value (must be greater then current tactic id)");
+                #endif
+                return FALSE;
+            }
+            return nTacticSubCommand;
+        }
+        case AI_COMMAND_FLY:
+        {
+            object oTurnTo;
+
+            if(_AI_CheckMoveTimer() == FALSE)
+                return FALSE;
+
+            switch(nTacticSubCommand)
+            {
+                case AI_FLY_TURN_MOST_HATED:
+                {
+                    oTurnTo = AI_Threat_GetThreatTarget(OBJECT_SELF);
+                    cTacticCommand = _AI_GetFlyCommand(oTurnTo);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_FLY_TURN_NEAREST_AI_WP:
+                {
+                    oTurnTo = UT_GetNearestObjectByTag(OBJECT_SELF, AI_WP_MOVE);
+                    cTacticCommand = _AI_GetFlyCommand(oTurnTo);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_FLY_TURN_NEAREST_ALLY:
+                {
+                    object [] arAllies = _AI_GetAllies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    oTurnTo = arAllies[0];
+                    cTacticCommand = _AI_GetFlyCommand(oTurnTo);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_FLY_TURN_NEAREST_ENEMY:
+                {
+                    object [] arEnemies = _AI_GetEnemies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    oTurnTo = arEnemies[0];
+                    cTacticCommand = _AI_GetFlyCommand(oTurnTo);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_FLY_APPROACH_MOST_HATED:
+                {
+                    oTurnTo = AI_Threat_GetThreatTarget(OBJECT_SELF);
+                    cTacticCommand = _AI_GetFlyCommand(oTurnTo, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_FLY_APPROACH_NEAREST_ENEMY:
+                {
+                    object [] arEnemies = _AI_GetEnemies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    oTurnTo = arEnemies[0];
+                    cTacticCommand = _AI_GetFlyCommand(oTurnTo, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_FLY_APPROACH_AI_WP_NEAREST_TO_MOST_HATED:
+                {
+                    object oEnemy = AI_Threat_GetThreatTarget(OBJECT_SELF);
+                    oTurnTo = UT_GetNearestObjectByTag(oEnemy, AI_WP_MOVE);
+                    cTacticCommand = _AI_GetFlyCommand(oTurnTo, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_FLY_APPROACH_AI_WP_NEAREST_TO_NEAREST_ENEMY:
+                {
+                    object [] arEnemies = _AI_GetEnemies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    object oEnemy = arEnemies[0];
+                    oTurnTo = UT_GetNearestObjectByTag(oEnemy, AI_WP_MOVE);
+                    cTacticCommand = _AI_GetFlyCommand(oTurnTo, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+            }
+            if(GetCommandType(cTacticCommand) == COMMAND_TYPE_WAIT)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Wait command for fly/turn AI action - aborting AI instead");
+                #endif
+                return FALSE;
+            }
+
+            if(!IsObjectValid(oTurnTo))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Invalid turn target");
+                #endif
+                return FALSE;
+            }
+            if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID)
+            {
+                 #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Invalid fly/turn command");
+                #endif
+                return FALSE;
+            }
+            _AI_SetMoveTimer();
+            break;
+        }
+        case AI_COMMAND_MOVE:
+        {
+            object oMoveTo;
+            if(nStationary &gt; 0)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Creature stationary - can't excute move command");
+                #endif
+                return FALSE;
+            }
+            if(nLastCommandStatus == COMMAND_FAILED_TIMEOUT)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Last command failed on timeout - can't excute move command");
+                #endif
+                return FALSE;
+            }
+            if(_AI_CheckMoveTimer() == FALSE)
+                return FALSE;
+
+            switch(nTacticSubCommand)
+            {
+                case AI_MOVE_HATED_ENEMY:
+                {
+                    oMoveTo = AI_Threat_GetThreatTarget(OBJECT_SELF);
+                    cTacticCommand = CommandMoveToObject(oMoveTo, TRUE, 0.0, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_MOVE_NEAREST_AI_WP:
+                {
+                    oMoveTo = UT_GetNearestObjectByTag(OBJECT_SELF, AI_WP_MOVE);
+                    cTacticCommand = CommandMoveToObject(oMoveTo, TRUE, 0.0, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_MOVE_NEAREST_ALLY:
+                {
+                    object [] arAllies = _AI_GetAllies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    oMoveTo = arAllies[0];
+                    cTacticCommand = CommandMoveToObject(oMoveTo, TRUE, 0.0, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_MOVE_NEAREST_ENEMY:
+                {
+                    object [] arEnemies = _AI_GetEnemies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    oMoveTo = arEnemies[0];
+                    cTacticCommand = CommandMoveToObject(oMoveTo, TRUE, 0.0, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_MOVE_RANDOM_AI_WP:
+                {
+                    int nRand = Random(3);
+                    object [] arWPs = GetNearestObjectByTag(OBJECT_SELF, AI_WP_MOVE, OBJECT_TYPE_WAYPOINT, 3);
+                    oMoveTo = arWPs[nRand];
+                    if(!IsObjectValid(oMoveTo)) // in case there are not enough AI waypoints
+                        oMoveTo = arWPs[0];
+                    cTacticCommand = CommandMoveToObject(oMoveTo, TRUE, 0.0, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_MOVE_AWAY_FROM_ENEMY_MEDIUM:
+                {
+                    object [] arEnemies = _AI_GetEnemies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    oMoveTo = arEnemies[0]; // Move away from
+                    float fDistance = GetDistanceBetween(OBJECT_SELF, oMoveTo);
+                    if(fDistance &gt;= AI_MOVE_AWAY_DISTANCE_MEDIUM)
+                    {
+                        #ifdef DEBUG
+                        Log_Trace_AI("_AI_ExecuteTactic", "NOT MOVING AWAY - already far away from target");
+                        #endif
+                        return FALSE;
+                    }
+                    cTacticCommand = CommandMoveAwayFromObject(oMoveTo, AI_MOVE_AWAY_DISTANCE_MEDIUM, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_MOVE_AWAY_FROM_ENEMY_SHORT:
+                {
+                    object [] arEnemies = _AI_GetEnemies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    oMoveTo = arEnemies[0]; // Move away from
+                    float fDistance = GetDistanceBetween(OBJECT_SELF, oMoveTo);
+                    if(fDistance &gt;= AI_MOVE_AWAY_DISTANCE_SHORT)
+                    {
+                        #ifdef DEBUG
+                        Log_Trace_AI("_AI_ExecuteTactic", "NOT MOVING AWAY - already far away from target");
+                        #endif
+                        return FALSE;
+                    }
+                    cTacticCommand = CommandMoveAwayFromObject(oMoveTo, AI_MOVE_AWAY_DISTANCE_SHORT, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_MOVE_AWAY_FROM_ENEMY_RANDOM:
+                {
+                    object [] arEnemies = _AI_GetEnemies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    oMoveTo = arEnemies[0]; // Move away from
+                    float fDistanceToMoveAway = RandomF(FloatToInt(AI_MOVE_AWAY_DISTANCE_MEDIUM - AI_MOVE_AWAY_DISTANCE_SHORT), FloatToInt(AI_MOVE_AWAY_DISTANCE_SHORT));
+
+                    float fDistance = GetDistanceBetween(OBJECT_SELF, oMoveTo);
+                    if(fDistance &gt;= fDistanceToMoveAway)
+                    {
+                        #ifdef DEBUG
+                        Log_Trace_AI("_AI_ExecuteTactic", "NOT MOVING AWAY - already far away from target");
+                        #endif
+                        return FALSE;
+                    }
+                    cTacticCommand = CommandMoveAwayFromObject(oMoveTo, fDistanceToMoveAway, TRUE);
+                    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, AI_TACTIC_ID_MOVE); // the last tactic being used
+                    break;
+                }
+                case AI_MOVE_AWAY_FROM_ENEMY_COWARD:
+                {
+                    object [] arEnemies = _AI_GetEnemies(AI_COMMAND_MOVE, nTacticSubCommand);
+                    oMoveTo = arEnemies[0]; // Move away from
+                    float fDistance = GetDistanceBetween(OBJECT_SELF, oMoveTo);
+                    if(fDistance &lt; AI_MOVE_AWAY_DISTANCE_MEDIUM)
+                        // run away
+                        cTacticCommand = CommandMoveToObject(oMoveTo, TRUE, AI_MOVE_AWAY_DISTANCE_MEDIUM, FALSE);
+                    else
+                        // cower in fear
+                        cTacticCommand = CommandPlayAnimation(602);
+
+                    break;
+                }
+            }
+
+            if(!IsObjectValid(oMoveTo))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Invalid movement target");
+                #endif
+                return FALSE;
+            }
+            if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Invalid move command");
+                #endif
+                return FALSE;
+            }
+            _AI_SetMoveTimer();
+            break;
+        }
+        case AI_COMMAND_USE_ITEM:
+        {
+            // ASSUMING ITEMS CAN BE USED ONLY ON SELF
+
+            if(Ability_CheckUseConditions(OBJECT_SELF, OBJECT_SELF, nTacticSubCommand) == FALSE)
+                return FALSE; // failed tactic
+
+            if(_AI_CanUseAbility(nTacticSubCommand, OBJECT_SELF) == FALSE)
+                return FALSE; // can't use specific ability
+
+            // Command is valid to be executed on the target
+            vector vNul;
+            cTacticCommand = CommandUseAbility(nTacticSubCommand, OBJECT_SELF, vNul, -1.0, sTacticItemTag);
+            break;
+        }
+        case AI_COMMAND_USE_PLACEABLE:
+        {
+            // Target should be valid now
+            // At this moment the user should register an action on the placeable
+            if(nStationary &gt; 0)
+            {
+                float fDistance = GetDistanceBetween(OBJECT_SELF, oTarget);
+                if(fDistance &gt; AI_STATIONARY_RANGE)
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_ExecuteTactic", "Creature stationary - placeable too far away to execute command");
+                    #endif
+                    return FALSE;
+                }
+            }
+
+            int nCount = GetLocalInt(oTarget, PLC_FLIP_COVER_USE_COUNT);
+            nCount++;
+            SetLocalInt(oTarget, PLC_FLIP_COVER_USE_COUNT, nCount);
+
+            // Check that I'm not already using a flip cover
+            object oPlaceable = GetLocalObject(OBJECT_SELF, AI_PLACEABLE_BEING_USED);
+            if(IsObjectValid(oPlaceable) &amp;&amp; !IsDead(oPlaceable))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "I'm already using a placeable!", LOG_SEVERITY_WARNING);
+                #endif
+                return FALSE;
+            }
+            SetLocalObject(OBJECT_SELF, AI_PLACEABLE_BEING_USED, oTarget);
+
+            cTacticCommand = CommandUseObject(oTarget, PLACEABLE_ACTION_USE);
+            break;
+        }
+        case AI_COMMAND_ATTACK:
+        {
+            // If target is not a hostile creature then fail the attack
+            if(!IsObjectHostile(OBJECT_SELF, oTarget))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Non-hostile target for ATTACK action!", LOG_SEVERITY_WARNING);
+                #endif
+                return FALSE;
+            }
+            cTacticCommand = _AI_ExecuteAttack(oTarget, nLastCommandStatus);
+
+            break;
+        }
+        case AI_COMMAND_ACTIVATE_MODE:
+        {
+            if(Ability_CheckUseConditions(OBJECT_SELF, oTarget, nTacticSubCommand) == FALSE)
+                return FALSE; // failed tactic
+
+            cTacticCommand = CommandUseAbility(nTacticSubCommand, OBJECT_SELF);
+            break;
+        }
+        case AI_COMMAND_DEACTIVATE_MODE:
+        {
+            // No need to check use conditions for the ability since we are trying to deactivate it
+
+            cTacticCommand = CommandUseAbility(nTacticSubCommand, OBJECT_SELF);
+            break;
+        }
+        case AI_COMMAND_WAIT:
+        {
+            int bQuick = FALSE;
+            if(nTacticSubCommand == 1) // this is a wait with cooldown (used for rogues for example)
+            {
+                int nMoveStart = GetLocalInt(OBJECT_SELF, AI_WAIT_TIMER);
+                int nCurrentTime = GetTime();
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Wait time dif: " + IntToString(nCurrentTime - nMoveStart));
+                #endif
+                if(nMoveStart != 0 &amp;&amp; nCurrentTime - nMoveStart &lt;= AI_WAIT_MIN_TIME)
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_ExecuteTactic", "Last wait happened too soon");
+                    #endif
+                    return FALSE;
+                }
+                SetLocalInt(OBJECT_SELF, AI_WAIT_TIMER, nCurrentTime);
+                bQuick = TRUE;
+            }
+            cTacticCommand = _AI_DoNothing(nLastTacticID, nLastCommandStatus, FALSE, TRUE);
+            break;
+        }
+        case AI_COMMAND_USE_ABILITY:
+        {
+
+            // -----------------------------------------------------------------
+            // Ability usage disabled
+            // -----------------------------------------------------------------
+            if (GetCreatureFlag(OBJECT_SELF,CREATURE_RULES_FLAG_AI_NO_ABILITIES))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "ABORT: AI_COMMAND_USE_ABILITY - CREATURE_RULES_FLAG_AI_NO_ABILITIES was set.", LOG_SEVERITY_WARNING);
+                Warning("ERROR! ability use disabled by a debug flag - call Yaron if you weren't using debug scripts!!!");
+                #endif
+                return FALSE;
+            }
+
+            // Checking target types
+            nAbilityTargetType = Ability_GetAbilityTargetType(nTacticSubCommand, Ability_GetAbilityType(nTacticSubCommand));
+            // NOTICE: tactic target types are not exactly the same as ability target types
+
+            // Make sure the target type specified for the ability matches a target type that is valid for the ability
+            switch(nTacticTargetType)
+            {
+                case AI_TARGET_TYPE_ENEMY:
+                case AI_TARGET_TYPE_MOST_HATED:
+                {
+                    if(!(nAbilityTargetType &amp; TARGET_TYPE_HOSTILE_CREATURE))
+                    {
+                        // Trying to find a target anyways
+                        #ifdef DEBUG
+                        Log_Trace_AI("_AI_ExecuteTactic", "Hostile target for an ability that does not support hostile targets - trying to find a new target!", LOG_SEVERITY_WARNING);
+                        #endif
+                        if(nAbilityTargetType &amp; TARGET_TYPE_SELF)
+                        {
+                            #ifdef DEBUG
+                            Log_Trace_AI("_AI_ExecuteTactic", "Target will now be OBJECT_SELF");
+                            #endif
+                            oTarget = OBJECT_SELF;
+                        }
+                        else if(nAbilityTargetType &amp; TARGET_TYPE_GROUND)
+                        {
+                            #ifdef DEBUG
+                            Log_Trace_AI("_AI_ExecuteTactic", "Target will now be location of target");
+                            #endif
+                            lTarget = GetLocation(oTarget);
+                        }
+                        else
+                            return FALSE;
+                    }
+                    break;
+                }
+                case AI_TARGET_TYPE_ALLY:
+                {
+                    if(!(nAbilityTargetType &amp; TARGET_TYPE_FRIENDLY_CREATURE))
+                    {
+                        if(nAbilityTargetType &amp; TARGET_TYPE_SELF)
+                        {
+                            #ifdef DEBUG
+                            Log_Trace_AI("_AI_ExecuteTactic", "Ally target for an ability that does not support friendly targets - Target will now be SELF!", LOG_SEVERITY_WARNING);
+                            #endif
+                            oTarget = OBJECT_SELF;
+                        }
+                        else
+                        {
+                            #ifdef DEBUG
+                            Log_Trace_AI("_AI_ExecuteTactic", "Ally target for an ability that does not support friendly targets - FAILING TACTIC!", LOG_SEVERITY_WARNING);
+                            #endif
+                            return FALSE;
+                        }
+                    }
+                    break;
+                }
+                case AI_TARGET_TYPE_PLACEABLE:
+                {
+                    if(!(nAbilityTargetType &amp; TARGET_TYPE_PLACEABLE))
+                    {
+                        #ifdef DEBUG
+                        Log_Trace_AI("_AI_ExecuteTactic", "Placeable target for an ability that does not support placeable targets - FAILING TACTIC!", LOG_SEVERITY_WARNING);
+                        #endif
+                        return FALSE;
+                    }
+                    break;
+                }
+                case AI_TARGET_TYPE_SELF:
+                {
+                    if(!(nAbilityTargetType &amp; TARGET_TYPE_SELF))
+                    {
+                        #ifdef DEBUG
+                        Log_Trace_AI("_AI_ExecuteTactic", "Self target for an ability that does not support self targets - trying to find a different target!", LOG_SEVERITY_WARNING);
+                        #endif
+                        if(nAbilityTargetType &amp; TARGET_TYPE_HOSTILE_CREATURE)
+                        {
+                            if(IsFollower(OBJECT_SELF))
+                            {
+                                if(_AI_IsHostileTargetValid(oFollowerSelectedTarget))
+                                    oTarget = oFollowerSelectedTarget;
+                                else
+                                    oTarget = _AI_Condition_GetNearestVisibleCreature(AI_TARGET_TYPE_ENEMY, 1, nTacticCommand, nTacticSubCommand, nTacticID);
+                            }
+                            else
+                                oTarget = _AI_Condition_GetMostHatedEnemy(1, nTacticCommand, nTacticSubCommand, nTacticID);
+                        }
+                        else if(nAbilityTargetType &amp; TARGET_TYPE_FRIENDLY_CREATURE)
+                        {
+                            oTarget = _AI_Condition_GetAnyTarget(AI_TARGET_TYPE_ALLY, nTacticCommand, nTacticSubCommand, nTacticID);
+                        }
+                        else
+                        {
+                            #ifdef DEBUG
+                            Log_Trace_AI("_AI_ExecuteTactic", "Can not find a different target for this ability target type!", LOG_SEVERITY_WARNING);
+                            #endif
+                            return FALSE;
+                        }
+
+                        if(!IsObjectValid(oTarget))
+                        {
+                            #ifdef DEBUG
+                            Log_Trace_AI("_AI_ExecuteTactic", "Failed to find a secondary target for this ability!", LOG_SEVERITY_WARNING);
+                            #endif
+                            return FALSE;
+                        }
+
+                    }
+                    break;
+                }
+            }
+
+            if(nLastCommandStatus == COMMAND_FAILED_TIMEOUT &amp;&amp; IsObjectHostile(OBJECT_SELF, oTarget) )
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteTactic", "Last command failed on timeout and this ability targets hostiles - aborting ability use");
+                #endif
+                return FALSE;
+            }
+
+            if(Ability_CheckUseConditions(OBJECT_SELF, oTarget, nTacticSubCommand) == FALSE)
+                return FALSE; // failed tactic
+
+            if(_AI_CanUseAbility(nTacticSubCommand, oTarget) == FALSE)
+                return FALSE; // can't use specific ability
+
+            vector vTarget;
+
+            if(IsLocationValid(lTarget))
+            {
+                vTarget = GetPositionFromLocation(lTarget);
+                oTarget = OBJECT_INVALID;
+            }
+            // Command is valid to be executed on the target
+            cTacticCommand = CommandUseAbility(nTacticSubCommand, oTarget, vTarget);
+            break;
+        }
+    }
+
+    if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "INVALID TACTIC COMMAND - FAILING TACTIC", LOG_SEVERITY_CRITICAL);
+        #endif
+        return FALSE;;
+    }
+
+    if (GetHasEffects(OBJECT_SELF, EFFECT_TYPE_CONFUSION) &amp;&amp; oTarget == OBJECT_SELF)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "Confused creature trying to target SELF (second check) - aborting tactic");
+        #endif
+        return FALSE;
+    }
+
+    if(IsFollower(OBJECT_SELF) &amp;&amp; IsObjectValid(oTarget) &amp;&amp; IsObjectHostile(OBJECT_SELF, oTarget)
+        &amp;&amp; !AI_GetPartyAllowedToAttack())
+    {
+
+        if(IsControlled(OBJECT_SELF))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteTactic", "Controlled follower attacking - clearing rest of party to target enemies");
+            #endif
+            AI_SetPartyAllowedToAttack(TRUE);
+        }
+        else if(AI_BehaviorCheck_AttackOnCombatStart() == FALSE)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteTactic", "Non-controlled follower trying to attack a hostile before being allowed - trying to move closer to leader");
+            #endif
+            cTacticCommand = _AI_MoveToControlled(nLastCommandStatus);
+        }
+    }
+
+    // Flagging last tactic used
+    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, nTacticID);
+    float fTimer = AI_COMMAND_TIMER;
+    if(oTarget == OBJECT_SELF)
+        fTimer = 0.0;
+    WR_AddCommand(OBJECT_SELF, cTacticCommand, FALSE, FALSE, -1, fTimer);
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_ExecuteTactic", "***** TACTIC EXECUTED! *****");
+    #endif
+    return TRUE;
+}
+
+int _AI_GetTacticsNum(int nPackageTable)
+{
+   return GetM2DARows(nPackageTable);
+}
+
+int _AI_GetPackageTable()
+{
+    // For now, returning a table number set on the creature
+
+    int nTable = -1;
+    if(_AI_HasAIStatus(OBJECT_SELF, AI_STATUS_POLYMORPH))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetPackageTable", "POLYMORPH ON!");
+        #endif
+        int nNewTable = -1;
+        if(IsModalAbilityActive(OBJECT_SELF, ABILITY_SPELL_BEAR))
+            nNewTable = GetM2DAInt(TABLE_SHAPECHANGE, "TacticsTable", ABILITY_SPELL_BEAR);
+        else if(IsModalAbilityActive(OBJECT_SELF, ABILITY_SPELL_SPIDER_SHAPE))
+            nNewTable = GetM2DAInt(TABLE_SHAPECHANGE, "TacticsTable", ABILITY_SPELL_SPIDER_SHAPE);
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetPackageTable", "polymorph new table: " + IntToString(nNewTable));
+        #endif
+        if(nNewTable != -1)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_GetPackageTable", "SHAPECHANGED - switching to new table: " + IntToString(nNewTable));
+            #endif
+            nTable = nNewTable;
+        }
+    }
+    else if(_AI_UseGUITables())
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetPackageTable", "Creature is FOLLOWER - using GUI table");
+        #endif
+    }
+
+    if(nTable == -1)
+    {
+        nTable = GetPackageAI(OBJECT_SELF);
+
+        if(nTable &lt;= AI_TABLE_DEFAULT)
+            nTable = AI_TABLE_DEFAULT;
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetPackageTable", "Using table: " + IntToString(nTable));
+        #endif
+    }
+
+    return nTable;
+}
+
+
+int _AI_IsAbilityValid(int nAbilityID)
+{
+    int nAbilityType = Ability_GetAbilityType(nAbilityID);
+    int nResult = TRUE;
+    if(!HasAbility(OBJECT_SELF, nAbilityID))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_IsAbilityValid", "ERROR: Creature does not have ability: " + IntToString(nAbilityID), LOG_SEVERITY_WARNING);
+        #endif
+        nResult = FALSE;
+    }
+    else if(Ability_CostCheck(OBJECT_SELF, nAbilityID, nAbilityType) == FALSE)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_IsAbilityValid", "Not enough resources to trigger ability: " + IntToString(nAbilityID), LOG_SEVERITY_WARNING);
+        #endif
+        nResult = FALSE;
+    }
+    else if(GetRemainingCooldown(OBJECT_SELF, nAbilityID) &gt; 0.0)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_IsAbilityValid", "Can't trigger ability (Cooldown running) - time left: " + FloatToString(GetRemainingCooldown(OBJECT_SELF, nAbilityID)));
+        #endif
+        nResult = FALSE;
+    }
+    else if(nAbilityID == ABILITY_TALENT_STEALTH &amp;&amp; GetCombatState(OBJECT_SELF) == TRUE &amp;&amp;
+        !HasAbility(OBJECT_SELF, ABILITY_TALENT_COMBAT_STEALTH))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_IsAbilityValid", "Can't execute stealth in combat");
+        #endif
+        nResult = FALSE;
+    }
+
+    // Check special ability conditions for triggering tactic
+    int nFollower_TrigOutComb = GetM2DAInt(TABLE_AI_ABILITY_COND, "Follower_TrigOutComb", nAbilityID);;
+    int nTrigOutCombat = GetM2DAInt(TABLE_AI_ABILITY_COND, "TrigOutComb", nAbilityID);;
+    if(nResult == TRUE)
+    {
+        if(IsFollower(OBJECT_SELF) &amp;&amp; GetCombatState(OBJECT_SELF) == FALSE &amp;&amp; !nFollower_TrigOutComb)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_IsAbilityValid", "Ability not allowed to trigger outside combat for followers");
+            #endif
+            nResult = FALSE;
+        }
+        else if(!IsFollower(OBJECT_SELF) &amp;&amp; GetCombatState(OBJECT_SELF) == FALSE &amp;&amp; !nTrigOutCombat)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_IsAbilityValid", "Ability not allowed to trigger outside combat for non-followers");
+            #endif
+            nResult = FALSE;
+        }
+    }
+
+    // special case: stealth
+    // Do not allow stealth if no ally is left alive or non stealthed
+    if(nAbilityID == ABILITY_TALENT_STEALTH)
+    {
+        object [] arAllies = _AI_GetAllies(-1, -1);
+        int nSize = GetArraySize(arAllies);
+        if(nSize == 0)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_IsAbilityValid", "Trying to use stealth with no allies around - aborting");
+            #endif
+            nResult = FALSE;
+        }
+        else // some allies alive
+        {
+            int i;
+            object oCurrent;
+            for(i = 0; i &lt; nSize; i++)
+            {
+                oCurrent = arAllies[i];
+                if(IsStealthy(oCurrent))
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_IsAbilityValid", "Trying to use stealth while at least one ally is stealthy - aborting");
+                    #endif
+                    nResult = FALSE;
+                    break;
+                }
+            }
+        }
+    }
+
+    // HACK START
+    // Allow followers to trigger only specific abilities outside of combat
+    //if(IsFollower(OBJECT_SELF) &amp;&amp; GetCombatState(OBJECT_SELF) == FALSE &amp;&amp; GetAbilityType(nAbilityID) != ABILITY_TYPE_ITEM)
+    //{
+        // only heal can work
+        // joshua@23/01/08: I allowed for Modal Abilities as well.
+    //    if(nAbilityID == 10104 || Ability_IsModalAbility(nAbilityID) )
+    //        nResult = TRUE;
+    //    else
+    //        nResult = FALSE;
+    //}
+    // HACK END
+
+    return nResult;
+}
+
+int _AI_IsCommandValid(int nCommand, int nSubCommand, int nTacticTargetType = -1)
+{
+    int nResult = TRUE;
+    int nAbilityType;
+
+    switch(nCommand)
+    {
+        case AI_COMMAND_ATTACK:
+        {
+            if(GetEffectsFlags(OBJECT_SELF) &amp; EFFECT_FLAG_DISABLE_COMBAT)
+                nResult = FALSE;
+            // Otherwise, this can not fail. The attacker can always attack with fists.
+            // NOTE: this command can still be valid if the attacker does not have enough ammo for a ranged weapon
+            // -&gt; the 'attack' routine will try to switch a weapon set.
+
+            break;
+        }
+        case AI_COMMAND_ACTIVATE_MODE:
+        {
+            nResult = _AI_IsAbilityValid(nSubCommand);
+            if(nResult == TRUE)
+            {
+                if(IsModalAbilityActive(OBJECT_SELF, nSubCommand))
+                    nResult = FALSE; // Ability is already active - can't activate again
+            }
+            if(Ability_GetAbilityType(nSubCommand) == ABILITY_TYPE_SPELL &amp;&amp; (GetEffectsFlags(OBJECT_SELF) &amp; EFFECT_FLAG_DISABLE_SPELLS))
+                nResult = FALSE;
+            else if(Ability_GetAbilityType(nSubCommand) == ABILITY_TYPE_TALENT &amp;&amp; (GetEffectsFlags(OBJECT_SELF) &amp; EFFECT_FLAG_DISABLE_TALENTS))
+                nResult = FALSE;
+            break;
+        }
+        case AI_COMMAND_DEACTIVATE_MODE:
+        {
+            if(!IsModalAbilityActive(OBJECT_SELF, nSubCommand))
+                    nResult = FALSE; // Ability is already inactive - can't deactivate again
+            break;
+        }
+        case AI_COMMAND_USE_ABILITY:
+        {
+            if(Ability_IsModalAbility(nSubCommand))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_IsCommandValid", "ERROR: Trying to execute a modal ability as a normal ability: " + IntToString(nSubCommand), LOG_SEVERITY_WARNING);
+                #endif
+                nResult = FALSE;
+            }
+
+            nResult = _AI_IsAbilityValid(nSubCommand);
+
+            if(Ability_GetAbilityType(nSubCommand) == ABILITY_TYPE_SPELL &amp;&amp; (GetEffectsFlags(OBJECT_SELF) &amp; EFFECT_FLAG_DISABLE_SPELLS))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_IsCommandValid", "can't trigger spell - spells disabled for this creature: " + IntToString(nSubCommand), LOG_SEVERITY_WARNING);
+                #endif
+                nResult = FALSE;
+            }
+            else if(Ability_GetAbilityType(nSubCommand) == ABILITY_TYPE_TALENT &amp;&amp; (GetEffectsFlags(OBJECT_SELF) &amp; EFFECT_FLAG_DISABLE_TALENTS))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_IsCommandValid", "can't trigger talent - talents disabled for this creature: " + IntToString(nSubCommand), LOG_SEVERITY_WARNING);
+                #endif
+                nResult = FALSE;
+            }
+            else if(Ability_GetAbilityType(nSubCommand) == ABILITY_TYPE_TALENT &amp;&amp;
+                GetHasEffects(OBJECT_SELF, EFFECT_TYPE_MISDIRECTION_HEX) &amp;&amp;
+                nTacticTargetType == AI_TARGET_TYPE_ENEMY)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_IsCommandValid", "can't trigger talent - having misdirection hex for a hostile target talent: " + IntToString(nSubCommand), LOG_SEVERITY_WARNING);
+                #endif
+                nResult = FALSE;
+
+            }
+
+
+            // TEMP - staff hack
+            if(nSubCommand == 11130) // STAFF
+            {
+                if(GetCreatureCoreClass(OBJECT_SELF) != CLASS_WIZARD)
+                    nResult = FALSE;
+            }
+            // END TEMP
+            break;
+        }
+        case AI_COMMAND_USE_PLACEABLE:
+        {
+            // can only work if the creature is in combat
+            if(GetCombatState(OBJECT_SELF) == FALSE)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_IsCommandValid", "Can't use placeable outside of combat");
+                #endif
+                nResult = FALSE;
+            }
+            break;
+        }
+        case AI_COMMAND_USE_ITEM:
+        {
+            nResult = _AI_IsAbilityValid(nSubCommand);
+
+            if(GetEffectsFlags(OBJECT_SELF) &amp; EFFECT_FLAG_DISABLE_ITEMS)
+                nResult = FALSE;
+            else if(Ability_GetAbilityType(nSubCommand) != ABILITY_TYPE_ITEM)
+                nResult = FALSE;
+            break;
+        }
+        case AI_COMMAND_MOVE:
+        {
+            if(GetEffectsFlags(OBJECT_SELF) &amp; EFFECT_FLAG_DISABLE_MOVEMENT)
+                nResult = FALSE;
+            break;
+        }
+        case AI_COMMAND_SWITCH_TO_MELEE:
+        {
+            if(!_AI_HasWeaponSet(AI_WEAPON_SET_MELEE))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_IsCommandValid", "No melee weapon set for switch-to-melee action - aborting");
+                #endif
+                return FALSE;
+            }
+            break;
+        }
+        case AI_COMMAND_SWITCH_TO_RANGED:
+        {
+            if(!_AI_HasWeaponSet(AI_WEAPON_SET_RANGED))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_IsCommandValid", "No ranged weapon set for switch-to-melee action - aborting");
+                #endif
+                return FALSE;
+            }
+            break;
+        }
+    }
+    return nResult;
+}
+
+
+
+
+
+int _AI_GetWeaponSetEquipped(object oTarget=OBJECT_SELF)
+{
+    int nRet = AI_WEAPON_SET_INVALID;
+    int nActiveWeaponSet = GetActiveWeaponSet(oTarget);
+    object oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN, oTarget, nActiveWeaponSet);
+
+    if(GetItemType(oWeapon) == ITEM_TYPE_WEAPON_WAND)
+        nRet = AI_WEAPON_SET_RANGED;
+    else if(GetItemType(oWeapon) == ITEM_TYPE_WEAPON_RANGED)
+        nRet = AI_WEAPON_SET_RANGED;
+    else if(GetItemType(oWeapon) == ITEM_TYPE_WEAPON_MELEE)
+        nRet = AI_WEAPON_SET_MELEE;
+    else
+        nRet = AI_WEAPON_SET_MELEE;
+
+    //int nCurrentSet = GetActiveWeaponSet(OBJECT_SELF);
+    //if(nCurrentSet == Items_GetRangedWeaponSet(OBJECT_SELF))
+    //    nRet = AI_WEAPON_SET_RANGED;
+    //else if(nCurrentSet == Items_GetMeleeWeaponSet(OBJECT_SELF))
+    //    nRet = AI_WEAPON_SET_MELEE;
+
+    return nRet;
+}
+
+int _AI_IsTargetInMeleeRange(object oTarget)
+{
+    int nApp = GetAppearanceType(oTarget);
+    if(!IsObjectValid(oTarget))
+        return FALSE;
+
+    float fMaxRange = AI_MELEE_RANGE;
+    float fPerSpace = GetM2DAFloat(TABLE_APPEARANCE, "PERSPACE", nApp);
+    if(fPerSpace &gt; 1.0 &amp;&amp; fPerSpace &lt;= 2.0)
+        fMaxRange += (fPerSpace / 2);
+    else if(fPerSpace &gt; 2.0)
+        fMaxRange = AI_RANGE_MEDIUM;
+    float fDistance = GetDistanceBetween(OBJECT_SELF, oTarget);
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_IsTargetInMeleeRange", "Target: " + GetTag(oTarget) + ", Distance: " + FloatToString(fDistance));
+    #endif
+
+    if(fDistance &lt;= fMaxRange)
+        return TRUE;
+
+    return FALSE;
+
+    /*object [] arEnemiesInMelee = GetCreaturesInMeleeRing(OBJECT_SELF, 0.0, 360.0, TRUE);
+    object oCurrent;
+    int nSize = GetArraySize(arEnemiesInMelee);
+    int i;
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arEnemiesInMelee[i];
+        if(oCurrent == oTarget)
+            return TRUE;
+    }
+
+    return FALSE;*/
+}
+
+int _AI_HasWeaponSet(int nWeaponSetType)
+{
+    int nRet = FALSE;
+    switch(nWeaponSetType)
+    {
+        case AI_WEAPON_SET_MELEE:
+        {
+            return Items_GetMeleeWeaponSet(OBJECT_SELF) != -1;
+            break;
+        }
+        case AI_WEAPON_SET_RANGED:
+        {
+            return Items_GetRangedWeaponSet(OBJECT_SELF, TRUE) != -1; // Also checks for ammo
+            break;
+        }
+    }
+
+    return -1;
+}
+
+command _AI_SwitchWeaponSet(int nWeaponSetType)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_SwitchWeaponSet", "Switching weapons to set type: " + IntToString(nWeaponSetType));
+    #endif
+
+    int nSet = -1;
+    switch(nWeaponSetType)
+    {
+        case AI_WEAPON_SET_MELEE:
+        {
+            nSet = Items_GetMeleeWeaponSet(OBJECT_SELF);
+            break;
+        }
+        case AI_WEAPON_SET_RANGED:
+        {
+            nSet = Items_GetRangedWeaponSet(OBJECT_SELF, TRUE);
+            break;
+        }
+    }
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_SwitchWeaponSet", "Switching weapons to set: " + IntToString(nSet));
+    #endif
+
+    command cmd;
+
+    #ifdef DEBUG
+    if(nSet == -1)
+        Log_Trace_AI("_AI_SwitchWeaponSet", "ERROR: FAILED TO FIND A SET TO SWITCH TO");
+    #endif
+
+    if (nSet != -1)
+    {
+        cmd = CommandSwitchWeaponSet(nSet);
+    }
+
+    return cmd;
+}
+
+
+int _AI_GetFlag(string sFlag, object oCreature = OBJECT_SELF)
+{
+    int nValue = GetLocalInt(oCreature, sFlag);
+    //Log_Trace_AI("_AI_GetFlag", "flag: " + sFlag + ", value= " + IntToString(nValue));
+    return nValue;
+}
+
+void _AI_SetFlag(string sFlag, int nValue)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_SetFlag", "flag: " + sFlag + ", value= " + IntToString(nValue));
+    #endif
+    SetLocalInt(OBJECT_SELF, sFlag, nValue);
+}
+
+void _AI_ApplyTimerDifficultyEffects(object oTarget)
+{
+    if(GetGameDifficulty() &gt; GAME_DIFFICULTY_NORMAL)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteAttack", "timer failure - increasing movement speed");
+        #endif
+        effect eSpeed = EffectModifyMovementSpeed(1.5);
+        ApplyEffectOnObject(EFFECT_DURATION_TYPE_TEMPORARY, eSpeed, OBJECT_SELF, AI_COMMAND_TIMER / 2);
+    }
+}
+
+command _AI_ExecuteAttack(object oTarget, int nLastCommandStatus)
+{
+    // This can include a weapon switch condition as well:
+    // If current creature equips a ranged weapon and the target is within melee range -&gt; switch to melee
+    // If current creature equips a melee weapon and the target is not within melee range AND
+    // the creature prefers ranged weapons (flag) AND the ranged weapon set has enough ammo -&gt; switch to ranged weapon
+    // All of the conditions above assume the creature has the appropriate weapon sets
+    // If the creature decides to switch weapons then we will NOT add another melee command this round
+
+
+
+    command cTacticCommand;
+    int nTacticID; // used to store the tactic that was executed, if it there is no tactic ID from a table
+    int nLastTacticID = GetLocalInt(OBJECT_SELF, AI_LAST_TACTIC); // the last tactic being used
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_ExecuteAttack", "*** START ***, Target: " + GetTag(oTarget) + ", Last Command Status: "
+        + IntToString(nLastCommandStatus) + ", last tactic id: " + IntToString(nLastTacticID));
+    #endif
+
+    float fDistance;
+    int nRand;
+    float fAvoidDistance;
+    object oCurrentWP;
+    object [] arWPs;
+    float fWPDistance;
+    int nSize;
+    int i;
+    int bWPFound = FALSE;
+    object [] oCreaturesNearWP;
+    float fNearestCreatureToWPDistance;
+    object [] arPerceivedCreatures;
+    object oCreatureNearWP;
+    object oOldWP;
+    int nFailMessage;
+    switch(nLastCommandStatus)
+    {
+        case COMMAND_FAILED_COMMAND_CLEARED: nFailMessage = UI_DEBUG_COMMAND_FAILED; break;
+        case COMMAND_FAILED_INVALID_DATA: nFailMessage = UI_DEBUG_INVALID_DATA; break;
+        case COMMAND_FAILED_INVALID_PATH: nFailMessage = UI_DEBUG_INVALID_PATH; break;
+        case COMMAND_FAILED_NO_LINE_OF_SIGHT: nFailMessage = UI_DEBUG_NO_LOS; break;
+        //case COMMAND_FAILED_NO_SPACE_IN_MELEE_RING: nFailMessage = UI_DEBUG_NO_SPACE_IN_MELEE_RING; break;
+        case COMMAND_FAILED_TARGET_DESTROYED: nFailMessage = UI_DEBUG_TARGET_DESTROYED; break;
+        case COMMAND_FAILED_DISABLED: nFailMessage = UI_DEBUG_MOVEMENT_DISABLED; break;
+        case COMMAND_FAILED_TIMEOUT: nFailMessage = UI_DEBUG_COMMAND_TIMED_OUT; break;
+    }
+    #ifdef DEBUG
+    if(nFailMessage &gt; 0)
+        UI_DisplayMessage(OBJECT_SELF, nFailMessage);
+    #endif
+
+
+    if(GetEffectsFlags(OBJECT_SELF) &amp; EFFECT_FLAG_DISABLE_COMBAT)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteAttack", "Can't add any combat commands: combat is disabled by effect - waiting instead");
+        #endif
+        cTacticCommand = _AI_DoNothing(nLastTacticID, nLastCommandStatus, TRUE);
+        nTacticID = AI_TACTIC_ID_WAIT;
+    }
+
+    // Special handling:
+    // If the last command failed AND the last command was a part of this generic 'attack' sequence
+    // dec 17, 2008 -- yaron: adding a condition that allows this part to run if the command before was not a normal attack and the failure is 'movement disable'
+    // feb 24, 2009 -- yaron: same as above but also for timeoutfailures
+    else if(nLastCommandStatus &lt; 0 &amp;&amp;
+            (nLastTacticID &lt; 0 || (nLastTacticID &gt;= 0 &amp;&amp; (nLastCommandStatus == COMMAND_FAILED_DISABLED || nLastCommandStatus == COMMAND_FAILED_TIMEOUT)))&amp;&amp;
+            nLastCommandStatus != COMMAND_FAILED_TARGET_DESTROYED)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteAttack", "Last tactic failed AND was an Attack tactic - trying something else, error: " + IntToString(nLastCommandStatus));
+        #endif
+        if(IsFollower(OBJECT_SELF))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteAttack", "Command failed for follower - trying only to WAIT");
+            #endif
+            // Nothing much we can do in these cases except wait
+            cTacticCommand = _AI_DoNothing(nLastTacticID, nLastCommandStatus, TRUE);
+            nTacticID = AI_TACTIC_ID_WAIT;
+        }
+        else
+        {
+            fDistance = GetDistanceBetween(OBJECT_SELF, oTarget);
+
+            // timeout failure - special case
+            // (regardles of what the last action was)
+            if(nLastCommandStatus == COMMAND_FAILED_TIMEOUT)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteAttack", "Handling attack timeout");
+                #endif
+                if(!IsFollower(OBJECT_SELF) &amp;&amp;
+                    GetLocalInt(OBJECT_SELF, CREATURE_HAS_TIMER_ATTACK) == 1) // first failure -&gt; try to attack again
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_ExecuteAttack", "First timer failure - try to attack again");
+                    #endif
+                    SetLocalInt(OBJECT_SELF, CREATURE_HAS_TIMER_ATTACK, 2);
+                    cTacticCommand = CommandAttack(oTarget);
+                    nTacticID = AI_TACTIC_ID_ATTACK;
+
+                }
+                else // not first failure -&gt; switch weapon or try to attack again
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_ExecuteAttack", "Not first timer failure - trying to switch to ranged");
+                    #endif
+                    if(_AI_GetWeaponSetEquipped() == AI_WEAPON_SET_MELEE &amp;&amp;
+                        _AI_HasWeaponSet(AI_WEAPON_SET_RANGED))
+                    {
+                        #ifdef DEBUG
+                        Log_Trace_AI("_AI_ExecuteAttack", "switching to ranged because of timer failure");
+                        #endif
+                        cTacticCommand = _AI_SwitchWeaponSet(AI_WEAPON_SET_RANGED);
+                        nTacticID = AI_TACTIC_ID_SWITCH_MELEE_TO_RANGED;
+                    }
+                    else // can't switch -&gt; try to attack again (no need for wait as this is a timeout failure
+                    {
+                        #ifdef DEBUG
+                        Log_Trace_AI("_AI_ExecuteAttack", "timer failure - can't switch - trying to attack again");
+                        #endif
+                        _AI_ApplyTimerDifficultyEffects(oTarget);
+                        // adding speed boost for normal/hard difficulty
+                        cTacticCommand = CommandAttack(oTarget);
+                        nTacticID = AI_TACTIC_ID_ATTACK;
+                    }
+
+                }
+            }
+            else // not a timer failure
+            {
+
+                switch(nLastTacticID)
+                {
+                    case AI_TACTIC_ID_ATTACK:
+                    {
+                        // if a follower has the movement disabled GUI activated and he fails the last action
+                        if(nLastCommandStatus == COMMAND_FAILED_DISABLED &amp;&amp;
+                                IsFollower(OBJECT_SELF) &amp;&amp;
+                                _AI_GetWeaponSetEquipped() == AI_WEAPON_SET_MELEE &amp;&amp;
+                                _AI_HasWeaponSet(AI_WEAPON_SET_RANGED) &amp;&amp;
+                                !_AI_IsTargetInMeleeRange(oTarget))
+                        {
+                            cTacticCommand = _AI_SwitchWeaponSet(AI_WEAPON_SET_RANGED);
+                            nTacticID = AI_TACTIC_ID_SWITCH_MELEE_TO_RANGED;
+                        }
+                        else if(!IsFollower(OBJECT_SELF) &amp;&amp;
+                                _AI_GetWeaponSetEquipped() == AI_WEAPON_SET_MELEE &amp;&amp;
+                                _AI_HasWeaponSet(AI_WEAPON_SET_RANGED) &amp;&amp; !_AI_IsTargetInMeleeRange(oTarget))
+                        {
+                            cTacticCommand = _AI_SwitchWeaponSet(AI_WEAPON_SET_RANGED);
+                            nTacticID = AI_TACTIC_ID_SWITCH_MELEE_TO_RANGED;
+                        }
+                        // if has melee but no ranged: move closer
+                        else if(_AI_GetWeaponSetEquipped() == AI_WEAPON_SET_MELEE &amp;&amp;
+                                !_AI_HasWeaponSet(AI_WEAPON_SET_RANGED) &amp;&amp;
+                                fDistance &gt; (AI_MINIMAL_MELEE_DISTANCE + 1.0) &amp;&amp;
+                                nLastCommandStatus != COMMAND_FAILED_DISABLED &amp;&amp;
+                                nLastCommandStatus != COMMAND_FAILED_PATH_ACTION_REQUIRED &amp;&amp;
+                                nLastCommandStatus != COMMAND_FAILED_INVALID_PATH)
+                        {
+                            #ifdef DEBUG
+                            Log_Trace_AI("_AI_ExecuteAttack", "Trying to move closer to target");
+                            #endif
+                            cTacticCommand = CommandMoveToObject(oTarget, TRUE, AI_MINIMAL_MELEE_DISTANCE);
+                            nTacticID = AI_TACTIC_ID_MOVE;
+                        }
+                        // if has ranged: change to melee
+                        else if(_AI_GetWeaponSetEquipped() == AI_WEAPON_SET_RANGED &amp;&amp;
+                                _AI_HasWeaponSet(AI_WEAPON_SET_MELEE) &amp;&amp; _AI_IsTargetInMeleeRange(oTarget))
+                        {
+                            cTacticCommand = _AI_SwitchWeaponSet(AI_WEAPON_SET_MELEE);
+                            nTacticID = AI_TACTIC_ID_SWITCH_RANGED_TO_MELEE;
+                        }
+                        // if too close and not on ring, move a little ways away from target
+                        else if ( nLastCommandStatus == COMMAND_FAILED_NO_SPACE_IN_MELEE_RING &amp;&amp;
+                                  fDistance &lt; AI_MELEE_RANGE )
+                        {
+                            #ifdef DEBUG
+                            Log_Trace_AI("_AI_ExecuteAttack", "Trying to move away from target");
+                            #endif
+                            cTacticCommand = CommandMoveAwayFromObject( oTarget, 2.0, FALSE );
+                            nTacticID = AI_TACTIC_ID_MOVE;
+                        }
+                        else
+                        {
+                            cTacticCommand = _AI_DoNothing(nLastTacticID, nLastCommandStatus, TRUE, FALSE, oTarget);
+                            nTacticID = AI_TACTIC_ID_WAIT;
+                        }
+                        break;
+                    }
+                    case AI_TACTIC_ID_SWITCH_MELEE_TO_RANGED:
+                    case AI_TACTIC_ID_SWITCH_RANGED_TO_MELEE:
+                    case AI_TACTIC_ID_WAIT:
+                    case AI_TACTIC_ID_MOVE:
+                    default:
+                    {
+                        // Nothing much we can do in these cases except wait
+                        cTacticCommand = _AI_DoNothing(nLastTacticID, nLastCommandStatus, TRUE, FALSE, oTarget);
+                        nTacticID = AI_TACTIC_ID_WAIT;
+                    break;
+                    }
+                } // end of tactic ID failure switch
+            } // end of else (not a timer failure)
+        } // end of 'not follower' if-else
+    }
+    else if(_AI_GetWeaponSetEquipped() == AI_WEAPON_SET_RANGED &amp;&amp;
+        (_AI_IsTargetInMeleeRange(oTarget) || !_AI_GetFlag(AI_FLAG_PREFERS_RANGED))&amp;&amp;
+        _AI_HasWeaponSet(AI_WEAPON_SET_MELEE) &amp;&amp;
+        nLastTacticID != AI_TACTIC_ID_SWITCH_MELEE_TO_RANGED) // so it won't try to switch to melee right after changing to ranged
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteAttack", "Trying to switch into a melee weapon set");
+        #endif
+
+        if(IsFollower(OBJECT_SELF) &amp;&amp; AI_BehaviorCheck_PreferRange())
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteAttack", "Follower prefers range - switch to melee aborted");
+            #endif
+        }
+        else
+        {
+            int nRandBackToMelee = Random(100) + 1;
+            if(!IsFollower(OBJECT_SELF) &amp;&amp; !_AI_GetFlag(AI_FLAG_PREFERS_RANGED) &amp;&amp; nRandBackToMelee &gt; 33)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteAttack", "Not prefering range, but random chance failed to allow changing back to melee");
+                #endif
+            }
+            else if(_AI_IsTargetInMeleeRange(oTarget))
+            {
+                cTacticCommand = _AI_SwitchWeaponSet(AI_WEAPON_SET_MELEE);
+                nTacticID = AI_TACTIC_ID_SWITCH_RANGED_TO_MELEE;
+
+                if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID) // failed to switch
+                {
+                    cTacticCommand = CommandAttack(oTarget); // Continue attacking with ranged weapon
+                    nTacticID = AI_TACTIC_ID_ATTACK;
+                }
+            }
+        }
+    }
+    else if(_AI_GetWeaponSetEquipped() == AI_WEAPON_SET_MELEE &amp;&amp;
+           !_AI_IsTargetInMeleeRange(oTarget)                 &amp;&amp;
+            (IsFollower(OBJECT_SELF) || _AI_GetFlag(AI_FLAG_PREFERS_RANGED)) &amp;&amp;
+            _AI_HasWeaponSet(AI_WEAPON_SET_RANGED) &amp;&amp;     // Ranged weapon set check includes ammo check
+            nLastTacticID != AI_TACTIC_ID_SWITCH_RANGED_TO_MELEE) // Did not try
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteAttack", "Trying to switch into a ranged weapon set");
+        #endif
+        if(IsFollower(OBJECT_SELF) &amp;&amp; AI_BehaviorCheck_PreferMelee())
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteAttack", "Follower prefers range - switch to range aborted");
+            #endif
+        }
+        else if(IsFollower(OBJECT_SELF) &amp;&amp; !AI_BehaviorCheck_PreferRange())
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteAttack", "Follower does NOT prefer range - switch to range aborted");
+            #endif
+        }
+        else
+        {
+            cTacticCommand = _AI_SwitchWeaponSet(AI_WEAPON_SET_RANGED);
+            //cTacticCommand = _AI_SwitchWeaponSet(0);
+            nTacticID = AI_TACTIC_ID_SWITCH_MELEE_TO_RANGED;
+
+            if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID) // failed to switch
+            {
+                cTacticCommand = CommandAttack(oTarget); // Continue attacking with melee weapon
+                nTacticID = AI_TACTIC_ID_ATTACK;
+            }
+        }
+
+    }
+    else// Did not switch any weapon set -&gt; continue attacking with current.
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteAttack", "NORMAL ATTACK");
+        #endif
+
+        cTacticCommand = CommandAttack(oTarget);
+        nTacticID = AI_TACTIC_ID_ATTACK;
+    }
+    // ...one last ammo check!
+
+
+    // One last check - in case we failed to switch a weapon:
+    if(GetCommandType(cTacticCommand) == COMMAND_TYPE_INVALID)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteAttack", "FAILED TO FIND A VALID COMMAND - TRYING COMMAND ATTACK", LOG_SEVERITY_CRITICAL);
+        #endif
+        cTacticCommand = CommandAttack(oTarget);
+        nTacticID = AI_TACTIC_ID_ATTACK;
+    }
+
+    // Last check - making sure selected attack matches stationary flag
+    if(!IsFollower(OBJECT_SELF) &amp;&amp; GetLocalInt(OBJECT_SELF, AI_FLAG_STATIONARY) &gt; 0 &amp;&amp; GetCommandType(cTacticCommand) == COMMAND_TYPE_ATTACK)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteAttack", "Creature stationary - checking if he can execute seleted attack");
+        #endif
+        if(_AI_GetWeaponSetEquipped() == AI_WEAPON_SET_MELEE)
+        {
+            // if melee weapon -&gt; attack only if target is in stationaty range
+            fDistance = GetDistanceBetween(OBJECT_SELF, oTarget);
+            if(fDistance &gt; AI_STATIONARY_RANGE)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteAttack", "Creature stationary - too far from melee target to execute attack - WAITING");
+                #endif
+                cTacticCommand = _AI_DoNothing(nLastTacticID, nLastCommandStatus, TRUE, TRUE);
+                nTacticID = AI_TACTIC_ID_WAIT;
+            }
+        }
+        else if(_AI_GetWeaponSetEquipped() == AI_WEAPON_SET_RANGED)
+        {
+            // if ranged weapon -&gt; attack only if target is in weapon range
+            object oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN);
+            fDistance = GetDistanceBetween(OBJECT_SELF, oTarget);
+            float fWeaponRange = GetItemRange(oWeapon);
+
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_ExecuteAttack", "Weapon range check for stationary creature - weapon range: " + FloatToString(fWeaponRange));
+            #endif
+            if(fDistance &gt; fWeaponRange)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_ExecuteAttack", "Creature stationary - too far from ranged target to execute attack - WAITING");
+                #endif
+                cTacticCommand = _AI_DoNothing(nLastTacticID, nLastCommandStatus, TRUE, TRUE);
+                nTacticID = AI_TACTIC_ID_WAIT;
+            }
+            else // creature within range - check line of sight
+            {
+                if(CheckLineOfSightObject(OBJECT_SELF, oTarget) == FALSE)
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_ExecuteAttack", "Creature stationary - no line of sight to target - WAITING");
+                    #endif
+                    cTacticCommand = _AI_DoNothing(nLastTacticID, nLastCommandStatus, TRUE, TRUE);
+                    nTacticID = AI_TACTIC_ID_WAIT;
+                }
+            }
+
+        }
+    }
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_ExecuteAttack", "Setting last tactic ID to: " + IntToString(nTacticID));
+    #endif
+    SetLocalInt(OBJECT_SELF, AI_LAST_TACTIC, nTacticID);
+    return cTacticCommand;
+}
+
+string _AI_GetCommandString(int nAICommand)
+{
+    string sRet = "INVALID";
+
+    switch(nAICommand)
+    {
+        case AI_COMMAND_ACTIVATE_MODE: sRet = "***** ACTIVATE MODE *****"; break;
+        case AI_COMMAND_ATTACK: sRet = "***** ATTACK *****"; break;
+        case AI_COMMAND_DEACTIVATE_MODE: sRet = "***** DEACTIVATE MODE *****"; break;
+        case AI_COMMAND_USE_ABILITY: sRet = "USE ABILITY"; break;
+        case AI_COMMAND_USE_ITEM: sRet = "***** USE ITEM *****"; break;
+        case AI_COMMAND_USE_PLACEABLE: sRet = "***** USE PLACEABLE *****"; break;
+        case AI_COMMAND_WAIT: sRet = "***** WAIT *****"; break;
+        case AI_COMMAND_MOVE: sRet = "***** MOVE *****"; break;
+        case AI_COMMAND_JUMP_TO_LATER_TACTIC: sRet = "***** JUMP TO LATER TACTIC *****"; break;
+        case AI_COMMAND_SWITCH_TO_MELEE: sRet = "***** SWTICH TO MELEE *****"; break;
+        case AI_COMMAND_SWITCH_TO_RANGED: sRet = "***** SWITCH TO RANGED *****"; break;
+        case AI_COMMAND_FLY: sRet = "***** FLY *****"; break;
+        case AI_COMMAND_USE_HEALTH_POTION_LEAST: sRet = "**** USE LEAST POWERFUL HEALING POTION"; break;
+        case AI_COMMAND_USE_HEALTH_POTION_MOST: sRet = "**** USE MOST POWERFUL HEALING POTION"; break;
+        case AI_COMMAND_USE_LYRIUM_POTION_LEAST: sRet = "**** USE LEAST POWERFUL MANA POTION"; break;
+        case AI_COMMAND_USE_LYRIUM_POTION_MOST: sRet = "**** USE MOST POWERFUL MANA POTION"; break;
+    }
+    return sRet;
+}
+
+int _AI_CanUseAbility(int nAbility, object oTarget)
+{
+    int nRet = TRUE;
+    float fDistance;
+
+    switch(nAbility)
+    {
+        case ABILITY_SPELL_CHAIN_LIGHTNING:
+        {
+            // for followers - valid only if there are at least 3+ enemies
+            if(IsFollower(OBJECT_SELF))
+            {
+                object [] arEnemies = GetNearestObjectByGroup(OBJECT_SELF, GROUP_HOSTILE, OBJECT_TYPE_CREATURE, 3, TRUE, TRUE, FALSE);
+                int nSize = GetArraySize(arEnemies);
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "number of hostiles found: " + IntToString(nSize));
+                #endif
+                if(nSize &lt; 3)
+                    nRet = FALSE;
+            }
+            break;
+        }
+        case ABILITY_TALENT_SHIELD_BASH:
+        case ABILITY_TALENT_OVERPOWER:
+        case ABILITY_TALENT_OVERRUN: // pommel strike
+        case ABILITY_TALENT_MONSTER_DOG_CHARGE:
+        case ABILITY_TALENT_PINNING_SHOT:
+        case ABILITY_TALENT_FRIGHTENING:
+        case ABILITY_TALENT_DIRTY_FIGHTING:
+        {
+            if(_AI_HasAIStatus(oTarget, AI_STATUS_CANT_ATTACK))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "target already can't fight - aborting use of stun/knockdown ability");
+                #endif
+                nRet = FALSE;
+            }
+            break;
+        }
+        case ABILITY_TALENT_HOLY_SMITE:
+        case ABILITY_SPELL_WYNNES_SEAL_PORTAL: // mana drain
+        case ABILITY_SPELL_MANA_CLASH:
+        {
+            // only on mages and applies only for non-followers (followers have the 'nearest by class' to filter)
+            if(!IsFollower(OBJECT_SELF))
+            {
+                int nClass = GetCreatureCoreClass(oTarget);
+                if(nClass != CLASS_WIZARD)
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_CanUseAbility", "mage-only spell targetted at non mages");
+                    #endif
+                    nRet = FALSE;
+                }
+            }
+            break;
+        }
+        case MONSTER_HIGH_DRAGON_FIRE_SPIT:
+        case ARCHDEMON_DETONATE_DARKSPAWN:
+        case ARCHDEMON_CORRUPTION_BLAST:
+        {
+            float fAngle = GetAngleBetweenObjects(OBJECT_SELF, oTarget);
+            if(fAngle &gt; 60.0 &amp;&amp; fAngle &lt; 300.0)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "Too large angle to trigger ability");
+                #endif
+                nRet = FALSE;
+            }
+            break;
+        }
+        case ARCHDEMON_VORTEX:
+        case ARCHDEMON_SMITE:
+        {
+            fDistance = GetDistanceBetween(OBJECT_SELF, oTarget);
+            if(fDistance &lt; AI_RANGE_MEDIUM)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "Archdemon abilities can't trigger too close");
+                #endif
+                nRet = FALSE;
+
+            }
+
+            break;
+        }
+        case ABILITY_SPELL_WALKING_BOMB:
+        {
+            // can't use if virulent is on
+            if(Ability_IsAbilityActive(oTarget, 12011))
+                nRet = FALSE;
+            break;
+        }
+        case 12011: // virulent walking bomb
+        {
+            // can't use if virulent is on
+            if(Ability_IsAbilityActive(oTarget, ABILITY_SPELL_WALKING_BOMB))
+                nRet = FALSE;
+            break;
+        }
+        case ABILITY_TALENT_MONSTER_DOG_OVERWHELM:
+        case ABILITY_TALENT_MONSTER_SHRIEK_OVERWHLEM:
+        case MONSTER_BEAR_OVERWHELM:
+        case MONSTER_SPIDER_OVERWHELM:
+        case MONSTER_STALKER_OVERWHLEM:
+        case MONSTER_DRAGON_OVERWHELM:
+        {
+            if(!IsHumanoid(oTarget))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "Overwhelm target not humanoid - can't execute ability");
+                #endif
+                nRet = FALSE;
+            }
+            else if(GetHasEffects(oTarget, EFFECT_TYPE_OVERWHELMED) || GetHasEffects(oTarget, EFFECT_TYPE_GRABBED))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "Tareget is already being overwhelmed or grabbed - can't execute another overwhelm");
+                #endif
+                nRet = FALSE;
+            }
+
+            break;
+        }
+        case ABILITY_TALENT_MONSTER_OGRE_GRAB:
+        case ABILITY_TALENT_BROODMOTHER_GRAB_LEFT:
+        case ABILITY_TALENT_BROODMOTHER_GRAB_RIGHT:
+        case MONSTER_HIGH_DRAGON_GRAB_LEFT:
+        case MONSTER_HIGH_DRAGON_GRAB_RIGHT:
+        {
+
+            if(!IsHumanoid(oTarget))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "Grabbed target not humanoid - can't execute ability");
+                #endif
+                nRet = FALSE;
+            }
+            else if(GetHasEffects(oTarget, EFFECT_TYPE_OVERWHELMED) || GetHasEffects(oTarget, EFFECT_TYPE_GRABBED))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "Tareget is already being overwhelmed or grabbed - can't execute another grab");
+                #endif
+                nRet = FALSE;
+            }
+
+            // Archdemon only: not trigger it on party members
+            if(nAbility == MONSTER_HIGH_DRAGON_GRAB_LEFT || nAbility == MONSTER_HIGH_DRAGON_GRAB_RIGHT)
+            {
+                if(GetAppearanceType(OBJECT_SELF) == APP_TYPE_ARCHDEMON &amp;&amp; IsFollower(oTarget))
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_CanUseAbility", "Archdemon can't grab party members");
+                    #endif
+                    nRet = FALSE;
+                }
+            }
+            break;
+        }
+        case ABILITY_SPELL_MONSTER_OGRE_HURL:
+        {
+            // Ogre Hurl ability can be used only with a minimum distance
+            fDistance = GetDistanceBetween(OBJECT_SELF, oTarget);
+            if(fDistance &lt; (AI_RANGE_SHORT * 2))
+                nRet = FALSE;
+            break;
+        }
+        case ABILITY_TALENT_SHIELD_DEFENSE:
+        {
+            // Do not run it if I have Shield Wall
+            if(HasAbility(OBJECT_SELF, ABILITY_TALENT_SHIELD_WALL))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "I have a better ability (Shield Wall) - not trying to run this one");
+                #endif
+                nRet = FALSE;
+            }
+            break;
+        }
+        case 200010: // healing potions
+        case 200011:
+        case 200012:
+        case 200013:
+        {
+            float fCurrentStat = GetCurrentHealth(OBJECT_SELF);
+            float fMaxStat = GetMaxHealth(OBJECT_SELF);
+            if(fCurrentStat == fMaxStat)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "full health - not using health potion");
+                #endif
+                nRet = FALSE;
+            }
+            break;
+        }
+        case 200030: // mana potions
+        case 200031:
+        case 200032:
+        case 200033:
+        {
+            float fCurrentStat = GetCurrentManaStamina(OBJECT_SELF);
+            float fMaxStat = IntToFloat(GetCreatureMaxMana(OBJECT_SELF));
+            if(fCurrentStat == fMaxStat)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "full mana - not using mana potion");
+                #endif
+                nRet = FALSE;
+            }
+            break;
+        }
+
+    }
+
+    // Stationary non-follower check
+    if(!IsFollower(OBJECT_SELF) &amp;&amp; GetLocalInt(OBJECT_SELF, AI_FLAG_STATIONARY) &gt; 0 &amp;&amp; oTarget != OBJECT_SELF)
+    {
+        fDistance = GetDistanceBetween(OBJECT_SELF, oTarget);
+        int nAbilityRangeID = GetM2DAInt(TABLE_ABILITIES_TALENTS, "range", nAbility);
+        float fAbilityRange = GetM2DAFloat(TABLE_RANGES, "PrimaryRange", nAbilityRangeID);
+
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_CanUseAbility", "Stationary creature ability range: " + FloatToString(fAbilityRange) + ", distance to target: " +
+            FloatToString(fDistance));
+        #endif
+
+        if(fDistance &gt; fAbilityRange)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_CanUseAbility", "Stationary creature: target too far for ability range");
+            #endif
+            nRet = FALSE;
+        }
+        else
+        {
+            if(CheckLineOfSightObject(OBJECT_SELF, oTarget) == FALSE)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "Stationary creature: no line of sight for target");
+                #endif
+                nRet = FALSE;
+            }
+            else
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_CanUseAbility", "Stationary creature: Clear to execute ability without moving");
+                #endif
+            }
+        }
+    }
+
+    return nRet;
+}
+
+float _AI_GetEquippedWeaponRange()
+{
+    object oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN);
+    float fRange = GetItemRange(oWeapon);
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_GetEquippedWeaponRange", "Weapon: " + GetTag(oWeapon) + ", Weapon Range: " + FloatToString(fRange));
+    #endif
+
+    return fRange;
+}
+
+int _AI_UseGUITables()
+{
+    int nUseGUI = GetLocalInt(GetModule(), AI_USE_GUI_TABLES_FOR_FOLLOWERS);
+    if(!nUseGUI)
+        return FALSE;
+
+    return (GetFollowerState(OBJECT_SELF) != FOLLOWER_STATE_INVALID &amp;&amp; !_AI_HasAIStatus(OBJECT_SELF, AI_STATUS_POLYMORPH));
+}
+
+command _AI_DoNothing(int nLastTacticID, int nLastCommandStatus, int nAllowTaunts, int bQuick = FALSE, object oTarget = OBJECT_INVALID, int nClearThreat = TRUE)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_DoNothing", "START");
+    #endif
+
+    int nRand;
+    int nRand2;
+    command cRet;
+    int nAnim;
+
+    if(IsFollower(OBJECT_SELF) || _AI_HasAIStatus(OBJECT_SELF, AI_STATUS_PARALYZE) || _AI_HasAIStatus(OBJECT_SELF, AI_STATUS_DAZE)
+        || _AI_HasAIStatus(OBJECT_SELF, AI_STATUS_STUN))
+        nAllowTaunts = FALSE;
+
+    nRand2 = Random(3) + 1;
+
+    if(IsControlled(OBJECT_SELF))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_DoNothing", "Controled follower - NOT WAITING");
+        #endif
+        return cRet;
+    }
+
+    if(nClearThreat &amp;&amp; oTarget != OBJECT_INVALID &amp;&amp; !IsFollower(OBJECT_SELF))
+    {
+        // Lowering threat to oTarget
+        AI_Threat_UpdateCantAttackTarget(OBJECT_SELF, oTarget);
+    }
+
+    // If last command was DoNothing and it failed (possibly by trying to play a non-existing taunt animation)
+    if(nLastTacticID == AI_TACTIC_ID_WAIT &amp;&amp; nLastCommandStatus &lt; 0)
+    {
+        if(bQuick)
+            cRet = CommandWait(AI_DO_NOTHING_DELAY_QUICK);
+        else
+            cRet = CommandWait(AI_DO_NOTHING_DELAY);
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_DoNothing", "Last DoNothing command failed - trying to wait");
+        #endif
+    }
+    else if(nAllowTaunts)
+    {
+        nRand = Random(100) + 1;
+        if(nRand &lt;= AI_TAUNT_CHANCE &amp;&amp; GetAppearanceType(OBJECT_SELF) != APR_TYPE_OGRE)
+        {
+            if(nRand2 == 1) nAnim = 144;
+            else if(nRand2 == 2) nAnim = 2005;
+            else if(nRand2 == 3) nAnim = 149;
+            cRet = CommandPlayAnimation(nAnim);
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_DoNothing", "Playing taunt animation");
+            #endif
+
+        }
+        if(GetCommandType(cRet) == COMMAND_TYPE_INVALID)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_DoNothing", "failed to add taunt animation - waiting instead");
+            #endif
+            if(bQuick)
+                cRet = CommandWait(AI_DO_NOTHING_DELAY_QUICK);
+            else
+                cRet = CommandWait(AI_DO_NOTHING_DELAY);
+        }
+    }
+    else
+    {
+        if(bQuick)
+            cRet = CommandWait(AI_DO_NOTHING_DELAY_QUICK);
+        else
+            cRet = CommandWait(AI_DO_NOTHING_DELAY);
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_DoNothing", "Waiting");
+        #endif
+    }
+    return cRet;
+}
+
+void _AI_LoadTacticsIntoGUI()
+{
+    int nTable = GetPackageAI(OBJECT_SELF);
+    int nRows = GetM2DARows(nTable);
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_LoadTacticsIntoGUI", "START - number of rows to load: " + IntToString(nRows));
+    #endif
+    int i;
+    int nTargetType;
+    int nCondition;
+    int nCommandType;
+    int nCommandParam;
+    for(i = 1; i &lt;= nRows; i++)
+    {
+        nTargetType = GetM2DAInt(nTable, "TargetType", i);
+        nCondition = GetM2DAInt(nTable, "Condition", i);
+        nCommandType = GetM2DAInt(nTable, "Command", i);
+        nCommandParam = GetM2DAInt(nTable, "SubCommand", i);
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_LoadTacticsIntoGUI", "Loading entry: [" + IntToString(i) + "], target type: " +
+            IntToString(nTargetType) + ", Condition: " + IntToString(nCondition) + ", Command Type: " +
+            IntToString(nCommandType) + ", nCommand Param: " + IntToString(nCommandParam));
+        #endif
+        SetTacticEntry(OBJECT_SELF, i, TRUE, nTargetType, nCondition, nCommandType, nCommandParam);
+    }
+}
+
+command _AI_MoveToControlled(int nLastCommandStatus)
+{
+    command cTacticCommand;
+    object oMainControlled = GetMainControlled();
+    location lLoc = GetFollowerWouldBeLocation(OBJECT_SELF);
+    float fDistance = GetDistanceBetween(OBJECT_SELF, oMainControlled);
+    // NOTE: there used to be a distance check but I removed it since it cause followers to linger behind
+    // when combat starts
+    // yaron nov 28, 2008
+    //-----
+    // NOTE II: putting the distance check back, now with a very short distance
+    // Without a distance check the move commands are eveluated constantly, flooding the AI.
+    // This is just to slow it down a bit
+    // yaron dec 8, 2008
+    if(!IsStealthy(oMainControlled) &amp;&amp; nLastCommandStatus == COMMAND_SUCCESSFUL &amp;&amp; fDistance &gt; AI_RANGE_SHORT)
+    {
+        if(AI_BehaviorCheck_AvoidNearbyEnemies())
+        {
+            // move to player only if no enemies nearby
+            object []arEnemies = GetNearestObjectByHostility(oMainControlled, TRUE, OBJECT_TYPE_CREATURE, 1);
+            fDistance = GetDistanceBetween(oMainControlled, arEnemies[0]);
+            if(fDistance &lt;= AI_RANGE_SHORT)
+                cTacticCommand = _AI_DoNothing(-1, nLastCommandStatus, FALSE, TRUE);
+            else
+                cTacticCommand = CommandMoveToLocation(lLoc, TRUE);
+        }
+        else
+            cTacticCommand = CommandMoveToLocation(lLoc, TRUE);
+    }
+    else
+        cTacticCommand = _AI_DoNothing(-1, nLastCommandStatus, FALSE, TRUE);
+
+    return cTacticCommand;
+}
+
+int AI_GetPartyAllowedToAttack()
+{
+    int nAllowed = GetLocalInt(GetModule(), AI_PARTY_CLEAR_TO_ATTACK);
+    #ifdef DEBUG
+    Log_Trace_AI("AI_GetPartyAllowedToAttack", "Party allowed-to-attack status: " + IntToString(nAllowed));
+    #endif
+    return nAllowed;
+}
+void AI_SetPartyAllowedToAttack(int nStatus)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("AI_SetPartyAllowedToAttack", "Setting party allowed-to-attack status to: " + IntToString(nStatus));
+    #endif
+    SetLocalInt(GetModule(), AI_PARTY_CLEAR_TO_ATTACK, nStatus);
+    // giving a wait command if the follower is doing nothing (to enable combat commands again)
+    object [] arParty = GetPartyList();
+    int nSize = GetArraySize(arParty);
+    int i;
+    object oCurrent;
+    command cCurrentCommand;
+    command cWait = CommandWait(AI_DO_NOTHING_DELAY_QUICK);
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arParty[i];
+        cCurrentCommand = GetCurrentCommand(oCurrent);
+        if(oCurrent != OBJECT_SELF &amp;&amp; GetCommandQueueSize(oCurrent) == 0 &amp;&amp; GetCommandType(cCurrentCommand) == COMMAND_TYPE_INVALID)
+            WR_AddCommand(oCurrent, cWait);
+
+    }
+
+}
+
+int _AI_CheckMoveTimer()
+{
+    int nMoveStart = GetLocalInt(OBJECT_SELF, AI_MOVE_TIMER);
+    int nCurrentTime = GetTime();
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_CheckMoveTimer", "current time: " + IntToString(nCurrentTime) + ", move start: " + IntToString(nMoveStart));
+    Log_Trace_AI("_AI_CheckMoveTimer", "Move/Turn time dif: " + IntToString(nCurrentTime - nMoveStart));
+    #endif
+    if(nMoveStart != 0 &amp;&amp; nCurrentTime - nMoveStart &lt;= AI_MOVE_MIN_TIME)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_ExecuteTactic", "Last move/turn happened too soon");
+        #endif
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
+void _AI_SetMoveTimer()
+{
+    SetLocalInt(OBJECT_SELF, AI_MOVE_TIMER, GetTime());
+    Log_Trace_AI("_AI_CheckMoveTimer", "Set move timer to: " + IntToString(GetTime()));
+}
+
+command _AI_GetFlyCommand(object oTurnTo, int bMoveTo = FALSE)
+{
+    float fAngle = GetAngleBetweenObjects(OBJECT_SELF, oTurnTo);
+    float fMyFacing = GetFacing(OBJECT_SELF);
+    float fEnemyFacing = GetFacing(oTurnTo);
+    float fTurnAngle = 360.0 - fAngle + fMyFacing;
+    if(fTurnAngle &gt;= 180.0)
+        fTurnAngle = fMyFacing - fAngle;
+    float fDif;
+    if(fTurnAngle &gt; fMyFacing) fDif = fTurnAngle - fMyFacing;
+    else fDif = fMyFacing - fTurnAngle;
+    float fDistance = GetDistanceBetween(OBJECT_SELF, oTurnTo);
+    command cFly;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_GetFlyCommand", "Object: " + GetTag(oTurnTo) + ", turn angle: " + FloatToString(fTurnAngle) + ", distance: " + FloatToString(fDistance)
+        + ", angle dif: " + FloatToString(fDif));
+    #endif
+
+
+    if(fDif &lt; AI_TURN_MIN_ANGLE &amp;&amp; bMoveTo == FALSE)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetFlyCommand", "Too small angle to turn - avoiding turn and returning invalid command");
+        #endif
+        return cFly;
+    }
+    else if(fDistance &lt; AI_FLY_MIN_DISTANCE &amp;&amp; bMoveTo == TRUE)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetFlyCommand", "Too small distance to fly - avoiding fly and returning invalid command. Distance: " + FloatToString(fDistance));
+        #endif
+        return cFly;
+    }
+
+
+    location lLoc;
+    if(bMoveTo)
+    {
+        if(fDistance &gt; AI_FLY_MAX_DISTANCE &amp;&amp;
+            GetLocalInt(OBJECT_SELF, CREATURE_COUNTER_3) == 0) // CREATURE_COUNTER_3 used to enable/disable stomp. 1 is for disabled
+        {
+            WR_ClearAllCommands(OBJECT_SELF, TRUE);
+            WR_SetObjectActive(OBJECT_SELF,FALSE);
+            event eFlyDown = Event(EVENT_TYPE_SET_OBJECT_ACTIVE);
+            float fFacing = GetFacing(oTurnTo);
+            eFlyDown = SetEventFloat(eFlyDown, 0, fFacing);
+            eFlyDown = SetEventLocation(eFlyDown, 0, GetLocation(oTurnTo));
+            eFlyDown = SetEventInteger(eFlyDown, 3, TRUE); // tells it to call an AI function
+            DelayEvent(2.5f, OBJECT_SELF, eFlyDown);
+
+            // putting wait command as a flag to abort AI
+            cFly = CommandWait(2.5);
+
+        }
+        else if(fDistance &lt; AI_FLY_MAX_DISTANCE)
+        {
+            lLoc = Location(GetArea(OBJECT_SELF), GetPosition(oTurnTo), fTurnAngle);
+            cFly = CommandFly(lLoc);
+        }
+    }
+    else if(fDistance &gt; AI_TURN_MIN_DISTANCE)
+    {
+        lLoc = Location(GetArea(OBJECT_SELF), GetPosition(OBJECT_SELF), fTurnAngle);
+        cFly = CommandFly(lLoc);
+    }
+
+
+
+    return cFly;
+}
+
+void AI_ExecuteAppearStomp(event ev)
+{
+
+    location lLoc = GetEventLocation(ev, 0);
+    float fFacing = GetEventFloat(ev, 0);
+    SetLocation(OBJECT_SELF, lLoc);
+    SetFacing(OBJECT_SELF, fFacing);
+    WR_SetObjectActive(OBJECT_SELF, TRUE);
+    int nType = GetEventInteger(ev, 4); // whether it's the appear (0) or screenshake (1) part
+    int nPerceiveParty = GetEventInteger(ev, 5);
+
+    #ifdef DEBUG
+    Log_Trace_AI("AI_ExecuteAppearStomp", "START, type=" + IntToString(nType));
+    #endif
+
+    if(nType == 0) // appear
+    {
+        object [] oTargets = GetObjectsInShape(OBJECT_TYPE_CREATURE, SHAPE_SPHERE, lLoc, HIGH_STOMP_RANGE);
+
+        int nCount = 0;
+        int nNum = GetArraySize(oTargets);
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_AI, "AI_ExecuteAppearStomp", "Targets in range = " + ToString(nNum));
+        #endif
+        effect eKnock = EffectKnockdown(OBJECT_SELF, 10);
+        eKnock = SetEffectEngineFloat(eKnock, EFFECT_FLOAT_KNOCKBACK_DISTANCE, HIGH_STOMP_KNOCKDOWN_RANGE);
+        object oWeapon  = GetItemInEquipSlot(INVENTORY_SLOT_MAIN, OBJECT_SELF);
+        int nResult;
+        float fDamage;
+        effect eImpactEffect;
+        object oTarget;
+
+        for (nCount = 0; nCount &lt; nNum; nCount++)
+        {
+            oTarget = oTargets[nCount];
+            if(oTarget != OBJECT_SELF)
+            {
+                #ifdef DEBUG
+                Log_Trace(LOG_CHANNEL_AI, "AI_ExecuteAppearStomp", "Target = " + ToString(oTargets[nCount]));
+                #endif
+
+                ApplyEffectOnObject(EFFECT_DURATION_TYPE_INSTANT, eKnock, oTarget, 0.0f, OBJECT_SELF);
+                nResult     = Combat_GetAttackResult(OBJECT_SELF, oTarget, oWeapon);
+                if(nResult == COMBAT_RESULT_MISS)
+                    nResult = COMBAT_RESULT_HIT;
+                fDamage   = Combat_Damage_GetAttackDamage(OBJECT_SELF, oTarget, oWeapon, nResult);
+                eImpactEffect = EffectImpact(fDamage, oWeapon);
+                Combat_HandleAttackImpact(OBJECT_SELF, oTarget, nResult, eImpactEffect);
+            }
+
+        }
+
+        if(nPerceiveParty)
+        {
+            object [] arParty = GetPartyList();
+            int nSize = GetArraySize(arParty);
+            int i;
+            object oCurrent;
+            for(i = 0; i &lt; nSize; i++)
+            {
+                oCurrent = arParty[i];
+                if(!IsDead(oCurrent) &amp;&amp; !IsDying(oCurrent) &amp;&amp; !IsStealthy(oCurrent) &amp;&amp; !IsPerceiving(OBJECT_SELF, oCurrent)
+                    &amp;&amp; GetFollowerState(oCurrent) == FOLLOWER_STATE_ACTIVE)
+                    WR_TriggerPerception(OBJECT_SELF, oCurrent);
+            }
+        }
+
+        // set the type field and re-sent the event
+        ev = SetEventInteger(ev, 4, 1);
+        DelayEvent(0.25, OBJECT_SELF, ev);
+    }
+    else // 1-&gt; screenshake
+    {
+        Ability_ApplyLocationImpactVFX(MONSTER_HIGH_DRAGON_STOMP, lLoc);
+        effect eEffect = EffectScreenShake(SCREEN_SHAKE_TYPE_BROODMOTHER_SCREEM);
+        ApplyEffectOnObject(EFFECT_DURATION_TYPE_TEMPORARY, eEffect, OBJECT_SELF, 2.0, OBJECT_SELF, MONSTER_HIGH_DRAGON_STOMP);
+
+    }
+}
+
+command _AI_GetPotionUseCommand(object oItem)
+{
+    command cRet;
+    // WORKS ONLY IN COMBAT!!!
+    if(IsObjectValid(oItem) &amp;&amp; GetCombatState(OBJECT_SELF) == TRUE)
+    {
+        int nAbility = GetItemAbilityId(oItem);
+        if(Ability_CheckUseConditions(OBJECT_SELF, OBJECT_SELF, nAbility) == FALSE)
+            return cRet; // failed tactic
+
+        if(_AI_CanUseAbility(nAbility, OBJECT_SELF) == FALSE)
+            return cRet; // can't use specific ability
+
+        // Command is valid to be executed on the target
+        vector vNul;
+        cRet = CommandUseAbility(nAbility, OBJECT_SELF, vNul, -1.0, GetTag(oItem));
+
+    }
+    else
+        return cRet;
+
+    return cRet;
+}
+
+object _AI_GetPotionByFilter(int nPotionType, int nPotionPower)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_GetPotionByFilter", "START, potion type: " + IntToString(nPotionType) + ", potion power type: " + IntToString(nPotionPower));
+    #endif
+
+
+    object [] arItems;
+
+    if(IsFollower(OBJECT_SELF))
+        arItems = GetItemsInInventory(GetPartyLeader());
+    else
+        arItems = GetItemsInInventory(OBJECT_SELF);
+    int nSize = GetArraySize(arItems);
+    int i;
+    object oCurrent;
+    object oSelectedItem;
+    int nCurrentCost;
+    int nStoredCost;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_GetPotionByFilter", "Items #: " + IntToString(nSize));
+    #endif
+    for(i = 0; i &lt; nSize; i++)
+    {
+        // this can be made faster if we add a special item property just to flag specific types of potions
+        oCurrent = arItems[i];
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetPotionByFilter", "GOT ITEM: " + GetTag(oCurrent));
+        #endif
+
+        if(nPotionType == AI_POTION_TYPE_HEALTH)
+        {
+            if(_HasItemProperty(oCurrent, ITEM_PROPERTY_IS_HEALING_POTION))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_GetPotionByFilter", "HEALTH POTION!");
+                #endif
+                nCurrentCost = GetItemValue(oCurrent);
+                if(nPotionPower == AI_POTION_LEVEL_MOST_POWERFUL &amp;&amp; nCurrentCost &gt; nStoredCost)
+                {
+                    nStoredCost = nCurrentCost;
+                    oSelectedItem = oCurrent;
+                }
+                else if(nPotionPower == AI_POTION_LEVEL_LEAST_POWERFUL &amp;&amp; (nCurrentCost &lt;= nStoredCost || nStoredCost == 0))
+                {
+                    nStoredCost = nCurrentCost;
+                    oSelectedItem = oCurrent;
+                }
+            }
+        }
+        else if(nPotionType == AI_POTION_TYPE_MANA)
+        {
+            if(_HasItemProperty(oCurrent, ITEM_PROPERTY_IS_MANA_POTION))
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_GetPotionByFilter", "MANA POTION!");
+                #endif
+                nCurrentCost = GetItemValue(oCurrent);
+                if(nPotionPower == AI_POTION_LEVEL_MOST_POWERFUL &amp;&amp; nCurrentCost &gt; nStoredCost)
+                {
+                    nStoredCost = nCurrentCost;
+                    oSelectedItem = oCurrent;
+                }
+                else if(nPotionPower == AI_POTION_LEVEL_LEAST_POWERFUL &amp;&amp; (nCurrentCost &lt;= nStoredCost || nStoredCost == 0))
+                {
+                    nStoredCost = nCurrentCost;
+                    oSelectedItem = oCurrent;
+                }
+            }
+        }
+    }
+
+    return oSelectedItem;
+}
+
+void AI_HandleCowardFollower(object oAppear = OBJECT_INVALID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("AI_HandleCowardFollower", "START, appear: " + GetTag(oAppear));
+    #endif
+
+    if(GetGameMode() != GM_COMBAT)
+        return;
+
+    if(IsObjectValid(oAppear) &amp;&amp; GetGroupHostility(GROUP_PC, GetGroupId(oAppear) == TRUE)) // perceived a creature that hates the player
+    {
+        // run away from this creature
+        command cWalk = CommandMoveAwayFromObject(oAppear, AI_RANGE_MEDIUM, TRUE);
+        PlaySoundSet(OBJECT_SELF, SS_EXPLORE_ENEMIES_SIGHTED_OTHER);
+        WR_ClearAllCommands(OBJECT_SELF);
+        WR_AddCommand(OBJECT_SELF, cWalk);
+    }
+    else // command complete. look for someone to run away from
+    {
+        object oNearestHostile = UT_GetNearestCreatureByGroup(OBJECT_SELF, GROUP_HOSTILE);
+        float fDistance = GetDistanceBetween(OBJECT_SELF, oNearestHostile);
+        #ifdef DEBUG
+        Log_Trace_AI("AI_HandleCowardFollower", "nearest visibile hostile: " + GetTag(oNearestHostile) + ", distance: " + FloatToString(fDistance));
+        #endif
+
+        if(fDistance &lt; (AI_RANGE_MEDIUM / 2))
+        {
+            command cWalk = CommandMoveAwayFromObject(oNearestHostile, AI_RANGE_MEDIUM, TRUE);
+            WR_AddCommand(OBJECT_SELF, cWalk);
+        }
+        else if(IsObjectValid(oNearestHostile) &amp;&amp; fDistance &lt;= AI_RANGE_MEDIUM)// cower
+        {
+            command cPlayAnimation = CommandPlayAnimation(3009, 1, TRUE, TRUE);
+            WR_AddCommand(OBJECT_SELF, cPlayAnimation);
+        }
+    }
+}
+
+const int CAI_DISABLED = 0;
+const int CAI_INACTIVE = 1;
+const int CAI_STASIS   = 2;
+const int CAI_INITIATE = 3;
+
+int CAI_SetCustomAI( object oCreature, int nCustomAI, int bInstant = FALSE )
+{
+    #ifdef DEBUG
+    LogTrace( LOG_CHANNEL_AI, "CAI_SetCustomAI( " + ToString(nCustomAI) + "); Instant: " + ToString(bInstant), oCreature );
+    #endif
+    SetLocalInt( oCreature, AI_CUSTOM_AI_ACTIVE, nCustomAI );
+    if ( bInstant )
+    {
+        WR_ClearAllCommands(oCreature,TRUE);
+        WR_AddCommand(oCreature,CommandWait(0.01f),TRUE);
+    }
+    return nCustomAI;
+}
+
+void CAI_SetCustomAIInteger( object oCreature, int nValue )
+{
+    #ifdef DEBUG
+    LogTrace( LOG_CHANNEL_AI, "CAI_SetCustomAIInteger( " + ToString(nValue) + ")", oCreature );
+    #endif
+    SetLocalInt(oCreature,AI_CUSTOM_AI_VAR_INT,nValue);
+}
+
+void CAI_SetCustomAIFloat( object oCreature, float fValue )
+{
+    #ifdef DEBUG
+    LogTrace( LOG_CHANNEL_AI, "CAI_SetCustomAIFloat( " + ToString(fValue) + ")", oCreature );
+    #endif
+    SetLocalFloat(oCreature,AI_CUSTOM_AI_VAR_FLOAT,fValue);
+}
+
+void CAI_SetCustomAIString( object oCreature, string sValue )
+{
+    #ifdef DEBUG
+    LogTrace( LOG_CHANNEL_AI, "CAI_SetCustomAIString( " + sValue + ")", oCreature );
+    #endif
+    SetLocalString(oCreature,AI_CUSTOM_AI_VAR_STRING,sValue);
+}
+
+void CAI_SetCustomAIObject( object oCreature, object oValue )
+{
+    #ifdef DEBUG
+    LogTrace( LOG_CHANNEL_AI, "CAI_SetCustomAIObject( " + GetTag(oValue) + ")", oCreature );
+    #endif
+    SetLocalObject(oCreature,AI_CUSTOM_AI_VAR_OBJECT,oValue);
+}
+
+int     CAI_GetCustomAI( object oCreature )        { return GetLocalInt(oCreature,AI_CUSTOM_AI_ACTIVE);        }
+int     CAI_GetCustomAIInteger( object oCreature ) { return GetLocalInt(oCreature,AI_CUSTOM_AI_VAR_INT);       }
+float   CAI_GetCustomAIFloat( object oCreature )   { return GetLocalFloat(oCreature,AI_CUSTOM_AI_VAR_FLOAT);   }
+string  CAI_GetCustomAIString( object oCreature )  { return GetLocalString(oCreature,AI_CUSTOM_AI_VAR_STRING); }
+object  CAI_GetCustomAIObject( object oCreature )  { return GetLocalObject(oCreature,AI_CUSTOM_AI_VAR_OBJECT); }
+/*void main()
+{
+    AI_DetermineCombatRound(OBJECT_SELF);
+    return;
+}*/
+
+
+
+
+/** @} */</text>
+	</Agent>
+</Resource>

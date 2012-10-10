@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="770" Folder="\_Game Effects\Effects\" ResRefName="effect_heartbeat_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_heartbeat_h.nss?moduleid=1&amp;resrefid=770" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_heartbeat_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------                                                                                                     // -----------------------------------------------------------------------------
+// effect_heartbeat
+// -----------------------------------------------------------------------------
+/*
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+#include "events_h"
+#include "log_h"
+effect EffectHeartbeat(float fRate, int nSubEvent);
+effect EffectHeartbeat(float fRate, int nSubEvent)
+{
+    effect e = Effect(EFFECT_TYPE_HEARTBEAT);
+    e = SetEffectInteger(e, 0, nSubEvent );
+    e = SetEffectFloat(e,0, fRate);
+    return e;
+}
+
+
+
+int Effects_HandleApplyEffectHeartbeat(effect eEffect)
+{
+
+    int   nSubEvent = GetEffectInteger(eEffect,0);
+    // Force a single instance per subtype
+    effect[] aHbs = GetEffects(OBJECT_SELF, EFFECT_TYPE_HEARTBEAT, 0 , GetModule());
+    int nSize = GetArraySize(aHbs);
+    int i;
+
+    int nFound = 0;
+    int nEffectId = 0;
+    for (i  = 0; i &lt; nSize; i++)
+    {
+        if (GetEffectInteger(aHbs[i],0) == nSubEvent)
+        {
+            nFound++;
+           // return FALSE;
+        }
+
+        if (nFound&gt;1) /*&gt;1 because this effect is technically applied already, we just unapply it on failure */
+        {
+            Log_Trace(LOG_CHANNEL_DESIGN_SCRIPTERROR, "effect_heartbeat", "More than one HB effect with id " + ToString(nSubEvent) + " found on object");
+            return FALSE;
+        }
+
+    }
+
+    nEffectId = GetEffectID(eEffect);
+
+
+    float fRate =  GetEffectFloat(eEffect,0);
+
+
+    event ev = Event(EVENT_TYPE_HEARTBEAT);
+    ev = SetEventFloat(ev, 0, fRate);
+    ev = SetEventInteger(ev, 0, nSubEvent);    
+    ev = SetEventInteger( ev, 1, nEffectId);
+
+    SignalEvent(OBJECT_SELF, ev);
+
+
+    return   TRUE;
+}
+
+int Effects_HandleRemoveEffectHeartbeat(effect eEffect)
+{
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

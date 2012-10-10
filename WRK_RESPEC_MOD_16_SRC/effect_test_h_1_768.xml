@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="768" Folder="\_Game Effects\Effects\" ResRefName="effect_test_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_test_h.nss?moduleid=1&amp;resrefid=768" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_test_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------                                                                                                     // -----------------------------------------------------------------------------
+// effect_test
+// -----------------------------------------------------------------------------
+/*
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: PeterT
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+effect EffectTest();
+int Effects_HandleApplyEffectTest(effect eEffect);
+int Effects_HandleRemoveEffectTest(effect eEffect);
+
+effect EffectTest()
+{
+
+    return Effect(EFFECT_TYPE_TEST);
+}
+
+
+
+int Effects_HandleApplyEffectTest(effect eEffect)
+{
+    // check to see if the player already has an item of this name
+    object oItem = GetItemPossessedBy(OBJECT_SELF, "gen_im_arm_shd_kit_wdn");
+    if (oItem != OBJECT_INVALID)
+    {
+        // if true, return false
+        Log_Trace(LOG_CHANNEL_EFFECTS, GetCurrentScriptName(), "Object Exists");
+        return FALSE;
+    } else
+    {
+        // if false, create object and return true
+        Log_Trace(LOG_CHANNEL_EFFECTS, GetCurrentScriptName(), "Object Does Not Exist");
+        oItem = CreateItemOnObject(R"gen_im_arm_shd_kit_wdn.uti", OBJECT_SELF);
+        SetTag(oItem, "gen_im_arm_shd_kit_wdn");
+
+        return TRUE;
+    }
+}
+
+int Effects_HandleRemoveEffectTest(effect eEffect)
+{
+    // check to see if the player has the object
+    object oItem = GetItemPossessedBy(OBJECT_SELF, "gen_im_amb_rshield_kite_a");
+    if (oItem != OBJECT_INVALID)
+    {
+        // if true, destroy and return true
+        Log_Trace(LOG_CHANNEL_EFFECTS, GetCurrentScriptName(), "Object Exists");
+        DestroyObject(oItem, 0);
+
+        return TRUE;
+    } else
+    {
+        // if false, return false
+        Log_Trace(LOG_CHANNEL_EFFECTS, GetCurrentScriptName(), "Object Does Not Exist");
+        return FALSE;
+    }
+}</text>
+	</Agent>
+</Resource>

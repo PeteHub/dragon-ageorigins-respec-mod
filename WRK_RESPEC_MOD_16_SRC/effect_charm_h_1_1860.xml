@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="1860" Folder="\_Game Effects\Effects\" ResRefName="effect_charm_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_charm_h.nss?moduleid=1&amp;resrefid=1860" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_charm_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_charm_h
+// -----------------------------------------------------------------------------
+/*
+    Effect Charm
+
+    Causes creature to temporarily switch groups and hostility.
+
+    Note: Only one charm effect can exist at any time.
+    If a charm effect exists, the new one will fail.
+
+
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+/** @brief Returns an effect which charms
+* @author Georg Zoeller
+*
+* @return a valid effect of type EFFECT_TYPE_CHARM.
+*/
+#include "effect_constants_h"
+#include "wrappers_h"
+#include "ai_threat_h"
+
+const float CHARM_MINIMUM_MEDIUM_CUTOFF = 0.53;
+const float CHARM_MINIMUM_LARGE_CUTOFF = 1.201;
+const int CHARM_CREATURE_SIZE_SMALL = 1;
+const int CHARM_CREATURE_SIZE_MEDIUM = 2;
+const int CHARM_CREATURE_SIZE_LARGE = 3;
+
+// Returns the creature's size based on its ring size in APR_base
+int _GetCreatureSize2(object oObject);
+int _GetCreatureSize2(object oObject)
+{
+    // Get creature's appearance from the 2DA APR_base
+    int nAppearance = GetAppearanceType(oObject);
+    float fAppearance = GetM2DAFloat(TABLE_APPEARANCE, "PERSPACE", nAppearance);
+    // Depending on the creature's size (float values)
+    if (fAppearance &lt; CHARM_MINIMUM_MEDIUM_CUTOFF)
+    {
+        // Creature is small
+        int nSize = CHARM_CREATURE_SIZE_SMALL;
+        return nSize;
+    }
+    else
+    {
+        if (fAppearance &gt;= CHARM_MINIMUM_LARGE_CUTOFF)
+        {
+            // Creature is large
+            int nSize = CHARM_CREATURE_SIZE_LARGE;
+            return nSize;
+        }
+        else
+        {
+            // Creature is medium
+            int nSize = CHARM_CREATURE_SIZE_MEDIUM;
+            return nSize;
+        }
+    }
+}
+
+effect EffectCharm(object oMaster, object oTarget);
+effect EffectCharm(object oMaster, object oTarget)
+{
+    effect eCharm = Effect(EFFECT_TYPE_CHARM);
+    if (IsDead(oMaster) == FALSE)
+    {
+        // save target group
+        int nGroup = GetGroupId(oTarget);
+        eCharm = SetEffectInteger(eCharm, 0, nGroup);
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EFFECTS, "effect_charm_h.EffectCharm","Charm on " + ToString(oTarget) + " with group " + ToString(nGroup));
+        #endif
+
+        // save master group
+        nGroup = GetGroupId(oMaster);
+        eCharm = SetEffectInteger(eCharm, 1, nGroup);
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EFFECTS, "effect_charm_h.EffectCharm","Master is " + ToString(oMaster) + " with group " + ToString(nGroup));
+        #endif
+    }
+
+    return eCharm;
+}
+
+
+int Effects_HandleApplyEffectCharm(effect eEffect)
+{
+    // fail if there are charm effects on creature
+    int nArraySize = GetArraySize(GetEffects(OBJECT_SELF, EFFECT_TYPE_CHARM));
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EFFECTS, "effect_charm_h.Effects_HandleApplyEffectCharm","ArraySize is " + ToString(nArraySize));
+    #endif
+    if (nArraySize &gt; 0  /*this includes this effect */ )
+    {
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EFFECTS,"ApplyCharm","Not applying charm because target is already charmed! ArraySize is "+ToString(nArraySize));
+        #endif
+
+        return FALSE;
+    } else
+    {
+        int nGroup = GetEffectInteger(eEffect, 1);;
+        SetGroupId(OBJECT_SELF, nGroup);
+        
+        // clear commands and switch to new target
+        ClearAllCommands(OBJECT_SELF);
+        object []oThreats = GetNearestObjectByHostility(OBJECT_SELF, TRUE, OBJECT_TYPE_CREATURE, 1, 1, 1);
+        object oThreat = oThreats[0];
+        AI_Threat_SetThreatTarget(OBJECT_SELF, oThreat);
+        
+/*        ClearAllCommands(OBJECT_SELF);
+        ClearThreatTable(OBJECT_SELF);
+        AI_Threat_ClearToSwitchTarget(OBJECT_SELF);
+        AI_Threat_UpdateEnemyAppeared(OBJECT_SELF, oThreat);
+        //AI_Threat_SetThreatTarget(OBJECT_SELF, oThreat);
+        //AddCommand(OBJECT_SELF, CommandAttack(oThreat), TRUE, TRUE);
+*/
+
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EFFECTS, "Threat num = " + ToString(GetArraySize(oThreats)));
+        Log_Trace(LOG_CHANNEL_EFFECTS, "Threat target = " + GetTag(oThreat));
+        #endif
+    }
+
+    return TRUE;
+}
+
+int Effects_HandleRemoveEffectCharm(effect eEffect)
+{
+    // if a valid group was stored
+    int nGroup = GetEffectInteger(eEffect, 0);
+
+    // Georg: Emmanuel's script had a race condition if people changed the group while the effect was active. Adding a check
+    int nMasterGroup = GetEffectInteger(eEffect, 1);
+    if (nGroup != 0 &amp;&amp; GetGroupId(OBJECT_SELF) == nMasterGroup)
+    {
+        SetGroupId(OBJECT_SELF, nGroup);
+    }
+
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EFFECTS, "effect_charm_h.Effects_HandleRemoveEffectCharm","Charm to " + ToString(nGroup) + " on " + ToString(OBJECT_SELF));
+    #endif
+
+    // clear threat info
+    AI_Threat_UpdateEnemyAppeared(OBJECT_SELF, GetEffectCreator(eEffect));
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

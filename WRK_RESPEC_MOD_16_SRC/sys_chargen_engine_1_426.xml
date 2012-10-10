@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="426" Folder="\_Systems\_Includes\" ResRefName="sys_chargen_engine" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\sys_chargen_engine.nss?moduleid=1&amp;resrefid=426" Requested="0">
+	<Agent type="empty">
+		<ResRefName>sys_chargen_engine</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// sys_chargen_engine
+// -----------------------------------------------------------------------------
+/*
+    Prototypes for to be created engine functions
+*/
+// -----------------------------------------------------------------------------
+// owner: georg zoeller
+// -----------------------------------------------------------------------------
+
+
+const int CHARGEN_MODE_CREATE = 0;
+const int CHARGEN_MODE_LEVELUP = 1;
+
+const int AUTOSCALING_LEVEL = 1;
+
+
+
+
+
+// -----------------------------------------------------------------------------
+// Engine defines
+// -----------------------------------------------------------------------------
+
+/*
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_START 44
+
+Int 0 - (0 = chargen, 1= levelup)
+
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SCREEN_ENTERED 45
+
+Int 0 - (0 = screen id)
+
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_RACE_AND_GENDER 46
+
+Int 0  -Race (race_base.xls)
+Int 1 - Gender (consts)
+
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_CLASS_AND_BG 47
+
+Int 0 - Class - cla_base.xls
+Int 1 - Background (backgrounds.xls) tbd
+
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_APPEARANCE_AND_SS 48
+
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_NAME 49
+
+String 0 = Name
+String 1 = Name  LastName if applicable
+
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_ASSIGN_ATTRIBUTES 50
+
+Int 0 - Attribute (index into properties.xls)
+Int 1 - # of points
+
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_ASSIGN_ABILITIES 51
+
+Int 0  -    # type of abilty (abi_base.abilitytype)
+Int 1  -    # of abilities picked
+Int 2..n - Ability (index into abi_base.xls)
+
+
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_END 52
+
+*/
+/*
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_START                     44
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SCREEN_ENTERED            45
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_RACE               46
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_CLASS              47
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_SOUNDSET           48
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_NAME               49
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_ASSIGN_ATTRIBUTES         50
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_ASSIGN_ABILITIES          51
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_LEVELUP_CLASS      52
+// 53, UPDATE_APPEARANCE, unused
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_GENDER             54
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_SELECT_BACKGROUND         55
+// Events #54 - 59 - Reserved for future chargen events
+#define CSSCRIPTEVENT_EVENTTYPE_CHARGEN_END                       59
+*/</text>
+	</Agent>
+</Resource>

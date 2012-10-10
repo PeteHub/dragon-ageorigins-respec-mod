@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="3211" Folder="\_Game Effects\Effects\" ResRefName="effect_enchantment_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_enchantment_h.nss?moduleid=1&amp;resrefid=3211" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_enchantment_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// Enchantment (temporary weapon enchantments)
+// -----------------------------------------------------------------------------
+#include "core_h"
+
+const int ENCHANTMENT_FIRE      = 3000;
+const int ENCHANTMENT_COLD      = 3001;
+const int ENCHANTMENT_LIGHTNING = 3002;
+const int ENCHANTMENT_STONE     = 6084;
+const int ENCHANTMENT_TELEK     = 6085;
+const int ENCHANTMENT_HOLY      = 6086;
+const int ENCHANTMENT_FIRE_COATING                   = 3003; // 2 fire damage per power
+const int ENCHANTMENT_COLD_COATING                   = 3004; // 2 cold damage per power
+const int ENCHANTMENT_LIGHTNING_COATING              = 3005; // 2 electricity damage per power
+const int ENCHANTMENT_NATURE_COATING                 = 3006; // 2 nature damage per power
+const int ENCHANTMENT_SPIRIT_COATING                 = 3007; // 2 spirit damage per power
+const int ENCHANTMENT_VENOM                          = 3008; // 1 nature damage per power, 0.1 slow per power for 5s (unresistable)
+const int ENCHANTMENT_DEATHROOT_EXTRACT              = 3009; // 1 nature damage per power, 2s stun per power (resistable)
+const int ENCHANTMENT_CROW_POISON                    = 3010; // 2 nature damage per power, 0.1 slow per power for 5s (unresistable), 2s stun per power (resistable)
+const int ENCHANTMENT_SOLDIERS_BANE                  = 3011; // 5 stamina damage per power (non-mages only)
+const int ENCHANTMENT_MAGEBANE                       = 3012; // 5 mana damage per power (mages only)
+const int ENCHANTMENT_DEMONIC_POISON                 = 3013; // 5 spirit damage per power
+const int ENCHANTMENT_QUIET_DEATH                    = 3014; // 10 nature damage per power, instant kill creatures 20% or less max health
+
+
+int _HasItemProperty(object oItem, int nProperty)
+{
+    LogTrace(LOG_CHANNEL_TEMP,"Enchant._HasItemProperty:" + ToString(oItem) + " " + ToString(nProperty) + " = " + ToString( GetItemPropertyPower(oItem, nProperty,FALSE)) );
+
+    return GetItemPropertyPower(oItem, nProperty,FALSE) &gt; 0;
+}
+
+
+int HasEnchantments(object oCreature)
+{
+    return GetHasEffects(oCreature, EFFECT_TYPE_ENCHANTMENT);
+}
+
+void EffectEnchantment_HandleEquip(object oItem, object oOwner, int nType=0, int nPower = 0)
+{
+    int nItemType= GetItemType (oItem);
+                                                     
+
+    if (nItemType != ITEM_TYPE_WEAPON_MELEE)
+    {
+        return;
+    }
+             
+
+    
+    
+    // -------------------------------------------------------------------------
+    // coming from function handler
+    // -------------------------------------------------------------------------
+    if ((nType+nPower)&gt;0?TRUE:FALSE)
+    {
+       if (!_HasItemProperty(oItem,nType))
+        {
+
+            AddItemProperty(oItem,nType,nPower);
+        }
+
+    }
+    // -------------------------------------------------------------------------
+    // coming from equip event
+    // -------------------------------------------------------------------------
+    else
+    {
+
+        effect[] eEffect = GetEffects(oOwner, EFFECT_TYPE_ENCHANTMENT);
+
+        int nSize = GetArraySize(eEffect);
+        int i;
+
+        for (i=0; i&lt; nSize; i++)
+        {
+            nType = GetEffectInteger(eEffect[i], 0);
+            nPower = GetEffectInteger(eEffect[i], 1);
+            if (!_HasItemProperty(oItem,nType))              `
+            {
+                AddItemProperty(oItem,nType,nPower);
+            }
+        }
+
+    }
+
+}
+
+
+
+
+
+
+void EffectEnchantment_HandleUnEquip(object oItem, object oOwner, int nType = 0)
+{
+    int nPower;
+
+    LogTrace(LOG_CHANNEL_TEMP,"EffectEnchantment_HandleUnEquip:" + ToString(oItem) + " " + ToString(nType) );
+
+    if (GetItemType (oItem) != ITEM_TYPE_WEAPON_MELEE)
+    {
+        return;
+    }
+
+
+    if (nType != 0)
+    {
+        if (_HasItemProperty(oItem,nType))
+        {
+            RemoveItemProperty(oItem,nType);
+            _HasItemProperty(oItem,nType);
+        }
+    }
+    else
+    {
+        effect[] eEffect = GetEffects(oOwner, EFFECT_TYPE_ENCHANTMENT);
+        int nSize = GetArraySize(eEffect);
+        int i;
+
+        for (i=0; i&lt; nSize; i++)
+        {
+            nType = GetEffectInteger(eEffect[i], 0);
+            nPower = GetEffectInteger(eEffect[i], 1);
+            if (_HasItemProperty(oItem,nType))
+            {
+                RemoveItemProperty(oItem,nType);
+            }
+        }
+    }
+
+}
+
+
+
+int Effects_HandleApplyEffectEnchantment(effect eEffect)
+{
+    int nType = GetEffectInteger(eEffect, 0);
+    int nPower = GetEffectInteger(eEffect, 1);
+
+    object oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN, OBJECT_SELF);
+    if (oWeapon != OBJECT_INVALID)
+    {
+
+            DEBUG_PrintToScreen( ToString(oWeapon) + " " + ToString(nType) + " " + ToString(nPower));
+            EffectEnchantment_HandleEquip(oWeapon, OBJECT_SELF, nType, nPower);
+    }
+
+
+    oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_OFFHAND, OBJECT_SELF);
+    if (oWeapon != OBJECT_INVALID)
+    {
+            EffectEnchantment_HandleEquip(oWeapon, OBJECT_SELF, nType, nPower);
+    }
+
+
+    return TRUE;
+}
+
+
+
+int Effects_HandleRemoveEffectEnchantment(effect eEffect)
+{
+    object oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_MAIN,  OBJECT_SELF);
+
+    LogTrace(LOG_CHANNEL_TEMP,"Enchant-Remove:" + ToString(oWeapon));
+    int nType = GetEffectInteger(eEffect, 0);
+    if (oWeapon != OBJECT_INVALID)
+    {
+
+        EffectEnchantment_HandleUnEquip(oWeapon,OBJECT_SELF, nType);
+    }
+
+
+     oWeapon = GetItemInEquipSlot(INVENTORY_SLOT_OFFHAND, OBJECT_SELF);
+    if (oWeapon != OBJECT_INVALID)
+    {
+            EffectEnchantment_HandleUnEquip(oWeapon,OBJECT_SELF, nType);
+    }
+
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

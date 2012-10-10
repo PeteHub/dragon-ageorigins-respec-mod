@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="747" Folder="\_Game Effects\Effects\" ResRefName="effect_addability" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_addability.nss?moduleid=1&amp;resrefid=747" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_addability</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_addability
+// -----------------------------------------------------------------------------
+/*
+    Effect: Add an ability for the duration of the effect
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "2da_constants_h"
+#include "wrappers_h"
+#include "events_h"
+#include "effect_constants_h"
+
+
+
+effect EffectAddAbility(int nAbility, object oOwner);
+effect EffectAddAbility(int nAbility, object oOwner)
+{
+    effect eEffect = Effect(EFFECT_TYPE_ADDABILITY);
+    eEffect = SetEffectInteger(eEffect, 0, nAbility);
+    eEffect = SetEffectObject(eEffect, 0, oOwner);
+    return eEffect;
+}
+
+
+
+// -----------------------------------------------------------------------------
+// This utility function handles the application of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleApplyEffectAddAbility(effect eEffect);
+int Effects_HandleApplyEffectAddAbility(effect eEffect)
+{
+    int nAbility = GetEffectInteger(eEffect, 0);
+    if (nAbility &gt; ABILITY_INVALID)
+    {
+
+        Log_Trace(LOG_CHANNEL_TEMP,"AddAbility:", ToString (nAbility));
+
+
+        AddAbility(OBJECT_SELF, nAbility);
+        SetQuickslot(OBJECT_SELF,7, nAbility);
+        return TRUE;
+    }
+    else
+    {               
+        Log_Trace(LOG_CHANNEL_TEMP,"AddAbility Failed:", ToString (nAbility));
+        return FALSE;
+    }
+
+}
+
+// -----------------------------------------------------------------------------
+// This utility function handles the removal of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleRemoveEffectAddAbility(effect eEffect);
+int Effects_HandleRemoveEffectAddAbility(effect eEffect)
+{
+    int nAbility = GetEffectInteger(eEffect, 0);
+    RemoveAbility(OBJECT_SELF, nAbility);
+    Log_Trace(LOG_CHANNEL_TEMP,"AddAbility - REMOVE:", ToString (nAbility));
+
+
+    return TRUE;
+}
+
+/*void AddItemAbilityByEffect(object oItem, object oTarget);
+void AddItemAbilityByEffect(object oItem, object oTarget)
+{
+    int nAbility = GetItemAbilityId(oItem);
+
+    if (nAbility &gt; INVALID_ITEM_ABILITY)
+    {
+        effect e = EffectAddAbility(nAbility, oItem);
+        ApplyEffectOnObject(4  ,e,oTarget, 0.0f, oItem, 0);
+    }
+
+}
+
+
+void RemoveItemAbilityEffect(object oItem, object oTarget)
+{
+    int nAbilityId = GetItemAbilityId(oItem);
+    if (nAbilityId &gt;  INVALID_ITEM_ABILITY)
+    {
+        effect[] effects = GetEffects(oTarget, EFFECT_TYPE_ADDABILITY, 0, oItem,4);
+        if (GetArraySize(effects)&gt;0)
+        {
+            RemoveEffect(oTarget, effects[0]);
+        }
+    }
+}*/</text>
+	</Agent>
+</Resource>

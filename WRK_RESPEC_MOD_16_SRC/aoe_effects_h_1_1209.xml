@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="1209" Folder="\_Ability_Scripts\" ResRefName="aoe_effects_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\aoe_effects_h.nss?moduleid=1&amp;resrefid=1209" Requested="0">
+	<Agent type="empty">
+		<ResRefName>aoe_effects_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>#include "ability_h"
+#include "plt_cod_aow_spellcombo1"
+
+const float GREASE_SLOW_FRACTION = 0.5f;
+
+const int AOE_FLAG_DESTRUCTION_PENDING = 1;
+
+void ApplyAOEEffect_Grease(object oTarget, object oCreator, int nAbility, object oAoE = OBJECT_INVALID)
+{
+    // slow effect
+    effect eSlow = EffectModifyMovementSpeed(GREASE_SLOW_FRACTION, TRUE);
+    ApplyEffectOnObject(EFFECT_DURATION_TYPE_PERMANENT, eSlow, oTarget, 0.0f, oCreator, nAbility);
+
+    // physical resistance
+    if (ResistanceCheck(oCreator, oTarget, PROPERTY_ATTRIBUTE_SPELLPOWER, RESISTANCE_PHYSICAL) == FALSE)
+    {
+        effect eEffect = Effect(EFFECT_TYPE_SLIP);
+        ApplyEffectOnObject(EFFECT_DURATION_TYPE_INSTANT, eEffect, oTarget, 0.0f, oCreator, nAbility);
+    }
+
+    if (HasDotEffectOfType(oTarget, DAMAGE_TYPE_FIRE))
+    {
+          if (oAoE != OBJECT_INVALID)
+          {
+              //Change this to actually supplying the AoE effect...
+              SendComboEventAoE(ABILITY_SPELL_GREASE,SHAPE_SPHERE,GetLocation(oAoE), oTarget,10.0f, 0.0f, 0.0f, 1.0f);
+          }
+          else
+          {
+              DEBUG_PrintToScreen("INVALID OBJECT");
+          }
+     }
+}
+
+
+
+void IgniteGreaseAoe(object oGrease, object oIgniter)
+{
+
+    if (!IsObjectValid(oIgniter))
+    {
+        oIgniter =  GetArea(OBJECT_SELF);
+    }
+    int nFlag = GetAOEFlags(oGrease);
+
+
+    if ((nFlag &amp; AOE_FLAG_DESTRUCTION_PENDING) != AOE_FLAG_DESTRUCTION_PENDING)
+    {
+        SetAOEFlags(oGrease, (nFlag | AOE_FLAG_DESTRUCTION_PENDING));
+
+        // create the fire effect
+        effect eAoE = EffectAreaOfEffect(204,R"sys_comboeffects.ncs");
+        eAoE = SetEffectEngineInteger(eAoE,2, 1114); /*vfx*/
+
+        Engine_ApplyEffectAtLocation(EFFECT_DURATION_TYPE_TEMPORARY,eAoE, GetLocation(oGrease), 20.0f,oIgniter, 0);
+        DestroyObject(oGrease,3000);
+
+        // combo effect codex - grease fire
+        if (IsFollower(oIgniter) == TRUE)
+        {
+            WR_SetPlotFlag(PLT_COD_AOW_SPELLCOMBO1, COD_AOW_SPELLCOMBO_1_GREASE_FIRE, TRUE);
+        }
+    }
+}
+
+// Will apply an AOE on a creature that makes everything in front of it be knocked back.
+void ApplyKnockbackAoe(object oTarget)
+{
+   effect eAoe = EffectAreaOfEffect(21, R"monster_aoe_knockback.ncs");
+   Engine_ApplyEffectOnObject(EFFECT_DURATION_TYPE_PERMANENT, eAoe, oTarget, 0.0f, oTarget, 0);
+}</text>
+	</Agent>
+</Resource>

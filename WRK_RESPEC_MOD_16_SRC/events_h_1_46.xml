@@ -1,0 +1,1190 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="46" Folder="\_Core Includes\" ResRefName="events_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\events_h.nss?moduleid=1&amp;resrefid=46" Requested="0">
+	<Agent type="empty">
+		<ResRefName>events_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// Events Includes
+// -----------------------------------------------------------------------------
+/*
+
+    This is an include file of all events that are created via scripting
+
+    Contents:
+
+        SendXXXEvent Functions
+        Event structs
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+
+#include "core_h"
+
+#include "log_h"
+
+/* -----------------------------------------------------------------------------
+*  Designer defined events
+*  ------------------------------------ ----------------------------------------*/
+
+
+//------------------------------------------------------------------------------
+// ** PLEASE ALSO UPDATE //tag/main/data/Source/2DA/events.xls if you add new
+//    events here !!!! ** -- Georg
+//------------------------------------------------------------------------------
+
+
+const int EVENT_TYPE_ATTACKED               = 1001;
+const int EVENT_TYPE_ALLY_ATTACKED          = 1002; // an ally has got the 'attacked' event and asked for help
+const int EVENT_TYPE_WORLD_MAP_USED         = 1003; // player used the world map to travel from point A to point B
+const int EVENT_TYPE_DELAYED_SHOUT          = 1004; // used to fire a dialog shout every few seconds
+const int EVENT_TYPE_TRANSITION_TO_WORLD_MAP= 1005; // player uses the generic transition system to open the world map
+
+//------------------------------------------------------------------------------
+// Redirector events for spellscripts in ability_core
+//------------------------------------------------------------------------------
+const int EVENT_TYPE_SPELLSCRIPT_PENDING    = 1005;
+const int EVENT_TYPE_SPELLSCRIPT_CAST       = 1006;  // cast
+const int EVENT_TYPE_SPELLSCRIPT_IMPACT     = 1007;  // impact
+const int EVENT_TYPE_SPELLSCRIPT_DEACTIVATE = 1008; // talent deactivated
+
+const int EVENT_TYPE_DOT_TICK               = 1010;
+const int EVENT_TYPE_CAST_AT                = 1011; //an ability has been cast on me
+const int EVENT_TYPE_STAT_REGEN             = 1012; // stat regeneration. might be changed in the future.
+const int EVENT_TYPE_RESURRECTION           = 1013; // creature resurrected.
+const int EVENT_TYPE_SET_OBJECT_ACTIVE      = 1014; // needed since CommandDoFunction was removed and we're using CommandDoEvent
+// 1015 used by ambient ai
+const int EVENT_TYPE_HANDLE_CUSTOM_AI       = 1016; // handle any custom AI before handling the built-in AI
+const int EVENT_TYPE_OUT_OF_AMMO            = 1017;
+const int EVENT_TYPE_HEARTBEAT              = 1018; // runs 2 seconds after death to set AI level to low
+const int EVENT_TYPE_TEAM_DESTROYED         = 1019; // fires when an entire team of creatures is destroyed. The event is fired to the last living creature on the team
+const int EVENT_TYPE_CAMPAIGN_ITEM_ACQUIRED = 1020;  // fires when items with the ITEM_ACQUIRED_EVENT_ID variable set are picked up. The event is fired to the module.
+const int EVENT_TYPE_SET_GAME_MODE          = 1021; // fires to the module when the game mode is set with the game mode being set carried as an integer on the event.
+const int EVENT_TYPE_COMBAT_END             = 1022; // fires to creature_core when combat ends
+const int EVENT_TYPE_DYING                  = 1023; // fired by effect_death_h when a creature received the killing blow.
+const int EVENT_TYPE_PLAYER_LEVELUP         = 1024; // fired by the levelup system into player_core.
+//const int EVENT_TYPE_...                  = 1025; // unused
+const int EVENT_TYPE_AMBIENT_CONTINUE       = 1026; // fired by engine when conversation ends or player is nearby to resume ambient behaviour
+const int EVENT_TYPE_MODULE_CHARGEN_DONE    = 1027; // fired the the core chargen script into the module
+const int EVENT_TYPE_PARTY_MEMBER_HIRED     = 1028; // fired when a party member is added to the party pool
+const int EVENT_TYPE_SUMMON_DIED            = 1029; // fired when the summon died.
+const int EVENT_TYPE_CONFUSION_CALLBACK     = 1030;
+const int EVENT_TYPE_PARTY_MEMBER_FIRED     = 1031;
+const int EVENT_TYPE_UNIQUE_POWER           = 1032;
+const int EVENT_TYPE_APPROACH_TRAP          = 1033; // Trap triggered and the creature receiving this event should approach the trap
+const int EVENT_TYPE_CAMPAIGN_ITEM_LOST     = 1034; // fire to the module when the ITEM_LOST_EVENT variable is set on an item removed form player inventory.
+
+const int EVENT_TYPE_TRAP_TRIGGER_DISARMED  = 1045; // Fired to trap's signal target(s) when the trap is disarmed.
+const int EVENT_TYPE_UNLOCK_FAILED          = 1046; // Fired to placeable when unlock attempt fails.
+const int EVENT_TYPE_OPENED                 = 1047; // Fired to placeable when it has been opened.
+const int EVENT_TYPE_TRAP_RESET             = 1048; // Fired to trap's signal target(s) so it releases/retracts/resets when trap is triggered.
+const int EVENT_TYPE_TRAP_DISARM            = 1049; // Fired to a trap to cause itself to disarm.
+const int EVENT_TYPE_TRAP_ARM               = 1050; // Fired to a trap to cause itself to arm.
+const int EVENT_TYPE_TRAP_TRIGGER_ENTER     = 1051;
+const int EVENT_TYPE_TRAP_TRIGGER_EXIT      = 1052;
+const int EVENT_TYPE_TRAP_TRIGGER_ARMED     = 1053;
+const int EVENT_TYPE_CUSTOM_COMMAND_COMPLETE= 1054;
+const int EVENT_TYPE_MODULE_HANDLE_GIFT     = 1055;
+const int EVENT_TYPE_MODULE_HANDLE_FOLLOWER_DEATH = 1056; // yes! its only here for Wynne!
+const int EVENT_TYPE_SET_INTERACTIVE        = 1057;
+const int EVENT_TYPE_OBJECT_ACTIVE          = 1058;
+const int EVENT_TYPE_SPELLSCRIPT_INDIVIDUAL_IMPACT = 1066;  // impact
+const int EVENT_TYPE_DROP_STEALTH           = 1090;
+const int EVENT_TYPE_CREATURE_SHAPESHIFTED  = 1100;
+
+
+
+const int EVENT_TYPE_DELAYED_GM_CHANGE = 2000;
+const int EVENT_TYPE_AUTOPAUSE = 2001;
+
+const int EVENT_TYPE_CHARGEN_AUTOLEVEL            = 56;
+
+
+const int EVENT_TYPE_DESTROY_OBJECT         = 1070; // object should destroy itself
+
+
+const int EVENT_TYPE_COMBO_IGNITE           = 1080;
+
+
+
+const int EVENT_TYPE_PARTY_MEMBER_RES_TIMER = 1201;// party members are rezzed on this event if it happens outside of combat.
+
+
+
+// QA is using events 30200-30300
+const int EVENT_TYPE_QA_EVENT = 30200;
+const int EVENT_TYPE_QA_EVENT_BLA =  30201;
+
+// Events 50000 to 60000 are reserved for plot events
+const int EVENT_TYPE_PROVING_ENTER = 50001;
+const int EVENT_TYPE_PROVING_START = 50002;
+const int EVENT_TYPE_PROVING_WIN   = 50003;
+const int EVENT_TYPE_PROVING_LOSE  = 50004;
+const int EVENT_TYPE_PROVING_EXIT  = 50005;
+const int EVENT_TYPE_CUSTOM_EVENT_01 = 50006;
+const int EVENT_TYPE_CUSTOM_EVENT_02 = 50007;
+const int EVENT_TYPE_CUSTOM_EVENT_03 = 50008;
+const int EVENT_TYPE_CUSTOM_EVENT_04 = 50009;
+const int EVENT_TYPE_CUSTOM_EVENT_05 = 50010;
+const int EVENT_TYPE_STEALING_SUCCESS = 50011;
+const int EVENT_TYPE_STEALING_FAILURE = 50012;
+const int EVENT_TYPE_CUSTOM_EVENT_06 = 50013;
+const int EVENT_TYPE_CUSTOM_EVENT_07 = 50014;
+const int EVENT_TYPE_CUSTOM_EVENT_08 = 50015;
+
+
+
+const int EVENT_TYPE_DEBUG_KICKSTART_AI = 9998; // (georg) kickstart the AI if it was frozen.
+const int EVENT_TYPE_DEBUG_RESURRECTION = 9999; // (georg) resurrection button handler for death panel/
+
+//------------------------------------------------------------------------------
+// Events 80000-81000 are reserved for run database events,
+//
+//   *** See design_tracking_h for their actual definition ***
+//
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// ** PLEASE ALSO UPDATE //tag/main/data/Source/2DA/events.xls if you add new
+//    events here !!!! ** -- Georg
+//------------------------------------------------------------------------------
+
+
+
+
+/* -----------------------------------------------------------------------------
+*  Using this to typecast event parameters for EVENT_CAST_AT
+*  ----------------------------------------------------------------------------*/
+struct EventOnCastAtParamStruct
+{
+    object oCaster;
+    int nAbility;
+    int bHostile;
+    float fParam1; // for healing spells: amount being healed
+};
+
+
+
+/* -----------------------------------------------------------------------------
+*  Script.nss defines
+*  -----------------------------------------------------------------------------
+int EVENT_TYPE_INVALID              =        0;
+int EVENT_TYPE_SPELLCASTAT          =        1;
+int EVENT_TYPE_DAMAGED              =        2;
+int EVENT_TYPE_SPAWN        = 3;
+int EVENT_TYPE_DEATH        = 4;
+int EVENT_TYPE_MELEE_ATTACK_START = 5;
+int EVENT_TYPE_INVENTORY_ADDED  = 6;
+int EVENT_TYPE_INVENTORY_REMOVED = 7;
+int EVENT_TYPE_ENTER        = 8;
+int EVENT_TYPE_EXIT     = 9;
+int EVENT_TYPE_BLOCKED      = 10;
+int EVENT_TYPE_EQUIP        = 11;
+int EVENT_TYPE_UNEQUIP      = 12;
+int EVENT_TYPE_FAILTOOPEN   = 13;
+int EVENT_TYPE_USE      = 14;
+int EVENT_TYPE_CLICK        = 15;
+int EVENT_TYPE_TRAP_TRIGGERED   = 16;
+int EVENT_TYPE_TRAP_DISARMED    = 17;
+int EVENT_TYPE_DIALOGUE     = 18;
+int EVENT_TYPE_MODULE_START = 19;
+int EVENT_TYPE_MODULE_LOAD  = 20;
+int EVENT_TYPE_LISTENER     = 21;
+int EVENT_TYPE_LOCKED       = 22;
+int EVENT_TYPE_UNLOCKED     = 23;
+int EVENT_TYPE_PLAYERLEVELUP    = 24;
+int EVENT_TYPE_PERCEPTION_APPEAR = 25;
+int EVENT_TYPE_PERCEPTION_DISAPPEAR = 26;
+int EVENT_TYPE_SET_PLOT = 27;
+int EVENT_TYPE_GET_PLOT = 28;
+int EVENT_TYPE_ATTACK_IMPACT = 29;
+int EVENT_TYPE_COMBAT_INITIATED = 30; // was ENGAGE_TARGET
+int EVENT_TYPE_ABILITY_CAST_IMPACT = 31; // was CAST
+int EVENT_TYPE_APPLY_EFFECT = 33;
+int EVENT_TYPE_REMOVE_EFFECT = 34;
+int EVENT_TYPE_COMMAND_PENDING = 35; // was RESOLVE_ATTACK, WEAPON_ATTACK_PENDING
+int EVENT_TYPE_COMMAND_COMPLETE = 36;
+int EVENT_TYPE_ABILITY_CAST_START = 32;
+int EVENT_TYPE_GAMEOBJECTSLOADED = 37;
+
+*/
+
+
+/**
+* @brief Signals a handle custom AI event
+*
+* @param oTarget   the target to signal the event to
+*
+* @returns  nothing
+* @author   Georg
+*
+**/
+void SendEventOutOfAmmo(object oTarget)
+{
+    #ifdef DEBUG
+    Log_Msg(LOG_CHANNEL_EVENTS,"events_h.SendEventOutOfAmmo", oTarget);
+    #endif
+
+    event ev = Event(EVENT_TYPE_OUT_OF_AMMO);
+
+    SignalEvent(oTarget, ev);
+}
+
+/**
+* @brief Signals a handle custom AI event
+*
+* @param oTarget   the target to signal the event to
+*
+* @returns  nothing
+* @author   Yaron
+*
+**/
+void SendEventHandleCustomAI(object oTarget, object oLastTarget, int nLastCommand,
+    int nLastCommandStatus, int nLastSubCommand, int nAITargetType = -1, int nAIParameter = 0, int nTacticID = -1)
+{
+    #ifdef DEBUG
+    Log_Msg(LOG_CHANNEL_EVENTS,"events_h.SendEventHandleCustomAI", oTarget);
+    #endif
+
+    event evHandleCustomAI = Event(EVENT_TYPE_HANDLE_CUSTOM_AI);
+    evHandleCustomAI = SetEventObject(evHandleCustomAI, 0, oLastTarget);
+    evHandleCustomAI = SetEventInteger(evHandleCustomAI, 1, nLastCommand);
+    evHandleCustomAI = SetEventInteger(evHandleCustomAI, 2, nLastCommandStatus);
+    evHandleCustomAI = SetEventInteger(evHandleCustomAI, 3, nLastSubCommand);
+    evHandleCustomAI = SetEventInteger(evHandleCustomAI, 4, nAITargetType);
+    evHandleCustomAI = SetEventInteger(evHandleCustomAI, 5, nAIParameter);
+    evHandleCustomAI = SetEventInteger(evHandleCustomAI, 6, nTacticID);
+
+    SignalEvent(oTarget, evHandleCustomAI);
+}
+
+/**
+* @brief Signals a set creature active event to oTarget.
+*
+* @param oTarget   the target to signal the event to
+* @param nActive whether the creature should be active or not
+* @param nAnimation the animation to play
+* @param nPartyMember - set to 1 to make this work on party members
+*
+* @returns  nothing
+* @author   Yaron
+*
+**/
+void SendEventOnSetObjectActive(object oTarget, int nActive, int nAnim = -1, float fDelay = 0.0f, int nPartyMember = 0)
+{
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EVENTS,"events_h.SendEventOnSetObjectActive",IntToString(nActive),oTarget);
+    #endif
+
+    event evOnSetObjectActive = Event(EVENT_TYPE_SET_OBJECT_ACTIVE);
+    evOnSetObjectActive = SetEventInteger( evOnSetObjectActive, 0, nActive );
+    evOnSetObjectActive = SetEventInteger( evOnSetObjectActive, 1, nPartyMember );
+    evOnSetObjectActive = SetEventInteger( evOnSetObjectActive, 2, nAnim );
+
+    if (fDelay == 0.0f)
+    {
+        SignalEvent(oTarget, evOnSetObjectActive);
+    }
+    else
+    {
+        DelayEvent(fDelay, oTarget, evOnSetObjectActive);
+    }
+}
+
+
+/**
+* @brief Signals an Damaged event to oTarget.
+*
+* @param oTarget   the target to signal the event to
+* @param oAttacker the attacker that caused the event
+*
+* @returns  nothing
+* @author   Brent
+*
+**/
+void SendEventOnDamaged(object oTarget, object oAttacker, float fDamage, int nDamageType, int nAbility)
+{
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EVENTS,"events_h.SendEventOnDamaged","Damage: " + FloatToString(fDamage),oTarget);
+    #endif
+
+    event evOnDamage = Event(EVENT_TYPE_DAMAGED);
+    evOnDamage = SetEventFloat( evOnDamage, 0, fDamage );
+    evOnDamage = SetEventInteger( evOnDamage, 0, nDamageType );
+    evOnDamage = SetEventCreator(evOnDamage, oAttacker);
+    evOnDamage = SetEventInteger( evOnDamage, 1, nAbility);
+
+    SignalEvent(oTarget, evOnDamage);
+}
+
+/**
+* @brief Signals a delayed shout event to oTarget.
+*
+* @param oTarget   the target to signal the event to
+*
+* @returns  nothing
+* @author   Yaron
+*
+**/
+void SendEventOnDelayedShout(object oTarget)
+{
+
+    event evOnDelayedShout = Event(EVENT_TYPE_DELAYED_SHOUT);
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EVENTS,"events_h.SendEventOnDelayedShout","",oTarget);
+    #endif
+
+    SignalEvent(oTarget, evOnDelayedShout);
+}
+
+
+/**
+* @brief Signals placeable that it has been opened.
+*
+* @param oTarget   the target to signal the event to
+*
+* @returns  nothing
+* @author   Georg
+*
+**/
+void SendEventOpened(object oTarget, object oUser)
+{
+    #ifdef DEBUG
+    Log_Msg(LOG_CHANNEL_EVENTS,"events_h.SendEventOpened", oTarget);
+    #endif
+
+    event ev = Event(EVENT_TYPE_OPENED);
+    ev = SetEventObject(ev, 0, oUser);
+    SignalEvent(oTarget, ev);
+}
+
+
+
+/**
+* @brief Returns EventOnCastAtParamStruct with event parameters for evt
+*
+*  structure fields - the target of the event
+*       object oCaster - the caster of the event
+*       int nAbility   - the ability id
+*       int bHostile   - whether or not to treat the event as hostile action
+*
+* @param evt       The event to get the parameters from
+*
+* @returns  struct with fields.
+* @author   Georg
+*
+**/
+struct EventOnCastAtParamStruct GetEventOnCastAtParams(event evt)
+{
+    struct EventOnCastAtParamStruct stRet;
+
+    // &lt;Debug&gt;
+    if (GetEventType(evt) != EVENT_TYPE_CAST_AT &amp;&amp; LOG_ENABLED)
+    {
+        Warning   ("Critical designer errorr: events_h.GetEventOnCastAtParams called with invalid parameter");
+        return stRet;
+    }
+    // &lt;/Debug&gt;
+
+    stRet.oCaster = GetEventObject(evt,0);
+    stRet.bHostile = GetEventInteger(evt,0);
+    stRet.nAbility = GetEventInteger(evt,1);
+    stRet.fParam1 = GetEventFloat(evt, 0);
+
+    return stRet;
+
+}
+
+
+
+
+/**
+* @brief Signals an Attacked event to oTarget.
+*
+* @param oTarget   the target to signal the event to
+* @param oAttacker the attacker that caused the event
+*
+* @returns  nothing
+* @author   Brent
+*
+**/
+
+void SendEventOnAttacked(object oTarget, object oAttacker)
+{
+    if (oTarget != oAttacker)
+    {
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EVENTS,"events_h.SendEventOnAttacked","",oTarget);
+        #endif
+
+        event evOnAttacked = Event(EVENT_TYPE_ATTACKED);
+        evOnAttacked = SetEventObject(evOnAttacked, 0, oAttacker);
+
+        SignalEvent(oTarget, evOnAttacked);
+    }
+}
+
+
+/**
+* @brief Signals an Cast_At event to oTarget.
+*
+* @param oTarget   the target to signal the event to
+* @param oCaster   the caster that caused the event
+* @param bHostile  true if the spell was cast with hostile intent
+* @param nAbilityId the ability id that was cast
+*
+* @returns  nothing
+* @author   Georg
+*
+**/
+void SendEventOnCastAt(object oTarget, object oCaster, int nAbilityId, int bHostile = TRUE, float fParam1 = 0.0);
+void SendEventOnCastAt(object oTarget, object oCaster, int nAbilityId, int bHostile = TRUE, float fParam1 = 0.0)
+{
+    if (oTarget != oCaster)
+    {
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EVENTS,"events_h.SendEventOnCastAt","Ability:" + IntToString(nAbilityId) + " hostile: " + ToString(bHostile),oTarget);
+        #endif
+
+        event evOnCast = Event(EVENT_TYPE_CAST_AT);
+        evOnCast = SetEventObject(evOnCast, 0, oCaster);
+        evOnCast = SetEventInteger(evOnCast, 0, bHostile);
+        evOnCast = SetEventInteger(evOnCast, 1, nAbilityId);
+        evOnCast = SetEventFloat(evOnCast, 0, fParam1);
+        SignalEvent(oTarget, evOnCast);
+    }
+}
+
+
+
+
+/**
+* @brief Signals an AllyAttacked event to oTarget.
+*
+* @param oTarget   the target to signal the event to
+* @param oAttacker the attacker that caused the event
+* @param bDoNotTriggerUpdate Don't fire a 'update my allies' event as well
+*
+* @returns  nothing
+* @author   Brent
+*
+**/
+void SendEventOnAllyAttacked(object oTarget, object oAttacker, int bDoNotTriggerUpdate = FALSE)
+{
+    if (oTarget != oAttacker)
+    {
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EVENTS,"events_h.SendEventOnAllyAttacked","",oTarget);
+        #endif
+        event evOnAllyAttacked = Event(EVENT_TYPE_ALLY_ATTACKED);
+        evOnAllyAttacked = SetEventObject(evOnAllyAttacked, 0, oAttacker);
+        evOnAllyAttacked = SetEventInteger(evOnAllyAttacked, 0, bDoNotTriggerUpdate);
+
+        SignalEvent(oTarget, evOnAllyAttacked);
+    }
+}
+
+
+/**
+* @brief Sends the death event FROM the death effect
+*
+* @param oTarget   the target to signal the event to
+* @param oAttacker the attacker that caused the Death of the creature
+*
+* @returns  nothing
+* @author   Georg Zoeller
+*
+**/
+void SendEventOnDeath(object oTarget, object oAttacker)
+{
+    event evOnDeath = Event(EVENT_TYPE_DEATH);
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EVENTS,"events_h.SendEventOnDeath","",oTarget);
+    #endif
+
+    evOnDeath = SetEventCreator(evOnDeath, oAttacker);
+    SignalEvent(oTarget, evOnDeath);
+}
+
+
+/**
+* @brief Sends the world-map-used event to the module object
+*
+* @param sSource   the area tag the player is travelling from
+* @param sTarget the area tag the player is travelling to
+* @param nSourceTerrain terrain type traveling from
+* @param nTargetTerrain terrain type traveling to
+*
+* @author   Yaron
+*
+**/
+void SendEventWorldMapUsed(string sSource, string sTarget, int nSourceTerrain, int nTargetTerrain)
+{
+    event evWorldMapUsed = Event(EVENT_TYPE_WORLD_MAP_USED);
+    evWorldMapUsed = SetEventString(evWorldMapUsed, 0, sSource);
+    evWorldMapUsed = SetEventString(evWorldMapUsed, 1, sTarget);
+    evWorldMapUsed = SetEventInteger(evWorldMapUsed, 0, nSourceTerrain);
+    evWorldMapUsed = SetEventInteger(evWorldMapUsed, 1, nTargetTerrain);
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EVENTS,"events_h.SendEventWorldMapUsed","from:" + sSource + " to:" + sTarget);
+    #endif
+
+    SignalEvent(GetModule(), evWorldMapUsed);
+}
+
+// -----------------------------------------------------------------------------
+//                          *** Spellscript Event Handling ***
+// -----------------------------------------------------------------------------
+
+
+// -----------------------------------------------------------------------------
+// Event Parameter Structs (for safe 'typecasting' of event parameters)
+// -----------------------------------------------------------------------------
+struct EventSpellScriptPendingStruct
+{
+    object oCaster;
+    object oTarget;
+    int    nAbility;
+    int    nAbilityType;
+};
+
+struct EventSpellScriptCastStruct
+{
+    object oCaster;
+    object oTarget;
+    int    nAbility;
+    int    nAbilityType;
+    int    nResistanceCheckResult;
+};
+
+
+struct EventSpellScriptImpactStruct
+{
+    object   oCaster;
+    object   oTarget;
+    object   oItem;
+    int      nAbility;
+    int      nAbilityType;
+    int      nResistanceCheckResult;
+    int      nHit;     // the number of the hit in the current attack (for things like flurry)
+    int      nHand;      // the hand that hit main 0 or offhand 1
+    location lTarget;
+};
+
+struct EventSpellScriptDeactivateStruct
+{
+    object oCaster;
+    int    nAbility;
+    int    nAbilityType;
+};
+
+
+// -----------------------------------------------------------------------------
+// Event Parameter Struct Accessor Functions
+// -----------------------------------------------------------------------------
+
+
+/**
+* @brief Retrieves the event parameters for a EVENT_TYPE_SPELLSCRIPT_CAST event
+*
+* @param ev The EventSpellPreScriptCast to retrieve the parameters from
+*
+* @returns  EventSpellScriptPendingStruct  with event parameters
+* @author   Georg Zoeller
+*
+**/
+struct EventSpellScriptPendingStruct Events_GetEventSpellScriptPendingParameters(event ev);
+struct EventSpellScriptPendingStruct Events_GetEventSpellScriptPendingParameters(event ev)
+{
+    struct EventSpellScriptPendingStruct stRet;
+
+
+    stRet.oCaster = GetEventObject(ev,0);
+    stRet.oTarget = GetEventObject(ev,1);
+
+    stRet.nAbility = GetEventInteger(ev,0);
+    stRet.nAbilityType = GetEventInteger(ev,1);
+
+
+    return stRet;
+}
+
+
+
+/**
+* @brief Retrieves the event parameters for a EVENT_TYPE_SPELLSCRIPT_CAST event
+*
+* @param ev           The EventSpellScriptCast to retrieve the parameters from
+*
+* @returns  EventSpellScriptCastStruct  with event parameters
+* @author   Georg Zoeller
+*
+**/
+struct EventSpellScriptCastStruct Events_GetEventSpellScriptCastParameters(event ev);
+struct EventSpellScriptCastStruct Events_GetEventSpellScriptCastParameters(event ev)
+{
+    struct EventSpellScriptCastStruct stRet;
+
+
+    stRet.oCaster = GetEventObject(ev,0);
+    stRet.oTarget = GetEventObject(ev,1);
+
+    stRet.nAbility = GetEventInteger(ev,0);
+    stRet.nAbilityType = GetEventInteger(ev,1);
+    stRet.nResistanceCheckResult = GetEventInteger(ev,2);
+
+    return stRet;
+}
+
+
+/**
+* @brief Retrieves the event parameters for a EVENT_TYPE_SPELLSCRIPT_CAST event
+*
+* @param ev The EventSpellPreScriptCast to retrieve the parameters from
+*
+* @returns  EventSpellScriptPendingStruct  with event parameters
+* @author   Georg Zoeller
+*
+**/
+struct EventSpellScriptImpactStruct Events_GetEventSpellScriptImpactParameters(event ev);
+struct EventSpellScriptImpactStruct Events_GetEventSpellScriptImpactParameters(event ev)
+{
+    struct EventSpellScriptImpactStruct stRet;
+
+
+    stRet.oCaster = GetEventObject(ev,0);
+    stRet.oTarget = GetEventObject(ev,1);
+    stRet.oItem   = GetEventObject(ev,2);
+
+    stRet.nAbility = GetEventInteger(ev,0);
+    stRet.nAbilityType = GetEventInteger(ev,1);
+    stRet.nResistanceCheckResult = GetEventInteger(ev,2);
+    stRet.nHit = GetEventInteger(ev,3);
+    stRet.nHand = GetEventInteger(ev,4);
+
+    stRet.lTarget = GetEventLocation(ev,0);
+
+    return stRet;
+}
+
+
+/**
+* @brief Retrieves the event parameters for a EVENT_TYPE_SPELLSCRIPT_DEACTIVATE event
+*
+* @param ev The EventSpellScriptDeactivate to retrieve the parameters from
+*
+* @returns  EventSpellScriptPendingStruct  with event parameters
+* @author   Georg Zoeller
+*
+**/
+struct EventSpellScriptDeactivateStruct Events_GetEventSpellScriptDeactivateParameters(event ev);
+struct EventSpellScriptDeactivateStruct Events_GetEventSpellScriptDeactivateParameters(event ev)
+{
+    struct EventSpellScriptDeactivateStruct stRet;
+
+    stRet.oCaster = GetEventObject(ev,0);
+
+    stRet.nAbility = GetEventInteger(ev,0);
+    stRet.nAbilityType = GetEventInteger(ev,1);
+
+    return stRet;
+}
+
+
+// -----------------------------------------------------------------------------
+// Spellscript Event Constructors
+// -----------------------------------------------------------------------------
+
+
+/**
+* @brief Creates a EVENT_TYPE_SPELLSCRIPT_PENDING event and returns it
+*
+* @param oCaster      The caster using the ability (EventObject 0)
+* @param oTarget      The target of the ability    (EventObject 1)
+* @param nAbility     The ability id               (EventInteger 0)
+* @param nAbilityType The ability type             (EventInteger 1)
+*
+* @returns  event with populated event parameters
+* @author   Georg Zoeller
+*
+**/
+event EventSpellScriptPending(object oCaster, object oTarget, int nAbility, int nAbilityType);
+event EventSpellScriptPending(object oCaster, object oTarget, int nAbility, int nAbilityType)
+{
+    event ev = Event(EVENT_TYPE_SPELLSCRIPT_PENDING);
+
+    ev = SetEventObject(ev,0,oCaster);
+    ev = SetEventObject(ev,1,oTarget);
+
+    ev = SetEventInteger(ev,0,nAbility);
+    ev = SetEventInteger(ev,1,nAbilityType);
+
+    return ev;
+}
+
+/**
+* @brief Creates a EVENT_TYPE_SPELLSCRIPT_CAST event and returns it
+*
+* @param oCaster      The caster using the ability (EventObject 0)
+* @param oTarget      The target of the ability    (EventObject 1)
+* @param nAbility     The ability id               (EventInteger 0)
+* @param nAbilityType The ability type             (EventInteger 1)
+* @param nResistanceCheckResult Result of the (EventInteger 2)
+*
+* @returns  event with populated event parameters
+* @author   Georg Zoeller
+*
+**/
+event EventSpellScriptCast(object oCaster, object oTarget, int nAbility, int nAbilityType, int nResistanceCheckResult);
+event EventSpellScriptCast(object oCaster, object oTarget, int nAbility, int nAbilityType, int nResistanceCheckResult)
+{
+    event ev = Event(EVENT_TYPE_SPELLSCRIPT_CAST);
+
+    ev = SetEventObject(ev,0,oCaster);
+    ev = SetEventObject(ev,1,oTarget);
+
+    ev = SetEventInteger(ev,0,nAbility);
+    ev = SetEventInteger(ev,1,nAbilityType);
+    ev = SetEventInteger(ev,2,nResistanceCheckResult );
+
+
+    return ev;
+}
+
+/**
+* @brief Creates a EVENT_TYPE_SPELLSCRIPT_IMPACT event and returns it
+*
+* @param oCaster      The caster using the ability (EventObject 0)
+* @param oTarget      The target of the ability    (EventObject 1)
+* @param nAbility     The ability id               (EventInteger 0)
+* @param nAbilityType The ability type             (EventInteger 1)
+* @param nResistanceCheckResult Result of the (EventInteger 2)
+* @returns  event with populated event parameters
+* @author   Georg Zoeller
+**/
+event EventSpellScriptImpact(object oCaster, object oTarget, int nAbility, int nAbilityType, int nResistanceCheckResult, location lTarget, int nHit = 1, int nHand = 0, object oItem = OBJECT_INVALID);
+event EventSpellScriptImpact(object oCaster, object oTarget, int nAbility, int nAbilityType, int nResistanceCheckResult, location lTarget, int nHit = 1, int nHand = 0, object oItem = OBJECT_INVALID)
+{
+    event ev = Event(EVENT_TYPE_SPELLSCRIPT_IMPACT);
+
+    ev = SetEventObject(ev,0,oCaster);
+    ev = SetEventObject(ev,1,oTarget);
+    ev = SetEventObject(ev,2,oItem);
+
+    ev = SetEventInteger(ev,0,nAbility);
+    ev = SetEventInteger(ev,1,nAbilityType);
+    ev = SetEventInteger(ev,2,nResistanceCheckResult );
+
+    ev = SetEventInteger(ev,3,nHit);
+    ev = SetEventInteger(ev,4,nHand);
+
+
+    ev = SetEventLocation(ev,0,lTarget);
+
+    return ev;
+}
+
+
+/** ----------------------------------------------------------------------------
+* @brief Creates a EVENT_TYPE_SPELLSCRIPT_DEACTIVATE event and returns it
+*
+* @param oCaster      The caster using the ability (EventObject 0)
+* @param nAbility     The ability id               (EventInteger 0)
+* @param nAbilityType The ability type             (EventInteger 1)
+
+* @returns  event with populated event parameters
+* @author   Georg Zoeller
+*  -----------------------------------------------------------------------------
+**/
+event EventSpellScriptDeactivate(object oCaster, int nAbility, int nAbilityType );
+event EventSpellScriptDeactivate(object oCaster, int nAbility, int nAbilityType )
+{
+    event ev = Event(EVENT_TYPE_SPELLSCRIPT_DEACTIVATE);
+
+    ev = SetEventObject(ev,0,oCaster);
+
+    ev = SetEventInteger(ev,0,nAbility);
+    ev = SetEventInteger(ev,1,nAbilityType);
+
+    return ev;
+
+}
+
+/**
+*   @brief Filters the Attack Impact Event
+*
+*   Returns whether or not to continue processing the attack impact event
+*
+*   @param oAttacker  - The Attacker
+*   @param oTarget    - The Attack Target
+*   @param nHitResult - The Hit Result of the Attack as propagated from COMMAND_PENDING
+*
+*   @returns    FALSE if processing the event should be aborted.
+*
+*   @author Georg Zoeller
+*/
+int Events_FilterAttackImpactEvent(object oAttacker, object oTarget, int nHitResult);
+int Events_FilterAttackImpactEvent(object oAttacker, object oTarget, int nHitResult)
+{
+
+    // -------------------------------------------------------------------------
+    // NOTE
+    //  We can not filter out IsDying(oTarget) as the attack impact ensures
+    //  that the creature is actually killed. Filtering it out would
+    //  get creatures stuck as dying but not dead...
+    // -------------------------------------------------------------------------
+
+
+    // -------------------------------------------------------------------------
+    // Don't process impacts from invalid attacker (object unloaded?)
+    // -------------------------------------------------------------------------
+    if(!IsObjectValid(oAttacker))
+    {
+        #ifdef DEBUG
+        Log_Trace_Combat("events_h.Events_FilterAttackImpactEvent","Attacker Invalid  - event discarded",oAttacker, oTarget);
+        #endif
+        return FALSE;
+    }
+
+    // -------------------------------------------------------------------------
+    // Don't process impacts from dead or dying attackers anymore
+    // -------------------------------------------------------------------------
+    if( IsDead(oAttacker) || IsDying(oAttacker) )
+    {
+        #ifdef DEBUG
+        Log_Trace_Combat("events_h.Events_FilterAttackImpactEvent","Attacker Dead or Dying - event discarded",oAttacker, oTarget);
+        #endif
+
+        return FALSE;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Don't process impacts from disabled attackers
+    // -------------------------------------------------------------------------
+    if(IsDisabled(oAttacker))
+    {
+        #ifdef DEBUG
+        Log_Trace_Combat("events_h.Events_FilterAttackImpactEvent","Attacker Disabled - event discarded",oAttacker, oTarget);
+        #endif
+        return FALSE;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Don't process impacts on invalid targets
+    // -------------------------------------------------------------------------
+    if(!IsObjectValid(oTarget))
+    {
+        #ifdef DEBUG
+        Log_Trace_Combat("events_h.Events_FilterAttackImpactEvent","Target invalid - event discarded",oAttacker, oTarget);
+        #endif
+        return FALSE;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Don't process impacts on dead targets
+    // -------------------------------------------------------------------------
+    if(IsDead(oTarget))
+    {
+        #ifdef DEBUG
+        Log_Trace_Combat("events_h.Events_FilterAttackImpactEvent","Target dead - event discarded",oAttacker, oTarget);
+        #endif
+        return FALSE;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Don't process on invalid hit results
+    // -------------------------------------------------------------------------
+    if(nHitResult == COMBAT_RESULT_INVALID)
+    {
+        #ifdef DEBUG
+        Log_Trace_Combat("events_h.Events_FilterAttackImpactEvent","COMBAT_RESULT_INVALID - event discarded",oAttacker, oTarget);
+        #endif
+        return FALSE;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Looks like we're clear to continue running this event.
+    // -------------------------------------------------------------------------
+    return TRUE;
+}
+
+
+
+/**
+*  @brief Decides whether or not a command_pending should be processed or discarded
+*
+*  @param oCommandOwner   The command owner, usually OBJECT_SELF
+*  @param oTarget         The Target of the command
+*  @param nCommandId      The command Id
+*  @param nCommandSubType The command subtype
+*
+*  @author Georg Zoeller
+**/
+int Events_ValidateCommandPending(object oCommandOwner, object oTarget, int nCommandId, int nCommandSubType);
+int Events_ValidateCommandPending(object oCommandOwner, object oTarget, int nCommandId, int nCommandSubType)
+{
+
+    if(!IsObjectValid(oCommandOwner))
+    {
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EVENTS,"events_h.ValidateCommandPending" , "owner is INVALID!");
+        #endif
+        SetCommandResult(oCommandOwner, COMMAND_RESULT_INVALID);
+        return FALSE;
+    }
+
+    if (IsObjectValid (oTarget) &amp;&amp; ( GetArea(oCommandOwner) != GetArea(oTarget) ) )
+    {
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EVENTS,"events_h.ValidateCommandPending" , "Discarded Command Pending ... not in the same area as target");
+        #endif
+        return FALSE;
+    }
+
+    if(IsDead(oCommandOwner) || IsDying(oCommandOwner))
+    {
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EVENTS,"rules_core: (COMMAND_PENDING) - I'm dead or dying- ignoring event - ignoring event!");
+        #endif
+        SetCommandResult(oCommandOwner, COMMAND_RESULT_INVALID);
+        return FALSE;
+    }
+    if(IsDisabled(oCommandOwner))
+    {
+        #ifdef DEBUG
+        Log_Trace(LOG_CHANNEL_EVENTS,"rules_core: (COMMAND_PENDING) -  I'm disabled - ignoring event!");
+        #endif
+        SetCommandResult(oCommandOwner, COMMAND_RESULT_INVALID);
+        return FALSE;
+    }
+
+    if(!IsObjectValid(oTarget))
+    {
+        //Log_Rules("rules_core, COMMAND_PENDING target is INVALID! - NOT stopping - it may be for a non-target ability (Berserk)", LOG_LEVEL_WARNING);
+        // NOT STOPPING - it may be Berserk, that has no target
+    }
+    else
+    // -----------------------------------------------------------------
+    // We can never attack or cast at a dying target, but
+    // UseAbility (nCommandId=25) is potentially valid on dead people
+    // -----------------------------------------------------------------
+    if((IsDying(oTarget) &amp;&amp; nCommandId != 25 || (IsDead(oTarget)) &amp;&amp; nCommandId != 25))
+    {
+            #ifdef DEBUG
+            Log_Trace(LOG_CHANNEL_EVENTS,"rules_core, COMMAND_PENDING target is DEAD or DYING");
+            #endif
+            SetCommandResult(oCommandOwner, COMMAND_RESULT_FAILED_NO_VALID_TARGET);
+            return FALSE;
+
+    }
+
+    return TRUE;
+}
+
+
+// Sent to the last living creature in a team when he dies.
+void SendEventTeamDestroyed(object oTarget, int nTeamID)
+{
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EVENTS,"SendEventTeamDestroyed, team: ",IntToString(nTeamID));
+    #endif
+
+    event evTeamDestroyed = Event(EVENT_TYPE_TEAM_DESTROYED);
+    evTeamDestroyed = SetEventInteger(evTeamDestroyed, 0, nTeamID );
+
+    SignalEvent(oTarget, evTeamDestroyed);
+}
+
+
+/**
+* @brief Signals an Item Acquired event
+*
+* @param oTarget   the target to signal the event to
+* @param oItem     the item acquired
+*
+* @returns  nothing
+* @author   David Sims
+*
+**/
+void SendEventCampaignItemAcquired(object oTarget, object oItem, int bProcessImmediate = FALSE)
+{
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EVENTS,"SendEventCampaignItemAcquired, item tag: ", GetTag(oItem));
+    #endif
+
+    event evItemAquired = Event(EVENT_TYPE_CAMPAIGN_ITEM_ACQUIRED);
+    evItemAquired = SetEventObject(evItemAquired, 0, oItem);
+
+    SignalEvent(oTarget, evItemAquired, bProcessImmediate );
+}
+
+
+/**
+ * @brief Signals an Item Lost event
+ *
+ * Signals the module when an item is removed from the player's inventory should
+ * that item have the ITEM_SEND_LOST_EVENT variable set.
+ *
+ * @param oTarget   The target object to signal the event to.
+ * @param oItem     The item removed from the player's inventory.
+ *
+ * @returns Nothing.
+ * @author  Grant Mackay
+ */
+void SendEventCampaignItemLost( object oTarget, object oItem, int bProcessImmediate = FALSE )
+{
+    #ifdef DEBUG
+    Log_Trace( LOG_CHANNEL_EVENTS, "SendEventCampaignItemLost, item tag: ", GetTag(oItem) );
+    #endif
+
+    event evItemLost = Event ( EVENT_TYPE_CAMPAIGN_ITEM_LOST );
+
+    evItemLost = SetEventObject( evItemLost, 0, oItem );
+
+    SignalEvent( oTarget, evItemLost, bProcessImmediate );
+
+}
+
+
+ /**
+* @brief Signals a dying event (when a creature receives the killing blow)
+*
+* @param oTarget   The target for the event
+* @param oKiller   The Killer
+*
+* @author   Georg
+*
+**/
+void SendEventDying(object oTarget, object oKiller);
+void SendEventDying(object oTarget, object oKiller)
+{
+    event ev = Event(EVENT_TYPE_DYING);
+    ev = SetEventObject(ev,0,oKiller);
+    SignalEvent(oTarget, ev);
+
+}
+
+/**
+* @brief Signals the module that the player is transitioning into the world map
+* using the generic area transition system. The module then handles campaign-specific
+* world maps
+*
+* @param sWorldMap A world map ID, most likely "world_map"
+* @param sTranType Transition type: will be "rand" when exiting random encounters
+* @param nWorldMapLoc1 a location on the map to set active right before opening the map
+* @param nWorldMapLoc2 a location on the map to set active right before opening the map
+* @param nWorldMapLoc3 a location on the map to set active right before opening the map
+* this location is equivalent to a plot flag in the world map plot or location ID
+*
+* @author   Georg
+*
+**/
+void SendEventTransitionToWorldMap(string sWorldMap, string sTransType, string nWorldMapLoc1, string nWorldMapLoc2, string nWorldMapLoc3, string nWorldMapLoc4, string nWorldMapLoc5);
+void SendEventTransitionToWorldMap(string sWorldMap, string sTransType, string nWorldMapLoc1, string nWorldMapLoc2, string nWorldMapLoc3, string nWorldMapLoc4, string nWorldMapLoc5)
+{
+    event ev = Event(EVENT_TYPE_TRANSITION_TO_WORLD_MAP);
+    ev = SetEventString(ev,0 , sWorldMap);
+    ev = SetEventString(ev,1 , sTransType);
+    ev = SetEventString(ev,2, nWorldMapLoc1);
+    ev = SetEventString(ev,3, nWorldMapLoc2);
+    ev = SetEventString(ev,4, nWorldMapLoc3);
+    ev = SetEventString(ev,5, nWorldMapLoc4);
+    ev = SetEventString(ev,6, nWorldMapLoc5);
+    SignalEvent(GetModule(), ev);
+
+}
+
+void SendLevelUpEvent(object oPartyMember, int nNewLevel)
+{
+    event ev = Event (EVENT_TYPE_PLAYER_LEVELUP);
+    ev = SetEventInteger(ev, 0, nNewLevel);
+    SignalEvent(oPartyMember, ev);
+}
+
+void SendEventModuleChargenDone(string sParam1, string sParam2);
+void SendEventModuleChargenDone(string sParam1, string sParam2)
+{
+    event ev = Event(EVENT_TYPE_MODULE_CHARGEN_DONE);
+    ev = SetEventString(ev,0,sParam1);
+    ev = SetEventString(ev,1,sParam2);
+    SignalEvent(GetModule(), ev);
+}
+
+void SendEventApproachTrap(object oCreature, object oTrap)
+{
+    event ev = Event(EVENT_TYPE_APPROACH_TRAP);
+    ev = SetEventObject(ev, 0, oTrap);
+    SignalEvent(oCreature, ev);
+}
+
+void SendPartyMemberHiredEvent(object oPartyMember, int nShowPartyPicker, int nMinLevel = 0, int bPreventLevelup = FALSE)
+{
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EVENTS, "SendPartyMemberHiredEvent", "follower: " + GetTag(oPartyMember) +
+        ", show party picker: " + IntToString(nShowPartyPicker) + ", prevent levelup: " + IntToString(bPreventLevelup));
+    #endif
+    event ev  = Event(EVENT_TYPE_PARTY_MEMBER_HIRED);
+    ev = SetEventInteger(ev, 0, nShowPartyPicker);
+    ev = SetEventInteger(ev, 1, nMinLevel);
+    ev = SetEventInteger(ev, 2, bPreventLevelup);
+    SignalEvent(oPartyMember, ev);
+}
+
+void SendPartyMemberFiredEvent(object oPartyMember)
+{
+    event ev  = Event(EVENT_TYPE_PARTY_MEMBER_FIRED);
+    SignalEvent(oPartyMember, ev);
+}
+
+
+const int COMBO_EVENT_IGNITE =  EVENT_TYPE_COMBO_IGNITE;
+const int COMBO_EVENT_DOUSE  = 2;
+
+
+void SendComboEventAoE(int nAbility, int nShapeId, location lLoc, object oCreator, float fA, float fB = 0.0f, float fC = 0.0f, float fDelay = 0.0f)
+{
+    event eve = Event(EVENT_TYPE_COMBO_IGNITE);
+    eve = SetEventInteger(eve, 0, nAbility);
+    eve = SetEventInteger(eve, 1, nShapeId);
+    eve = SetEventFloat(eve, 0,fA);
+    eve = SetEventFloat(eve, 1,fB);
+    eve = SetEventFloat(eve, 2,fC);
+    eve = SetEventLocation(eve, 0,lLoc);
+    eve = SetEventObject(eve,0,oCreator);
+
+    DelayEvent(fDelay, GetModule(), eve);
+ }
+
+void SendHandleModuleGift(object oFollower, object oGiftTag, int nApprovalChange)
+{
+    event evModuleHandleGift = Event(EVENT_TYPE_MODULE_HANDLE_GIFT);
+    evModuleHandleGift = SetEventObject(evModuleHandleGift, 0, oFollower);
+    evModuleHandleGift = SetEventObject(evModuleHandleGift, 1, oGiftTag);
+    evModuleHandleGift = SetEventInteger(evModuleHandleGift, 0, nApprovalChange);
+
+    SignalEvent(GetModule(), evModuleHandleGift);
+}
+
+void SendModuleHandleFollowerDeath(object oFollower)
+{
+    event ev = Event(EVENT_TYPE_MODULE_HANDLE_FOLLOWER_DEATH);
+    ev = SetEventObject(ev, 0, oFollower);
+
+    SignalEvent(GetModule(), ev);
+}
+
+
+void SignalEventDropStealth(object oTarget)
+{
+    DelayEvent(0.0f, oTarget, Event(EVENT_TYPE_DROP_STEALTH));
+}</text>
+	</Agent>
+</Resource>

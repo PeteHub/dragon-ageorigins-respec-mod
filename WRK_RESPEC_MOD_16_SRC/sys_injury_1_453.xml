@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="453" Folder="\_Systems\" ResRefName="sys_injury" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\sys_injury.nss?moduleid=1&amp;resrefid=453" Requested="0">
+	<Agent type="empty">
+		<ResRefName>sys_injury</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// sys_injury
+// -----------------------------------------------------------------------------
+/*
+    Injury System
+
+    The injury system uses special, permanently applied effects to a party member
+    to mimic last damage sustained when dropping in combat.
+
+    Note about injury effects:
+
+    -   these are normal effects, however they are applied with an id of
+        50000 (INJURY_SPELL_ID) + injury index
+
+
+*/
+// -----------------------------------------------------------------------------
+// owner: georg zoeller
+// -----------------------------------------------------------------------------
+
+#include "log_h"
+#include "core_h"
+#include "wrappers_h"
+#include "2da_constants_h"
+
+#include "plt_tut_combat_injury"
+#include "plt_tut_combat_injury_lots"
+
+#include "stats_core_h"
+
+const int TUTORIAL_LOTS_OF_INJURIES_THRESHOLD = 5;
+
+// -----------------------------------------------------------------------------
+
+void     Injury_AddInjury(object oCharacter, int nInjury);
+void     Injury_RemoveInjury (object oCharacter, int nInjury);
+void     Injury_DetermineInjury(object oCharacter);
+void     Injury_RemoveAllInjuries(object oCharacter);
+void     Injury_RemoveAllInjuriesFromParty();
+int      Injury_GetInjuryIdFromEffect(effect eInjury);
+effect[] Injury_GetInjuryEffects(object oCharacter);
+int      Injury_GetInjuriesNum(object oCharacter);
+
+// -----------------------------------------------------------------------------
+
+effect _CreateInjuryEffect(int nInjuryIndex);
+effect _CreateInjuryEffect(int nInjuryIndex)
+{
+
+    // -------------------------------------------------------------------------
+
+
+    int nEffect    = GetM2DAInt(TABLE_RULES_INJURIES, "effect", nInjuryIndex);
+    Log_Trace(LOG_CHANNEL_CHARACTER,"injury.CreateInjuryEffect", "Effect for index " + ToString(nInjuryIndex) + " = " + ToString(nEffect));
+    int nIntParam1 = GetM2DAInt(TABLE_RULES_INJURIES, "effect_int1", nInjuryIndex);
+    int nIntParam2 = GetM2DAInt(TABLE_RULES_INJURIES, "effect_int2", nInjuryIndex);
+
+
+    float fFloatParam1 = GetM2DAFloat(TABLE_RULES_INJURIES, "effect_float1", nInjuryIndex);
+    float fFloatParam2 = GetM2DAFloat(TABLE_RULES_INJURIES, "effect_float2", nInjuryIndex);
+
+
+    effect e;
+    if (nEffect &gt;0)
+    {
+        e = Effect(nEffect);
+
+        e = SetEffectInteger(e,0,nIntParam1);
+        e = SetEffectInteger(e,1,nIntParam2);
+
+        e = SetEffectFloat(e,0,fFloatParam1);
+        e = SetEffectFloat(e,1,fFloatParam2);
+
+    }
+
+    return e;
+}
+
+
+void _ApplyInjuryEffect(object oCharacter, effect eEffect, int nInjury)
+{
+
+    ApplyEffectOnObject(EFFECT_DURATION_TYPE_PERMANENT, eEffect, oCharacter, 0.0f, oCharacter,INJURY_ABILITY_EFFECT_ID  + nInjury);
+    // Handle injury stats
+    STATS_HandleInjuries(oCharacter);
+}
+
+
+int Injury_HasInjury(object oCharacter, int nInjury)
+{
+    return GetHasEffects(oCharacter, EFFECT_TYPE_INVALID, INJURY_ABILITY_EFFECT_ID  + nInjury);
+
+}
+
+
+// -----------------------------------------------------------------------------
+// Add a single injury
+// -----------------------------------------------------------------------------
+void Injury_AddInjury(object oCharacter, int nInjury)
+{
+
+    Log_Trace(LOG_CHANNEL_CHARACTER,"sys_injury.AddInjury","Adding Injury " + ToString(nInjury) +" for " + ToString(oCharacter));
+
+    // is this area a tutorial one?
+    int bTutorial = GetLocalInt(GetArea(oCharacter), "INJURY_FLAG");
+    if (bTutorial == FALSE)
+    {
+        // is the injury not already present?
+        if (!Injury_HasInjury(oCharacter, nInjury))
+        {
+            effect e = _CreateInjuryEffect(nInjury);
+            if (IsEffectValid(e))
+            {
+                Log_Trace(LOG_CHANNEL_CHARACTER,"sys_injury.AddInjury", "Applying Injury " + ToString(nInjury), oCharacter );
+                _ApplyInjuryEffect(oCharacter, e, nInjury);
+
+                if (IsPartyMember(oCharacter))
+                {
+                    if(!WR_GetPlotFlag(PLT_TUT_COMBAT_INJURY, TUT_COMBAT_INJURY_1))
+                        WR_SetPlotFlag(PLT_TUT_COMBAT_INJURY, TUT_COMBAT_INJURY_1, TRUE);
+                    if(!WR_GetPlotFlag(PLT_TUT_COMBAT_INJURY_LOTS, TUT_COMBAT_INJURY_LOTS_1))
+                    {
+                        if(Injury_GetInjuriesNum(oCharacter) &gt;= TUTORIAL_LOTS_OF_INJURIES_THRESHOLD)
+                            WR_SetPlotFlag(PLT_TUT_COMBAT_INJURY_LOTS, TUT_COMBAT_INJURY_LOTS_1, TRUE);
+                    }
+                }
+            }
+            else
+            {
+                Log_Trace(LOG_CHANNEL_CHARACTER,"sys_injury.AddInjury","Not adding injury, effect is INVALID!!");
+            }
+        }
+        else
+        {
+            Log_Trace(LOG_CHANNEL_CHARACTER,"sys_injury.AddInjury","Not adding injury, already present #" + ToString(nInjury));
+        }
+    } else
+    {
+        Log_Trace(LOG_CHANNEL_CHARACTER,"sys_injury.AddInjury","Not adding injury - Tutorial level.");
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+//  Remove a single injury
+// -----------------------------------------------------------------------------
+void Injury_RemoveInjury (object oCharacter, int nInjury)
+{
+    effect[] eEffects = GetEffects(oCharacter, EFFECT_TYPE_INVALID, INJURY_ABILITY_EFFECT_ID + nInjury);
+
+    int nCount = GetArraySize(eEffects);
+    int i;
+    for (i = 0; i &lt; nCount; i++)
+    {
+        RemoveEffect(oCharacter, eEffects[i]);
+    }
+
+    if (nCount)
+    {
+        ApplyEffectVisualEffect(oCharacter,oCharacter, 90092 /* purify vfx */, EFFECT_DURATION_TYPE_INSTANT, 0.0f);
+    }
+
+}
+
+
+void Injury_DetermineInjury(object oCharacter)
+{
+
+    int nMax      = GetM2DARows(TABLE_RULES_INJURIES);
+    int nStart    = (Random(nMax)+1);
+    int nLoopEnd  = nStart;
+
+    Log_Trace(LOG_CHANNEL_CHARACTER,"sys_injury.DetermineInjury","Determining Injuries for " + ToString(oCharacter));
+
+
+    // Only add injuries flagged valid for auto-apply and randomize the entry point
+    // This causes a lower probabilty of an injury being found and applied the more injuries a
+    // character has, which is fine.      
+    int nTableIndex = GetM2DARowIdFromRowIndex(TABLE_RULES_INJURIES, nStart); // table index used for engine 2da references only
+    while ( !GetM2DAInt(TABLE_RULES_INJURIES,"auto_apply",nTableIndex) || Injury_HasInjury(oCharacter,nStart) )
+    {
+        nStart = (nStart%(nMax+1)+1);    
+        nTableIndex = GetM2DARowIdFromRowIndex(TABLE_RULES_INJURIES, nStart);
+        // We definately never want to get stuck in a loop, in the case where
+        // all valid injuries are applied, this will exit us from the loop.
+        if ( nStart == nLoopEnd )
+            break;
+    }
+
+    Injury_AddInjury(oCharacter, nStart);
+}
+
+
+void Injury_RemoveAllInjuries(object oCharacter)
+{
+
+    effect[] eEffects = GetEffects(oCharacter);
+    int nCount = GetArraySize(eEffects);
+    int nInjuryID;
+
+    int i;
+
+    for (i = 0; i &lt; nCount; i++)
+    {
+        if (IsInjuryEffect(eEffects[i]))
+        {
+            // Only remove injuries flagged valid for auto-remove
+            nInjuryID = Injury_GetInjuryIdFromEffect( eEffects[i] );
+            if ( GetM2DAInt(TABLE_RULES_INJURIES,"auto_remove",nInjuryID) )
+                RemoveEffect(oCharacter, eEffects[i]);
+        }
+    }
+
+}
+
+void Injury_RemoveAllInjuriesFromParty()
+{
+    object[] partyMembers = GetPartyPoolList();
+    int      nMemberCount = GetArraySize(partyMembers);
+    int      i;
+
+    for (i = 0; i &lt; nMemberCount; i++)
+    {
+        Injury_RemoveAllInjuries(partyMembers[i]);
+    }
+
+}
+
+effect[] Injury_GetInjuryEffects(object oCharacter)
+{
+    effect[] effects = GetEffects(oCharacter);
+    int nCount = GetArraySize(effects);
+    int i;
+    int nTargetIdx = 0;
+    effect [] returnList;
+
+    effect eTmp;
+
+    for (i = 0; i &lt; nCount; i++)
+    {
+        eTmp = effects[i];
+
+        if (IsInjuryEffect(eTmp))
+        {
+            returnList[nTargetIdx++] = eTmp;
+        }
+    }
+
+    return returnList;
+
+}
+
+int Injury_GetInjuryIdFromEffect(effect eInjury)
+{
+    if (IsInjuryEffect(eInjury))
+    {
+        return GetEffectAbilityID(eInjury) - INJURY_ABILITY_EFFECT_ID;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+int Injury_GetInjuriesNum(object oCharacter)
+{
+    effect [] arInjuries = Injury_GetInjuryEffects(oCharacter);
+    return GetArraySize(arInjuries);
+}</text>
+	</Agent>
+</Resource>

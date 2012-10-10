@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="602" Folder="\_Core Includes\" ResRefName="2da_data_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\2da_data_h.nss?moduleid=1&amp;resrefid=602" Requested="0">
+	<Agent type="empty">
+		<ResRefName>2da_data_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// 2da_data_h
+// -----------------------------------------------------------------------------
+/*
+    Purpose:
+        Provide access to data stored in 2da files.
+*/
+// -----------------------------------------------------------------------------
+// owner: georg zoeller
+// -----------------------------------------------------------------------------
+#include "2da_constants_h"
+
+// cla_data.xls - Class Data
+const string CLASS_DATA_DAMAGE_BONUS       = "DamagePerLevel";
+const string CLASS_DATA_BASE_HEALTH        = "BaseHealth";
+const string CLASS_DATA_BASE_MANA_STAMINA  = "BaseManaStamina";
+const string CLASS_DATA_BASE_DEFENSE       = "BaseDefense";
+const string CLASS_DATA_BASE_ATTACK        = "BaseAttack";
+const string CLASS_DATA_ATTACK_PER_LEVEL   = "AttackPerLevel";
+const string CLASS_DATA_DEFENSE_PER_LEVEL  = "DefensePerLevel";
+const string CLASS_DATA_HEALTH_PER_LEVEL   = "HealthPerLevel";
+const string CLASS_DATA_MANA_PER_LEVEL     = "DepletableProgression"; //also stamina
+
+
+// bitm_base.xls
+const string ITEM_DATA_BASE_ARMORVALUE     = "ArmourValue";
+const string ITEM_DATA_BASE_DAMAGE         = "BaseDamage";
+const string ITEM_DATA_STRENGTH_MODIFIER   = "StrengthModifier";
+const string ITEM_DATA_BASE_AP             = "armourpenetration";
+const string ITEM_DATA_BASE_SPEED          = "dspeed";
+const string ITEM_DATA_EQUIPPABLE_SLOTS    = "equippableslots";
+const string ITEM_DATA_ARMOR_TYPE          = "armortype";
+const string ITEM_DATA_RANGE               = "range";
+
+// as_data.xls - Autoscaling Data
+const string AS_RANK_SCALE_FACTOR             = "fscale";
+const string AS_RANK_HEALTH_SCALE_FACTOR     = "fHealthScale";
+
+
+// abi_base.xls
+const string ABILITY_DATA_COOLDOWN           = "cooldown";
+
+// apr_base.xls
+const string APPEARANCE_DATA_CREATURE_TYPE = "creature_type";
+const string APPEARANCE_DATA_ONESHOT_KILL = "oneshotkills";
+const string APPEARANCE_DATA_CAN_DO_DEATHBLOWS =  "candodeathblows";
+
+//ss_types.xls
+const string SS_DATA_RESTRICT              = "brestrict";
+
+
+const string SUMMON_DATA_TEMPLATE          = "template";
+const string SUMMON_DATA_ABILITY_0         = "ability0";
+const string SUMMON_DATA_ABILITY_1         = "ability1";
+
+
+float GetAutoScaleDataFloat(int nRank, string sType);
+float GetAutoScaleDataFloat(int nRank, string sType)
+{
+    return GetM2DAFloat(TABLE_AUTOSCALE, sType, nRank);
+}
+
+
+float GetClassDataFloat(string sField, int nClass);
+float GetClassDataFloat(string sField, int nClass)
+{
+    float fRet = GetM2DAFloat(TABLE_RULES_CLASSES, sField, nClass);
+    LogTrace(LOG_CHANNEL_TEMP, "GetClassDataFloat:" + sField + " nClass " + ToString(nClass) + "-&gt; " + ToString(fRet) );
+
+    return fRet;
+}
+
+
+
+
+/**
+* @brief (2da_data)  Returns the ability type as a ABILITY_TYPE_* constant
+*
+* @param nAbility   ability id (row number in ABI_BASE)
+*
+* @returns ABILITY_TYPE_* constant
+*
+* @author   Georg Zoeller
+**/
+int GetAbilityType(int nAbility);
+int GetAbilityType(int nAbility)
+{
+    return GetM2DAInt(TABLE_ABILITIES_SPELLS,"AbilityType",nAbility);
+}
+
+
+/**
+* @brief (2da_data) Returns the cooldown defined in the 2da for an ability
+*
+*   Returns a cooldown value (in seconds) that exists in ABI_base.xls
+*
+* @param    nAbility   ability id (row number in ABI_BASE)
+*
+* @returns  cooldown.
+*
+* @author   Georg Zoeller
+**/
+float GetAbilityBaseCooldown(int nAbility);
+float GetAbilityBaseCooldown(int nAbility)
+{
+   return GetM2DAFloat(TABLE_ABILITIES_SPELLS,ABILITY_DATA_COOLDOWN,nAbility);
+}
+
+float GetItemArmorBaseValue(int nBaseItemType)
+{
+    return GetM2DAFloat(TABLE_ITEMSTATS,ITEM_DATA_BASE_ARMORVALUE, nBaseItemType);
+}
+
+
+float GetItemStrengthModifierBaseValue(int nBaseItemType)
+{
+        return GetM2DAFloat(TABLE_ITEMS, ITEM_DATA_STRENGTH_MODIFIER, nBaseItemType);
+
+}
+
+
+float GetWeaponSpeed(int nBaseItemType)
+{
+    return GetM2DAFloat(TABLE_ITEMS, ITEM_DATA_BASE_SPEED, nBaseItemType);
+}
+
+/**
+* @brief (2da_data) Returns the creature type associated with nAppearanceType
+*
+*   Returns the creature type classification associated with the given appearance
+*   type. This is not the racial type of the creature set on the creature template.
+*
+* @param    nAppearanceType   The appearance type of the creature.
+*
+* @returns  Creature type CREATURE_TYPE_*
+*
+* @author   David Sims
+**/
+int GetCreatureTypeClassification(int nAppearanceType);
+int GetCreatureTypeClassification(int nAppearanceType)
+{
+   return GetM2DAInt(TABLE_APPEARANCE,APPEARANCE_DATA_CREATURE_TYPE, nAppearanceType);
+}
+
+
+int GetItemEquipSlotMask(int nBaseItemType)
+{
+    return GetM2DAInt(TABLE_ITEMS, ITEM_DATA_EQUIPPABLE_SLOTS, nBaseItemType);
+}
+
+float GetArmorPieceBaseValue(int nSlot, int nArmorType)
+{
+    string sPiece;
+    switch (nSlot)
+    {
+        case   16  /* chest */ : sPiece = "Chest"; break;
+        case   32  /* helmet */: sPiece = "Helmet"; break;
+        case   64  /* boots */ : sPiece = "Boots"; break;
+        case  128  /* gloves*/ : sPiece = "Gloves"; break;
+    }
+
+    return GetM2DAFloat(TABLE_RULES_ARMOR_DATA,sPiece,nArmorType);
+}
+
+
+int GetItemArmorType(int nBaseItemType)
+{
+    return GetM2DAInt(TABLE_ITEMS, ITEM_DATA_ARMOR_TYPE, nBaseItemType);
+}
+
+float GetItemArmorPieceRating(object oItem)
+{
+    int nBase = GetBaseItemType(oItem);
+    int nSlot = GetItemEquipSlotMask(nBase) ;
+    int nArmorType = GetItemArmorType(nBase);
+
+
+    float fAr = GetArmorPieceBaseValue(nSlot, nArmorType );
+
+    //LogTrace(LOG_CHANNEL_TEMP, "AR for " + ToString(oItem) + " is:" + ToString(fAr));
+
+    return fAr;
+}
+
+
+
+int GetIsSoundSetEntryTypeRestricted(int nSSEntry)
+{
+    return GetM2DAInt(TABLE_SOUNDSETS, SS_DATA_RESTRICT, nSSEntry);
+}
+
+float GetItemRange(object oItem)
+{
+    int nBaseItemType = GetBaseItemType(oItem);
+    return GetM2DAFloat(TABLE_ITEMS, ITEM_DATA_RANGE, nBaseItemType);
+}
+
+
+int IsOneShotKillCreature(object oCreature)
+{
+    int nApp = GetAppearanceType(oCreature);
+    return (GetM2DAInt(TABLE_APPEARANCE,APPEARANCE_DATA_ONESHOT_KILL, nApp));
+
+}
+
+int CanPerformDeathblows(object oCreature)
+{
+    int nApp = GetAppearanceType(oCreature);
+    return (GetM2DAInt(TABLE_APPEARANCE,APPEARANCE_DATA_CAN_DO_DEATHBLOWS, nApp));
+
+}</text>
+	</Agent>
+</Resource>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="86" Folder="\_Game Effects\Effects\" ResRefName="effect_modify_mana_stam_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_modify_mana_stam_h.nss?moduleid=1&amp;resrefid=86" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_modify_mana_stam_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_modify_stamina
+// -----------------------------------------------------------------------------
+/*
+    Effect: Modify Stamina
+
+            When applied to a creature, this effect increase or decreases the
+            creature’s current stamina. The creature’s  current stamina will not
+            be raised above its maximum stamina nor will it be lowered bellow 0.
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "2da_constants_h"
+#include "wrappers_h"
+#include "events_h"
+#include "effect_constants_h"
+
+
+
+effect EffectModifyManaStamina(float fValue);
+effect EffectModifyManaStamina(float fValue)
+{
+    effect eEffect = Effect(EFFECT_TYPE_MODIFYMANASTAMINA);
+    eEffect = SetEffectFloat(eEffect, 0, fValue);
+    return eEffect;
+}
+
+
+int Effect_InstantApplyEffectModifyManaStamina(object oTarget, float fAmount)
+{
+
+    if (fAmount == 0.0)
+    {
+        return FALSE;
+    }
+                                        
+     UpdateCreatureProperty(oTarget, PROPERTY_DEPLETABLE_MANA_STAMINA,fAmount,PROPERTY_VALUE_CURRENT);
+
+
+    return TRUE;
+}
+
+
+// -----------------------------------------------------------------------------
+// This utility function handles the application of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleApplyEffectModifyManaStamina(effect eEffect);
+int Effects_HandleApplyEffectModifyManaStamina(effect eEffect)
+{
+    float fAmount = GetEffectFloat(eEffect, 0);
+    object oTarget = OBJECT_SELF;
+
+
+        return Effect_InstantApplyEffectModifyManaStamina(oTarget, fAmount);
+}
+
+// -----------------------------------------------------------------------------
+// This utility function handles the removal of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleRemoveEffectModifyManaStamina(effect eEffect);
+int Effects_HandleRemoveEffectModifyManaStamina(effect eEffect)
+{
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

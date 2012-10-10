@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="216" Folder="\_Game Effects\Effects\" ResRefName="effect_visualeffect_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_visualeffect_h.nss?moduleid=1&amp;resrefid=216" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_visualeffect_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_visualaffect_h.nss
+// -----------------------------------------------------------------------------
+/*
+    Returns a visual effect.
+
+    Note that visual effects of different types require to be applied with
+    different EFFECT_DURATION_TYPE_* constants to work properly.
+
+    Please consult VFX.xls for the valid duration types for each effect
+
+*/
+// -----------------------------------------------------------------------------
+// Georg Zoeller@2007-03-23
+// -----------------------------------------------------------------------------
+
+#include "effect_constants_h"
+#include "core_h"
+
+
+
+
+/** @brief Returns a visual effect
+*
+* @ param nVfxId - Index from VFX.xls
+* @author Georg Zoeller
+* @return a valid effect of type EFFECT_TYPE_SEPLL_TARGET.
+*/
+effect EffectVisualEffect(int nVfxId);
+effect EffectVisualEffect(int nVfxId)
+{
+
+
+    effect eEffect = Effect(EFFECT_TYPE_VISUAL_EFFECT);
+
+    // int(0) is the VFX id
+    eEffect = SetEffectInteger(eEffect,0, nVfxId);
+
+    return eEffect;
+
+}
+
+// -----------------------------------------------------------------------------
+//              ENGINE EFFECT - SPECIAL CASE - Please Read
+// -----------------------------------------------------------------------------
+/*
+    EFFECT_TYPE_VISUALEFFECT is an engine effect, which means the Apply and
+    Remove Events are handled in the engine. There are no events fired into
+    scripting languge when visual effects are applied or removed.
+*/
+// -----------------------------------------------------------------------------
+// -- Georg@2007-03-23
+// -----------------------------------------------------------------------------</text>
+	</Agent>
+</Resource>

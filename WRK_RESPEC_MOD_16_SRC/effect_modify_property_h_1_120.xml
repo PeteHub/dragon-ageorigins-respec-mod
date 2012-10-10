@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="120" Folder="\_Game Effects\Effects\" ResRefName="effect_modify_property_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_modify_property_h.nss?moduleid=1&amp;resrefid=120" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_modify_property_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_modify_property
+// -----------------------------------------------------------------------------
+/*
+    Generic Property Modification Effect.
+
+    This effect modifies a creature property MODIFIER.
+
+
+
+
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+#include "2da_constants_h"
+#include "events_h"
+#include "effect_constants_h"
+#include "attributes_h"
+
+
+const int EFFECT_MODIFY_PROPERTY_ATTRIBUTE_ALL = -1000;
+
+void ModifyAllAttributes(float fChange)
+{
+    UpdateCreatureProperty(OBJECT_SELF,PROPERTY_ATTRIBUTE_STRENGTH,fChange,PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF,PROPERTY_ATTRIBUTE_DEXTERITY,fChange,PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF,PROPERTY_ATTRIBUTE_CONSTITUTION,fChange,PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF,PROPERTY_ATTRIBUTE_WILLPOWER,fChange,PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF,PROPERTY_ATTRIBUTE_INTELLIGENCE,fChange,PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF,PROPERTY_ATTRIBUTE_MAGIC,fChange,PROPERTY_VALUE_MODIFIER);
+}
+
+// MGB - February 23, 2009
+// EffectModifyProperty Constructor moved into Engine.
+// All other functions moved into engine.
+
+// Georg: This is identical to effect modify property - it is just flagged as
+//        consider hostile in the 2da.
+effect EffectDecreaseProperty(int nProperty0, float fChange0, int nProperty1=0, float fChange1=0.0, int nProperty2=0, float fChange2=0.0 )
+{  
+    return EffectModifyPropertyHostile(nProperty0, fChange0, nProperty1, fChange1, nProperty2, fChange2);
+}
+
+
+int Effects_HandleApplyEffectModifyProperty(effect eEffect)
+{
+    ApplyEffectModifyProperty(eEffect);    
+    return TRUE;
+
+}
+
+
+int Effects_HandleRemoveEffectModifyProperty(effect eEffect)
+{                                             
+    RemoveEffectModifyProperty(eEffect);    
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

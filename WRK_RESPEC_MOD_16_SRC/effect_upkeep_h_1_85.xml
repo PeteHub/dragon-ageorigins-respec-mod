@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="85" Folder="\_Game Effects\Effects\" ResRefName="effect_upkeep_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_upkeep_h.nss?moduleid=1&amp;resrefid=85" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_upkeep_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_upkeep.nss
+// -----------------------------------------------------------------------------
+/*
+    Effect: Upkeep
+
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+#include "2da_constants_h"
+#include "events_h"
+#include "effect_constants_h"
+#include "attributes_h"
+#include "config_h"
+#include "ui_h"
+
+const int VFX_MODAL_DEACTIVATE = 1146;
+
+// -----------------------------------------------------------------------------
+/** @brief Applies an upkeep effect to a creature for the duration of the parent ability
+*
+* Upkeep Effects take away some of the characters maximum stamina or mana and restore
+* it when they expire. They also take away current mana when created and partially
+* refund it when expiring.
+*
+* @param  nUpkeepType The UPKEEP_TYPE_* (mana or stamina)
+* @param  nValue The cost of the upkeep effect (usually a negative integer read from abi_base)
+* @param  nAbilityId Ability ID of the ability that is being upkept
+* @param  oTarget The target of the beneficial effect of the upkeep spell
+*
+* @returns Upkeep Effect
+*
+* @author Georg
+**/
+
+const int PROPERTY_ATTRIBUTE_FATIGUE = 41;
+
+effect EffectUpkeep(int nUpkeepType, float fCost, int nAbilityId, object oTarget, int bPartywide)
+{
+    effect eEffect = Effect( EFFECT_TYPE_UPKEEP);
+    eEffect = SetEffectInteger(eEffect, 0, nUpkeepType);
+    eEffect = SetEffectInteger(eEffect, 1, nAbilityId);
+    eEffect = SetEffectInteger(eEffect, 2, bPartywide);
+    eEffect = SetEffectObject (eEffect, 0, oTarget);
+
+    Log_Trace(LOG_CHANNEL_TEMP,"BAFAF","Cost:" + ToString(fCost));
+
+    eEffect = SetEffectFloat  (eEffect, 0, fCost);
+
+    float fFatigue = GetM2DAFloat(TABLE_ABILITIES_SPELLS, "fatigue", nAbilityId);
+    DEBUG_PrintToScreen(ToString(fCost));
+
+    eEffect = SetEffectFloat  (eEffect, 1, fFatigue);
+    return eEffect;
+}
+
+
+int Effects_HandleApplyEffectUpkeep(effect eEffect)
+{
+    int nUpkeepType     = GetEffectInteger(eEffect,0);
+    int nAbilityId      = GetEffectInteger(eEffect,1);
+    float fFatigue      = GetEffectFloat(eEffect,1);
+
+
+    float fAmount = GetEffectFloat(eEffect,0);
+    // -----------------------------------------------------------------
+    // Do not apply this effect if it would bring us below 0
+    // -----------------------------------------------------------------
+
+    float fMaxStamina = GetCreatureProperty(OBJECT_SELF, PROPERTY_DEPLETABLE_MANA_STAMINA,PROPERTY_VALUE_TOTAL);
+
+    if (fMaxStamina + fAmount &lt; 0.0)
+    {
+        return FALSE;
+    }
+
+    // -------------------------------------------------------------------------
+    // This is where the upkeep amount is reserved
+    // -------------------------------------------------------------------------
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_DEPLETABLE_MANA_STAMINA, fAmount, PROPERTY_VALUE_MODIFIER);
+
+
+
+
+    // -------------------------------------------------------------------------
+    // This is where the fatigue cost gets applied
+    // -------------------------------------------------------------------------
+    if (fFatigue&gt;0.0f)
+    {
+        UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_FATIGUE, fFatigue, PROPERTY_VALUE_MODIFIER);
+    }
+
+
+
+    #ifdef DEBUG
+    Log_Trace(LOG_CHANNEL_EFFECTS,"effect_upkeep_h.Effects_HandleApplyEffectUpkeep","Upkeep effect applied for ability " + IntToString(nAbilityId));
+    #endif
+
+    // -------------------------------------------------------------------------
+    // Valid Ability ID - Synchronize Modal ability UI
+    // -------------------------------------------------------------------------
+    if (nAbilityId != ABILITY_INVALID)
+    {
+        Engine_SetModalAbilityGUI(OBJECT_SELF,nAbilityId, TRUE);
+    }
+
+
+
+    return TRUE;
+}
+
+
+// -----------------------------------------------------------------------------
+// @brief Helper, remove effects held up by an upkeep effect.
+//
+// @param oCreator      - The effect creator
+// @param oTarget       - The creature to remove the effects from
+// @param nAbilityId    - The ability id of the effects to be removed
+// @author Georg
+// -----------------------------------------------------------------------------
+void _RemoveUpkeptEffects(object oCreator, object oTarget, int nAbilityId)
+{
+    effect[] effects = GetEffectsByAbilityId(oTarget, nAbilityId);
+    int nCount = GetArraySize(effects);
+    int i;
+    Log_Trace(LOG_CHANNEL_EFFECTS,"effect_upkeep_h._RemoveUpkeptEffects","removing " + IntToString(nCount) + " upkept effects for ability id: " + IntToString(nAbilityId) + " creator:" + GetTag(oCreator),oTarget);
+
+    for (i = 0; i &lt; nCount; i++)
+    {
+        if (IsEffectValid(effects[i]))
+        {
+            if (GetEffectType(effects[i]) != EFFECT_TYPE_UPKEEP)
+            {
+                if ( GetEffectCreator(effects[i]) == oCreator)
+                {
+
+                        RemoveEffect(oTarget, effects[i]);
+                }
+            }
+        }
+    }
+
+    if (nCount)
+    {
+        ApplyEffectVisualEffect(OBJECT_SELF, OBJECT_SELF, VFX_MODAL_DEACTIVATE, EFFECT_DURATION_TYPE_INSTANT, 0.0f);
+    }
+
+}
+
+
+int Effects_HandleRemoveEffectUpkeep(effect eEffect)
+{
+    int nUpkeepType = GetEffectInteger(eEffect,0);
+    int nPercent    = Config_GetSetting(CONFIG_SETTING_UPKEEP_RETURN_PERCENT);
+    int nAbilityId  = GetEffectInteger(eEffect,1);
+    int bPartywide  = GetEffectInteger(eEffect,2);
+    object oTarget = GetEffectObject(eEffect,0);
+    object oCreator = GetEffectCreator(eEffect);
+    float fFatigue  = GetEffectFloat(eEffect,1) * -1.0f;
+
+    float fAmount = GetEffectFloat (eEffect,0) * -1.0f;
+
+
+    if (bPartywide &amp;&amp; IsFollower(oCreator))
+    {
+        object[] arrParty = GetPartyList();
+        int nCount = GetArraySize(arrParty);
+        int i;
+
+        for (i =0; i&lt;nCount; i++)
+        {
+            if (IsObjectValid(arrParty[i]))
+            {
+            //     Log_Trace(LOG_CHANNEL_TEMP,"effect_upkeep_h.Effects_HandleRemoveEffectUpkeep","bPartyWide: removing from " + GetTag(arrParty[i]),arrParty[i] ) ;
+
+                _RemoveUpkeptEffects(oCreator, arrParty[i],nAbilityId);
+            }
+        }
+
+    }
+    else
+    {
+        // -------------------------------------------------------------------------
+        // Purge all the effects held up by this upkeep effect of the original
+        // target and the caster
+        // * identified by ability_id
+        // -------------------------------------------------------------------------
+        if (IsObjectValid(oTarget) &amp;&amp; oTarget != OBJECT_SELF)
+        {
+             _RemoveUpkeptEffects(oCreator, oTarget,nAbilityId);
+        }
+
+        _RemoveUpkeptEffects(oCreator, OBJECT_SELF, nAbilityId);
+    }
+
+     UpdateCreatureProperty(OBJECT_SELF, PROPERTY_DEPLETABLE_MANA_STAMINA, fAmount, PROPERTY_VALUE_MODIFIER);
+
+    if (fFatigue &lt;0.0f)
+    {
+        UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_FATIGUE, fFatigue, PROPERTY_VALUE_MODIFIER);
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Valid Ability ID - Synchronize Modal ability UI
+    // -------------------------------------------------------------------------
+    if (nAbilityId != ABILITY_INVALID)
+    {
+        Engine_SetModalAbilityGUI(OBJECT_SELF,nAbilityId, FALSE);
+        Ability_SetCooldown(OBJECT_SELF, nAbilityId);
+    }
+
+
+
+    return TRUE;
+}
+
+void Effects_RemoveUpkeepEffect(object oCaster, int nAbilityId)
+{
+    effect [] effects = GetEffects(oCaster, EFFECT_TYPE_UPKEEP, nAbilityId );
+
+    int nSize = GetArraySize(effects);
+    int i;
+
+
+    Log_Trace(LOG_CHANNEL_EFFECTS,"effect_upkeep_h.Effects_RemoveUpkeepEffect","removing " + IntToString(nSize) + " upkeep effects for ability id: " + IntToString(nAbilityId),oCaster);
+    UI_DisplayAbilityMessage(oCaster, nAbilityId, TRUE);
+
+    for (i = 0; i &lt; nSize; i++)
+    {
+        RemoveEffect(oCaster, effects[i]);
+    }
+}</text>
+	</Agent>
+</Resource>

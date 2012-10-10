@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="1833" Folder="\_Game Effects\Effects\" ResRefName="effect_sleep_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_sleep_h.nss?moduleid=1&amp;resrefid=1833" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_sleep_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_sleep_h
+// -----------------------------------------------------------------------------
+/*
+    Effect Sleep
+
+        When applied to an object, this effect
+        * applies the sleep effect
+        */
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+                  
+#include "effect_constants_h"
+#include "log_h"  
+
+
+const float _EFFECT_SLEEP_DEXTERITY_DEBUFF = -1000.0f;
+
+/** @brief Creates a sleep effect
+*                 
+* @param nEffectID - The specific sleep effect (EFFECT_TYPE_SLEEP or EFFECT_TYPE_SLEEP_PLOT).
+* @returns A valid effect of type EFFECT_TYPE_SLEEP (or EFFECT_TYPE_SLEEP_PLOT).
+*/
+effect EffectSleep(int nEffectID = EFFECT_TYPE_SLEEP)
+{
+    effect eSleep = Effect(nEffectID);
+    eSleep = SetEffectEngineInteger(eSleep, EFFECT_INTEGER_VFX, VFX_CRUST_SLEEP);
+    return eSleep;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Effects_HandleApplyEffectSleep
+///////////////////////////////////////////////////////////////////////////////
+//  Created By: Georg Zoeller
+//  Created On: Jan 2007
+///////////////////////////////////////////////////////////////////////////////
+int Effects_HandleApplyEffectSleep(effect eEffect)
+{
+
+     if (GetArraySize(GetEffects(OBJECT_SELF, EFFECT_TYPE_SLEEP)) &gt; 1  /*this includes this effect */ )
+     {
+        Log_Trace(LOG_CHANNEL_EFFECTS,"ApplySleep","NOT applying sleep, target already sleepling!");
+        return FALSE;
+     }
+
+
+    // Sleep debuffs dexterity. Note that we're subtracting a very large number here, but because the
+    // property system confines the actual value between floor and ceiling, it will never drop below 1.
+    // This is intended behavior.
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_DEXTERITY,_EFFECT_SLEEP_DEXTERITY_DEBUFF, PROPERTY_VALUE_MODIFIER);
+
+    return   TRUE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//  Effects_HandleRemoveEffectSleep
+///////////////////////////////////////////////////////////////////////////////
+//  Created By: Georg Zoeller
+//  Created On: Jan 2007
+///////////////////////////////////////////////////////////////////////////////
+int Effects_HandleRemoveEffectSleep(effect eEffect)
+{
+
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_DEXTERITY, (_EFFECT_SLEEP_DEXTERITY_DEBUFF * -1), PROPERTY_VALUE_MODIFIER);
+    return TRUE;
+}
+       
+
+
+/** @brief Causes a creature to sleep.
+*
+* @param oCreature - The creature to force asleep.
+*/
+void ForceSleepStart(object oCreature);
+void ForceSleepStart(object oCreature)
+{
+    if (IsObjectValid(oCreature))
+    {
+        effect eSleep = Effect(EFFECT_TYPE_SLEEP_PLOT);
+        Engine_ApplyEffectOnObject (EFFECT_DURATION_TYPE_PERMANENT, eSleep, oCreature, 0.0f, oCreature, 0);
+    }
+}
+
+/** @brief Causes a sleeping creature to wake.
+*
+* @param oCreature - The creature to wake.
+*/
+void ForceSleepEnd(object oCreature);
+void ForceSleepEnd(object oCreature)
+{
+    effect[] arEffects = GetEffects(oCreature);
+    int i;
+    for (i = 0; i &lt; GetArraySize(arEffects); i++)
+    {
+        if (GetEffectType(arEffects[i]) == EFFECT_TYPE_SLEEP_PLOT
+            &amp;&amp; GetEffectCreator(arEffects[i]) == oCreature)
+        {
+            RemoveEffect(oCreature, arEffects[i]);
+        }
+    }
+}</text>
+	</Agent>
+</Resource>

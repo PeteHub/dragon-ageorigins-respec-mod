@@ -1,0 +1,66 @@
+UPDATE v1.6 is out!
+===============
+The latest version of the addin and it's source code is up on the site.
+
+1.6 - Added: Confirmation screen to ensure no accidental character resets can happen.
+1.6 - Added: Welcome screen
+1.6 - Added: A couple of random RP lines
+1.6 - Added: More mysterious Ravens appear all over Ferelden! Keep an eye out for them.
+
+Known Issues v1.6
+==============
+- If the player cancels the respecialization the potion might become unusable for everyone else but the character that tried to respec. Working on the fix, in the meanwhile just delete the potion and get a new one.
+
+As always, I'm looking forward to any kind of feedback!
+
+Enjoy
+
+HOW TO USE IT
+============
+Look for a Raven next to the fallen tree in the player camp or next to the ruined statue in the exterior of Flemeth's hut.
+
+Hold TAB key to find them easier or check the screenshots from the gallery.
+
+INSTALLATION
+===========
+
+Use "bin_ship\daupdater.exe" from your Dragon Age Origins installation directory to install downloadable content.
+
+In case you experience serious problems and wish to remove the addon, all you have to do is delete the "WRK_RESPEC_MOD" folder from: 
+Documents\\BioWare\\Dragon Age\\AddIns\WRK_RESPEC_MOD
+
+IMPORTANT
+===========
+This mod pokes around with your character statistics, use it at your own risk.
+At least make a savegame before you try it. 
+
+The mod does not grant you character specializations that are tied to the campaign, such as Champion, Reaver, Blood Mage and Duelist. However, if you have aquired these specializations throughout the storyline you are not loosing them either.
+
+The mod takes into account all kind of bonuses you gain to your base stats during your adventure, including the points you get during the Fade and from skill books all around the world.
+
+USE THE SOURCE CODE AT YOUR OWN RISK. YOU CAN CAUSE SERIOUS HARM TO YOUR GAME IF YOU DON'T PAY ATTENTION
+
+Version History
+===========
+1.0 Initial release
+-
+1.1 - Fixed doubled attribute points on the level up screen
+1.1 - Fixed compatibility issue with Crag Graff's Storage Chest mod
+1.1 - Temporary workaround Virulent Walking Bomb and Tempest Mage spells crashing the client.
+1.1 - Fixed issues with wrong target when the potion used from the character stat page
+1.1 - Fixed issue with effects staying on the character after the removal of the ability that grants it
+1.1 - Fixed issue with stealthy characters remaining in stealth after removal of Stealth rank 2.
+-
+1.2 - Fixed the client crashes upon resetting casters (hopefully, only could test with premade characters)
+1.2 - Disabled resetting of DLC character Shale until the abilities are implemented
+-
+1.3 - Added the option to learn class specializations
+1.3 - From now on attributes reset to the default base value defines by the characters race and core class combination.
+1.3 - Added an extra raven to the exterior of Flemeth's home. Look around the ruined statue.
+-
+1.4 - Fixed: Client crash errors due to multiple instances of the same spells in the quickslots of the actionbar. (Mage and Morrigan crashes)
+1.4 - Fixed: Sten now resets to the Qunari Warrior base attribute values
+1.4 - Fixed: The dog companion now resets to the Mabari Warhound base attribute values
+1.4 - Added: You can now respec Shale, the DLC extra character
+-
+1.5 - Fixed: The issue with the raven not spawning outside of Flemeth's hut.

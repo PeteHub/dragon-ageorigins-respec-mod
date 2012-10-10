@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="399" Folder="\_Core Includes\" ResRefName="design_tracking_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\design_tracking_h.nss?moduleid=1&amp;resrefid=399" Requested="0">
+	<Agent type="empty">
+		<ResRefName>design_tracking_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// design_tracking h
+// -----------------------------------------------------------------------------
+/*
+
+    PURPOSE
+
+    This defines the interface into georg's development telemetry system, used
+    for path coverage analysis, collecting statistics and tracking user behavior
+    when playing the game.
+
+    DETAILS
+
+    Please see http://georg/skynetweb for whitepaper, technical specs and
+    frontend.
+
+    This system uses SendToRunDatabase() to send specifically coded
+    'event packets' via UDP to a central server (georg.bioware.ad.ea.com), which
+    receives and transforms the data into the project database.
+
+    This system gathers DEVELOPMENT telemetry and as such only works in NON SHIP
+    builds - Non SHIP builds no do support the VM commands.
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg
+// -----------------------------------------------------------------------------
+
+
+#include "var_constants_h"
+#include "2da_constants_h"
+
+
+const int TRACKING_ENABLED = TRUE;      // turns the whole system off,
+const string TRACK_DELIMITER = "~";     // Character used as field delimiter in the udp packet.
+                                        // Do not change this without updating servercore/svmachinecommands.cpp as well.
+
+// HARDCODED ENGINE EVENTS -- for reference
+// const string TRACK_PACKET_INIT = "0A";  //Announces to server with game version when game starts, as wll
+// const string TRACK_PACKET_INIT = "0P";  //Ping / keepalive packet
+
+// EVENTS HANDLED IN THIS FUNCTION
+ const string TRACK_PACKET_PARTY_AREA_EVENT = "xA";  // Area Event Packet
+
+// svmachinecommands events.
+// const string TRACK_PACKET_PARTY_AREA_EVENT = "xE";  // Game Event. This is used for almost everything
+
+
+// Enable tracking of combat impacts. This is further limited in the TrackCombatEvent function.
+const int TRACKING_TRACK_COMBAT_IMPACT = TRUE;
+
+const int TRACKING_TRACK_SPAWN_EVENTS = FALSE;
+
+// Enable tracking of the player's position
+const int TRACKING_TRACK_PLAYER_POSITION = TRUE;
+const float TRACKING_TRACK_PLAYER_POSITION_FREQ = 3.5f; // Track player position every 5 seconds;
+const float TRACKING_TRACK_ACCURACY_COMBAT  = 3.0f;      // In combat, track position updates greater than 3 meters difference
+const float TRACKING_TRACK_ACCURACY_DEFAULT = 1.5f;      // Out of combat, track greater than 1.5 meters
+
+const int TRACKING_EVENT_ID_POSITION     = 12000;
+const int TRACKING_EVENT_ID_TRACKNOTE    = 12010;
+const int TRACKING_EVENT_ID_LEVELUP       = 10050;       // Levelup
+const int TRACKING_EVENT_ID_LEVELUP_DATA  = 10051;      // Levelup
+const int TRACKING_EVENT_ID_STAT_DATA     = 10052;       // Levelup
+const int TRACKING_EVENT_CHEAT            = 12050;       // Cheat.
+
+// -----------------------------------------------------------------------------
+// Creature Death Message
+// -----------------------------------------------------------------------------
+void TrackObjectDeath(event ev);
+void TrackObjectDeath(event ev)
+{
+    if (TRACKING_ENABLED)
+    {
+        int nEventType = GetEventType(ev);
+        int nParam1 = 0;
+        if (GetObjectType(GetEventCreator(ev)) == OBJECT_TYPE_CREATURE)
+        {
+            nParam1 = GetCreatureRank(OBJECT_SELF);
+        }
+
+        // Not interested in suicide
+        if (GetEventCreator(ev) != OBJECT_SELF)
+        {
+            SendGameEventRunDatabase(nEventType,GetEventCreator(ev),OBJECT_SELF, GetAppearanceType(OBJECT_SELF), nParam1);
+        }
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Party Area Event (enter, exit)
+// -----------------------------------------------------------------------------
+void TrackPartyAreaEvent(object oArea, int nEvent);
+void TrackPartyAreaEvent(object oArea, int nEvent)
+{
+    if (TRACKING_ENABLED)
+    {
+        //SendToRunDatabase(TRACK_PACKET_PARTY_AREA_EVENT + GetTag(oArea) + TRACK_DELIMITER + ToString(nEvent));
+        SendGameEventRunDatabase(nEvent,oArea, OBJECT_INVALID, 0,0,GetTag(oArea),"","xA");
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Track ability events
+// -----------------------------------------------------------------------------
+void TrackPartyAbilityUse(int nEvent, object oUser, object oTarget, int nAbility);
+void TrackPartyAbilityUse(int nEvent, object oUser, object oTarget, int nAbility)
+{
+    if (TRACKING_ENABLED)
+    {
+        SendGameEventRunDatabase(nEvent,oUser, oTarget, nAbility,IsControlled(oUser));
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Track monster
+// -----------------------------------------------------------------------------
+void TrackMonsterAbilityUse(int nEvent, object oUser, object oTarget, int nAbility);
+void TrackMonsterAbilityUse(int nEvent, object oUser, object oTarget, int nAbility)
+{
+    if (TRACKING_ENABLED)
+    {
+        SendGameEventRunDatabase(nEvent,oUser, oTarget, nAbility,0);
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Track plot events
+// -----------------------------------------------------------------------------
+void TrackPlotEvent(int nEvent, object oConvOwner, object oParty, int nValue, int nOldValue, string sPlot, string sFlag);
+void TrackPlotEvent(int nEvent, object oConvOwner, object oParty, int nValue, int nOldValue, string sPlot, string sFlag)
+{
+    if (TRACKING_ENABLED)
+    {
+        SendGameEventRunDatabase(nEvent,oConvOwner, oParty, nValue,nValue, sPlot, sFlag );
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Track Placeable events
+// -----------------------------------------------------------------------------
+void TrackPlaceableEvent(int nEvent, object oPlc, object oUser,  int nInt0 = 0, int nInt1 = 0);
+void TrackPlaceableEvent(int nEvent, object oPlc, object oUser, int nInt0 = 0, int nInt1 = 0)
+{
+    if (TRACKING_ENABLED)
+    {
+        if (IsHero(oUser))
+        {
+            SendGameEventRunDatabase(nEvent,oPlc, oUser, nInt0, nInt1);
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Track Item Events
+// -----------------------------------------------------------------------------
+void TrackItemEvent(int nEvent, object oUser, object oItem);
+void TrackItemEvent(int nEvent, object oUser, object oItem)
+{
+    if (TRACKING_ENABLED)
+    {
+        SendGameEventRunDatabase(nEvent,oUser, oItem);
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Track Creature Events
+// -----------------------------------------------------------------------------
+void TrackCreatureEvent(int nEvent, object oCreature, object oTarget = OBJECT_INVALID, int nInt1 = 0, int nInt2 = 0);
+void TrackCreatureEvent(int nEvent, object oCreature, object oTarget = OBJECT_INVALID, int nInt1 = 0, int nInt2 = 0)
+{
+    if (TRACKING_ENABLED)
+    {
+        SendGameEventRunDatabase(nEvent,oCreature, OBJECT_INVALID,nInt1, nInt2);
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Track Creature Events
+// -----------------------------------------------------------------------------
+void TrackPartyMemberEvent(int nEvent, object oCreature, object oTarget = OBJECT_INVALID, int nInt1 = 0, int nInt2 = 0,string sString1 = "", string sString2="");
+void TrackPartyMemberEvent(int nEvent, object oCreature, object oTarget = OBJECT_INVALID, int nInt1 = 0, int nInt2 = 0,string sString1 = "", string sString2="")
+{
+    if (TRACKING_ENABLED)
+    {
+        SendGameEventRunDatabase(nEvent,oCreature, OBJECT_INVALID,nInt1, nInt2, sString1, sString2);
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Track Dialog events
+// -----------------------------------------------------------------------------
+void TrackDialogEvent(int nEvent, object oTalkee, object oInitiator, string sDialogResRef);
+void TrackDialogEvent(int nEvent, object oTalkee, object oInitiator, string sDialogResRef)
+{
+    if (TRACKING_ENABLED)
+    {
+        if (IsFollower(oInitiator))
+        {
+            SendGameEventRunDatabase(nEvent,oTalkee, oInitiator, 0,0,sDialogResRef);
+        }
+        else if (IsFollower(oTalkee))
+        {
+            SendGameEventRunDatabase(nEvent, oInitiator, oTalkee, 0,0,sDialogResRef);
+        }
+        else
+        {
+           SendGameEventRunDatabase(nEvent, oTalkee, oInitiator, 1,0,sDialogResRef);
+        }
+
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Track Module events (load, start, etc..)
+// -----------------------------------------------------------------------------
+void TrackModuleEvent(int nEvent, object oModule, object oCreature = OBJECT_INVALID, int nInt1 = 0, int nInt2 = 0);
+void TrackModuleEvent(int nEvent, object oModule, object oCreature = OBJECT_INVALID, int nInt1 = 0, int nInt2 = 0)
+{
+    if (TRACKING_ENABLED)
+    {
+        SendGameEventRunDatabase(nEvent,oModule, oCreature,nInt1,nInt2, GetTag(GetArea(GetHero())),"","xM");
+    }
+}
+
+
+
+
+// -----------------------------------------------------------------------------
+// Track Combat specific events
+// -----------------------------------------------------------------------------
+void TrackCombatEvent(int nEvent, object oObject, object oTarget = OBJECT_INVALID, int nParam1 = 0, int nParam2 = 0, string sParam1 ="" );
+void TrackCombatEvent(int nEvent, object oObject, object oTarget = OBJECT_INVALID, int nParam1 = 0, int nParam2 = 0, string sParam1 ="" )
+{
+    if (TRACKING_ENABLED)
+    {
+        // Currently limited to deathblows. Removing this switch will cause any hit or miss against a party member
+        // to be logged...
+        if (nParam1 == COMBAT_RESULT_DEATHBLOW)
+        {
+            SendGameEventRunDatabase(nEvent,oObject, oTarget, nParam1, nParam2, sParam1);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+/*
+    @brief Generates a unique game id based on the system tick count. Used
+           for associating loaded games with previously played game sessions.
+
+*/
+//------------------------------------------------------------------------------
+int TrackGenerateGameId();
+int TrackGenerateGameId()
+{
+    return GetLowResTimer();
+}
+
+
+void TrackSendGameId(int bFromStart)
+{
+    int nGameId = GetLocalInt(GetModule(), TRACKING_GAME_ID);
+    // -------------------------------------------------------------------------
+    // If no game id is stored on the module, a new game was started, so
+    // and id is generated and saved;
+    // -------------------------------------------------------------------------
+    if (nGameId == 0)
+    {
+        nGameId = TrackGenerateGameId();
+        SetLocalInt(GetModule(), TRACKING_GAME_ID, nGameId);
+        SendToRunDatabase("xG" + ToString(nGameId) + TRACK_DELIMITER + "N" + TRACK_DELIMITER + ToString(bFromStart) );
+    }
+    else
+    {
+        SendToRunDatabase("xG" + ToString(nGameId) + TRACK_DELIMITER + "L" + TRACK_DELIMITER + ToString(bFromStart));
+    }
+
+    LogTrace(LOG_CHANNEL_SYSTEMS ,"TrackSendGameId: Game ID is " + ToString(nGameId) + " FromStart: " + ToString(bFromStart));
+
+}
+
+
+// do not use. If you use this georg will kill you.
+void TrackSendEmail(string sAddress, string sSubject,  string sContents, int bNoHeader = FALSE);
+void TrackSendEmail(string sAddress, string sSubject,  string sContents, int bNoHeader = FALSE)
+{
+    if (GetStringLength(sContents) &lt;850)
+    {
+        SendToRunDatabase("xD"+sAddress +  TRACK_DELIMITER + sSubject + TRACK_DELIMITER + ToString(bNoHeader) + TRACK_DELIMITER +  sContents );
+    }
+    else
+    {
+
+        sContents = StringLeft(sContents, 850);
+        SendToRunDatabase("xD"+sAddress +  TRACK_DELIMITER + sSubject + TRACK_DELIMITER + ToString(bNoHeader) + TRACK_DELIMITER +  sContents );
+        DEBUG_PrintToScreen("Sent truncated email, contents longer than 850 chars");
+    }
+
+}
+
+void TrackInstallPositionTracker(object oObject)
+{
+    /* if (TRACKING_TRACK_PLAYER_POSITION  &amp;&amp; TRACKING_ENABLED )
+     {
+         if (IsHero(oObject))
+         {
+            if (!GetHasEffects(oObject,1001))
+            {
+                effect eHB = Effect(1001);
+                eHB = SetEffectInteger(eHB, 0,  TRACKING_EVENT_ID_POSITION);
+                eHB= SetEffectFloat(eHB, 0, TRACKING_TRACK_PLAYER_POSITION_FREQ);
+                Engine_ApplyEffectOnObject(EFFECT_DURATION_TYPE_PERMANENT, eHB, oObject, 0.0f, oObject);
+            }
+         }
+     }*/
+}
+
+// -----------------------------------------------------------------------------
+// Track Trigger events
+// -----------------------------------------------------------------------------
+void TrackTriggerEvent(int nEvent, object oTrigger, object oEnter = OBJECT_INVALID);
+void TrackTriggerEvent(int nEvent, object oTrigger, object oEnter = OBJECT_INVALID )
+{
+    if (TRACKING_ENABLED)
+    {
+        SendGameEventRunDatabase(nEvent,oTrigger, oEnter,GetObjectType(oTrigger));
+    }
+}
+
+void TrackSendPositionUpdate(int nType = 0, object oDest = OBJECT_INVALID, float fDistance  = 0.0f)
+{
+    TrackPartyMemberEvent(TRACKING_EVENT_ID_POSITION, OBJECT_SELF, oDest, GetGameMode(),0, ToString(fDistance));
+}
+
+void TrackJumpEvent(object oJumper, object oDestination)
+{
+    if (TRACKING_ENABLED &amp;&amp; TRACKING_TRACK_PLAYER_POSITION )
+    {
+        if (IsHero(oJumper))
+        {
+            TrackSendPositionUpdate(1, oDestination);
+        }
+    }
+}
+
+
+
+
+const string STAT_TRACK_HIT = "STAT_HIT";
+const string STAT_TRACK_MISS = "STAT_MISS";
+const string STAT_TRACK_DMG = "STAT_DMG";
+const string STAT_TRACK_CRIT = "STAT_CRIT";
+
+
+void TrackAddStat(object oCreature, string stat, int nAdd = 1)
+{
+    if (TRACKING_ENABLED )
+    {
+        SetLocalInt(oCreature, stat,(GetLocalInt(oCreature,stat)+nAdd));
+    }
+}
+
+
+
+int TrackGetStat(object oCreature, string stat)
+{
+    if (TRACKING_ENABLED )
+    {
+        return GetLocalInt(oCreature, stat);
+    }
+    return -1;
+}
+
+
+void TrackResetStats(object oCreature)
+{
+    if (TRACKING_ENABLED )
+    {
+        SetLocalInt(oCreature, STAT_TRACK_MISS,0);
+        SetLocalInt(oCreature, STAT_TRACK_HIT,0);
+        SetLocalInt(oCreature, STAT_TRACK_DMG,0);
+        SetLocalInt(oCreature, STAT_TRACK_CRIT,0);
+
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Track Creature Events
+// -----------------------------------------------------------------------------
+void TrackLevelUp(object oCreature);
+void TrackLevelUp( object oCreature)
+{
+    if (TRACKING_ENABLED)
+    {
+
+        int nClass = FloatToInt(GetCreatureProperty(oCreature, 27));
+        int nLevel = FloatToInt(GetCreatureProperty(oCreature, 15));
+
+        string sDataArray;
+        string sDataArray2;
+        int i;
+        for (i = 1; i&lt; 49; i++)
+        {
+            if (i &lt; 25)
+            {
+                sDataArray  += FloatToString(GetCreatureProperty(oCreature, i, PROPERTY_VALUE_BASE),8,1) + "," ;
+            }
+            else
+            {
+                sDataArray2  += FloatToString(GetCreatureProperty(oCreature, i, PROPERTY_VALUE_BASE),8,1) + "," ;
+            }
+        }
+
+        SendGameEventRunDatabase(TRACKING_EVENT_ID_LEVELUP,oCreature, OBJECT_INVALID,nLevel, nClass,sDataArray);
+        SendGameEventRunDatabase(TRACKING_EVENT_ID_LEVELUP, oCreature, OBJECT_INVALID,0,0, sDataArray2);
+
+
+        SendGameEventRunDatabase(TRACKING_EVENT_ID_STAT_DATA, oCreature, OBJECT_INVALID, TrackGetStat(oCreature,STAT_TRACK_HIT), TrackGetStat(oCreature,STAT_TRACK_MISS), ToString(TrackGetStat(oCreature,STAT_TRACK_CRIT)), ToString(TrackGetStat(oCreature,STAT_TRACK_DMG))    );
+
+         TrackResetStats(oCreature);
+
+    }
+}
+
+
+
+// -----------------------------------------------------------------------------
+// Purpose: Experimental :)
+// -----------------------------------------------------------------------------
+void TrackReactToWebFrontendRequest(int uid, string sKey, string sValue )
+{
+    SendToRunDatabase("fs" + ToString(uid) + TRACK_DELIMITER + sKey + TRACK_DELIMITER + sValue );
+}
+
+
+// ------------------------------------------------------------------------------
+// This is not strictly needed as I'm capturing all console input anyway, but
+// having this allows me to pinpoint the actual location where the cheat happens,
+// later allowing identification of combats where people regulary cheat to get
+// by for balancing review.
+// ------------------------------------------------------------------------------
+void TrackCheat( string cheat, int param1 = 1,string param2 = "" )
+{
+
+    if (TRACKING_ENABLED)
+    {
+            SendGameEventRunDatabase(TRACKING_EVENT_CHEAT,OBJECT_SELF, OBJECT_INVALID, param1, 0, cheat, param2);
+
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// @brief  Generate Position information based on the player's current location
+// @author Georg
+// -----------------------------------------------------------------------------
+
+void TrackPos()
+{
+     // ----------------------------------------------------------------
+     // Player tracking system position updates. See
+     // http://georg/skynetweb
+     // ----------------------------------------------------------------
+     if (TRACKING_TRACK_PLAYER_POSITION )
+     {
+
+            float fOldX = GetLocalFloat(OBJECT_SELF,DEBUG_TRACKING_POS);
+            float fOldY = GetLocalFloat(OBJECT_SELF, DEBUG_TRACKING_POS_Y);
+
+            vector vPos = GetPosition(OBJECT_SELF);
+            location lA = GetLocation(OBJECT_SELF);
+            location lB = Location(GetArea(OBJECT_SELF), Vector(fOldX,fOldY,vPos.z), 0.0);
+
+
+            // In combat, we only register significant movements
+            float fThreshHold = (GetGameMode() == GM_COMBAT? TRACKING_TRACK_ACCURACY_COMBAT: TRACKING_TRACK_ACCURACY_DEFAULT);
+
+            // -----------------------------------------------------------------
+            // basic 2d distance check
+            // -----------------------------------------------------------------
+            float fDist = GetDistanceBetweenLocations(lA,lB) ;
+            if ((fOldX + fOldY == 0.0) || fDist &gt; fThreshHold)
+            {
+
+               SetLocalFloat(OBJECT_SELF,"DEBUG_TRACKING_POS", vPos.x);
+               SetLocalFloat(OBJECT_SELF,"DEBUG_TRACKING_POS_Y", vPos.y);
+
+               TrackSendPositionUpdate(0,OBJECT_INVALID, fDist);
+            }
+
+
+     }
+
+}
+
+void TrackPCImmortal(object oChar, int bImmortal)
+{
+    SendGameEventRunDatabase(12099,oChar,OBJECT_INVALID, IsImmortal(oChar),bImmortal, GetCurrentScriptName());
+}</text>
+	</Agent>
+</Resource>

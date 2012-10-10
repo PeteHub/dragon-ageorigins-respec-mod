@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="98" Folder="\_Game Effects\Effects\" ResRefName="effect_daze_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_daze_h.nss?moduleid=1&amp;resrefid=98" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_daze_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_daze_h
+// -----------------------------------------------------------------------------
+/*
+    Effect Daze
+
+        When applied to an object, this effect
+        * applies the daze VFX
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+/** @brief Returns an effect which dazes a creature
+* @author Georg Zoeller
+*
+* @return a valid effect of type EFFECT_TYPE_DAZE.
+*/
+effect EffectDaze();
+effect EffectDaze()
+{
+    effect eEffect = Effect(EFFECT_TYPE_DAZE);
+    eEffect = SetEffectEngineInteger(eEffect, EFFECT_INTEGER_VFX, 1133);
+    return eEffect;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Effects_HandleApplyEffectDaze
+///////////////////////////////////////////////////////////////////////////////
+//  Created By: Georg Zoeller
+//  Created On: Jan 2007
+///////////////////////////////////////////////////////////////////////////////
+const float DAZE_ATTACK_PENALTY = -5.0f;
+const float DAZE_DEFENSE_PENALTY = -5.0f;
+int Effects_HandleApplyEffectDaze(effect eEffect)
+{
+    // attack and defense debuff
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_ATTACK, DAZE_ATTACK_PENALTY, PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_DEFENSE, DAZE_DEFENSE_PENALTY, PROPERTY_VALUE_MODIFIER);
+
+    return   TRUE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//  Effects_HandleRemoveEffectDaze
+///////////////////////////////////////////////////////////////////////////////
+//  Created By: Georg Zoeller
+//  Created On: Jan 2007
+///////////////////////////////////////////////////////////////////////////////
+int Effects_HandleRemoveEffectDaze(effect eEffect)
+{
+    // remove attack and defense debuff
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_ATTACK, DAZE_ATTACK_PENALTY * -1.0f, PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_DEFENSE, DAZE_DEFENSE_PENALTY * -1.0f, PROPERTY_VALUE_MODIFIER);
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

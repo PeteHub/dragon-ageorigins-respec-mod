@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="7393" Folder="\_Global\Tutorials\" ResRefName="tutorials_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\tutorials_h.nss?moduleid=1&amp;resrefid=7393" Requested="0">
+	<Agent type="empty">
+		<ResRefName>tutorials_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>////////////////////////////////////////////////////////////////////////////////
+//  Tutorials Include file
+//  Copyright © 2007 Bioware Corp.
+////////////////////////////////////////////////////////////////////////////////
+/*
+    Handles defines for any general tutorial functions
+*/
+////////////////////////////////////////////////////////////////////////////////
+
+// Unique Identifiers for the various Teach and Test Tutorials.
+const int TRAINING_SESSION_INVALID                   = 0;
+const int TRAINING_SESSION_TACTICAL_VIEW             = 1;
+const int TRAINING_SESSION_MOVE_COMMANDS             = 2;
+const int TRAINING_SESSION_FOLLOWERS_AND_TACTICS     = 3;
+const int TRAINING_SESSION_LEVEL_UP                  = 4;
+const int TRAINING_SESSION_EQUIPMENT                 = 5;
+const int TRAINING_SESSION_HOTBAR                    = 6;
+
+void BeginTrainingMode(int a_nTrainingSessionId)
+{
+    //This will fire a: EVENT_TYPE_TRAINING_BEGIN event.
+    SetTrainingMode(a_nTrainingSessionId);
+}
+
+void EndTrainingMode()
+{
+    SetTrainingMode(TRAINING_SESSION_INVALID);
+}</text>
+	</Agent>
+</Resource>

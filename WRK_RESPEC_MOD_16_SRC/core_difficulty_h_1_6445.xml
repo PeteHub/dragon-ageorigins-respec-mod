@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="6445" Folder="\_Core Includes\" ResRefName="core_difficulty_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\core_difficulty_h.nss?moduleid=1&amp;resrefid=6445" Requested="0">
+	<Agent type="empty">
+		<ResRefName>core_difficulty_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// core_difficulty_h
+// -----------------------------------------------------------------------------
+/*
+    game difficulty scaling
+
+    as a core file, this CANNOT include any other files
+*/
+// -----------------------------------------------------------------------------
+// owner: noel borstad
+// -----------------------------------------------------------------------------
+
+#include "2da_constants_h"
+
+/** @brief Returns the appropriate autoscale table to use based on current difficulty
+*
+*   Looks up which autoscale table to use based on the current difficulty setting
+* @author Noel
+**/
+int Diff_GetAutoScaleTable();
+int Diff_GetAutoScaleTable()
+{
+    return TABLE_AUTOSCALE;/*  TABLE_AUtos GetM2DAInt( TABLE_DIFFICULTY, "AUTOSCALE", GetGameDifficulty() );*/
+}
+
+
+
+/** @brief Returns an attack modifier for enemies who are flanking a party character
+*
+*   Allows us to increase the importance of character positioning in combat
+* @author Noel
+**/
+float Diff_GetEnemyFlankModifier();
+float Diff_GetEnemyFlankModifier()
+{
+    return GetM2DAFloat( TABLE_DIFFICULTY, "ENEMYFLANKBONUS", GetGameDifficulty() );
+}
+
+float Diff_GetDurationModifier(object oCreature)
+{
+    int nRank       = GetCreatureRank(oCreature);
+    string sColumn  = "fEffectDur";
+    sColumn +=GetM2DAString(TABLE_DIFFICULTY,"Suffix", GetGameDifficulty());
+
+    float fRet = GetM2DAFloat(TABLE_AUTOSCALE,sColumn, nRank);
+    if (fRet&gt;0.0f)
+    {
+         return fRet;
+    }
+    return 1.0f;
+}
+
+
+float Diff_GetRulesAttackBonus(object oAttacker)
+{
+    if (GetCreatureRank(oAttacker) != CREATURE_RANK_PLAYER)
+    {
+        return 0.0;
+    }
+
+    return GetM2DAFloat(TABLE_DIFFICULTY,"AttackBonus", GetGameDifficulty());
+
+}
+
+
+float Diff_GetRulesDefenseBonus(object oCreature)
+{
+    if (GetCreatureRank(oCreature) != CREATURE_RANK_PLAYER)
+    {
+        return 0.0;
+    }
+
+    return GetM2DAFloat(TABLE_DIFFICULTY,"DefenseBonus", GetGameDifficulty());
+
+}
+
+
+float Diff_GetRulesDamageBonus(object oCreature)
+{
+    if (GetCreatureRank(oCreature) != CREATURE_RANK_PLAYER)
+    {
+        return 0.0;
+    }
+
+    return GetM2DAFloat(TABLE_DIFFICULTY,"DamageBonus", GetGameDifficulty());
+
+}
+
+
+
+float Diff_GetRulesHealingModifier (object oCreature)
+{
+    if (GetCreatureRank(oCreature) != CREATURE_RANK_PLAYER)
+    {
+        return 1.0;
+    }
+
+    float fRet = GetM2DAFloat(TABLE_DIFFICULTY,"HealingModifier", GetGameDifficulty());
+
+    if (fRet &gt;0.0f)
+    {
+        return fRet;
+    }
+    else /* outdated resources */
+    {
+        return 1.0f;
+    }
+
+
+}
+
+
+float GetDamageScalingThreshold()
+{
+    float fRet = GetM2DAFloat(TABLE_DIFFICULTY,"DmgScalingThresh", GetGameDifficulty());
+
+    if (fRet &gt;0.0f)
+    {
+        return fRet;
+    }
+    else /* outdated resources */
+    {
+        return 5.0f;
+    }
+}
+
+/*
+    @brief  Gets the spell resistance runtime modifiers based on game difficulty
+    @author georg
+*/
+float Diff_GetSRMod(object oCreature)
+{
+    int nRank = GetCreatureRank(oCreature);
+    if (nRank == CREATURE_RANK_PLAYER)
+    {
+        float fMod = GetM2DAFloat(TABLE_DIFFICULTY, "SRModPlayer", GetGameDifficulty() );
+        return fMod;
+    }
+
+    // -------------------------------------------------------------------------
+    // Base is defined in difficulties.xls and modified per rank
+    // -------------------------------------------------------------------------
+    float fBase =  GetM2DAFloat(TABLE_DIFFICULTY, "SRMod", GetGameDifficulty() );
+    float fRank =  GetM2DAFloat(TABLE_AUTOSCALE, "BaseSR", nRank);
+
+    return fBase + fRank;
+
+}
+
+
+/*
+    @brief  Gets the damage resistance runtime modifiers based on game difficulty
+    @author georg
+*/
+float Diff_GetDRMod(object oCreature)
+{
+    int nRank = GetCreatureRank(oCreature);
+    if (nRank == CREATURE_RANK_PLAYER)
+    {
+        float fMod = GetM2DAFloat(TABLE_DIFFICULTY, "DRModPlayer", GetGameDifficulty() );
+        return fMod;
+    }
+
+    // -------------------------------------------------------------------------
+    // Base is defined in difficulties.xls and modified per rank
+    // -------------------------------------------------------------------------
+    float fBase =  GetM2DAFloat(TABLE_DIFFICULTY, "DRMod", GetGameDifficulty() );
+    float fRank =  GetM2DAFloat(TABLE_AUTOSCALE, "BaseDR", nRank);
+
+    return fBase + fRank;
+
+}
+
+//This function is duplicated within the game executable. Any change made to this function will 
+//result in GUI glitches and other bugs. Sorry.
+float Diff_GetAbilityUseMod(object oCreature)
+{
+   int nRank = GetCreatureRank(oCreature);
+   if (nRank == CREATURE_RANK_PLAYER || nRank == CREATURE_RANK_CRITTER || nRank == CREATURE_RANK_WEAK_NORMAL)
+   {
+        return 1.0f;
+   }
+
+   // --------------------------------------------------------------------------
+   // Up to level 3, we don't enforce this rule on HARD
+   // --------------------------------------------------------------------------
+   float fLevel = GetCreatureProperty(oCreature, PROPERTY_SIMPLE_LEVEL);
+   if (fLevel &lt;= 3.0f || GetGameDifficulty() &lt;= 2)
+   {
+        return 1.0f;
+   }
+
+
+   float fBase =  GetM2DAFloat(TABLE_DIFFICULTY, "AIAbilityUseMod", GetGameDifficulty() );
+
+   // capping at 0.5, just in case someone adds bad 2da data
+   if (fBase &gt; 0.75)
+   {
+        return fBase;
+   }
+   return 0.75;
+}
+
+/**-----------------------------------------------------------------------------
+* @brief Returns modifier for scaling trap damage to game difficulty.
+*-----------------------------------------------------------------------------*/
+float Diff_GetTrapDamageModifier()
+{
+    float fMod = GetM2DAFloat(TABLE_DIFFICULTY, "TrapDmgScale", GetGameDifficulty());
+    return (fMod &gt; 0.0f) ? fMod : 1.0f;
+}</text>
+	</Agent>
+</Resource>

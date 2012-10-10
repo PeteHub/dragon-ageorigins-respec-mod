@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="795" Folder="\_Systems\" ResRefName="sys_disease" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\sys_disease.nss?moduleid=1&amp;resrefid=795" Requested="0">
+	<Agent type="empty">
+		<ResRefName>sys_disease</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//==============================================================================
+// sys_disease
+//------------------------------------------------------------------------------
+/*
+
+    Disease System
+
+    The disease system uses special, permanently applied effects to a party
+    member to mimic diseases contracted during combat or due to some event.
+
+*/
+//------------------------------------------------------------------------------
+// Created By: Joshua Stiksma
+// Created On: January 16, 2007
+//==============================================================================
+
+#include "effect_disease_h"
+#include "effects_h"
+#include "log_h"
+#include "core_h"
+
+//==============================================================================
+// FUNCTION DECLARATIONS
+//==============================================================================
+
+/** @brief Returns whether or not a character has a Disease
+*
+* Checks if a Character currently has a certain Disease Effect applied to him.
+* Disease Effects are defined in the Disease 2DA (diseases.xls)
+*
+* @param oCharacter the Creature to check
+* @param nDiseaseID the Disease to check for. If -1, it will return TRUE if ANY disease is present.
+* @return TRUE if the Creature has the Disease; otherwise FALSE
+* @author joshua
+*/
+int     Disease_HasDisease( object oCharacter, int nDiseaseID );
+
+/** @brief Adds Disease to a Character
+*
+* Adds a certain Disease Effect to a Charaacter.
+* Disease Effects are defined in the Disease 2DA (diseases.xls)
+*
+* @param oCharacter the Creature to add Disease to
+* @param nDiseaseID the Disease to add.
+* @author joshua
+*/
+void Disease_AddDisease( object oCharacter, int nDiseaseID, int nAbilityId = 0 );
+
+/** @brief Removes Disease from a Character
+*
+* Removes a certain Disease from a Character.
+* Disease Effects are defined in the Disease 2DA (diseases.xls)
+*
+* @param oCharacter the Creature to remove Disease from
+* @param nDiseaseID the Disease to remove
+* @author joshua
+*/
+void    Disease_RemoveDisease( object oCharacter, int nDiseaseID );
+
+/** @brief Removes ALL Diseases from a Character
+*
+* Removes ALL Diseases from a Character .
+* Disease Effects are defined in the Disease 2DA (diseases.xls)
+*
+* @param oCharacter the Creature to remove Diseases from
+* @author joshua
+*/
+void    Disease_RemoveAllDiseases( object oCharacter );
+
+/** @brief Removes ALL Diseases from ALL Party Members
+*
+* Removes ALL Diseases from ALL Party Members.
+* Disease Effects are defined in the Disease 2DA (diseases.xls)
+*
+* @author joshua
+*/
+void    Disease_RemoveAllDiseasesFromParty();
+
+
+
+//==============================================================================
+// FUNCTION DEFINITIONS
+//------------------------------------------------------------------------------
+// Disease_HasDisease
+//------------------------------------------------------------------------------
+
+int Disease_HasDisease( object oCharacter, int nDiseaseID )
+{
+
+    int         nIndex;
+    int         nArraySize;
+    effect []   arDiseaseEffects;
+
+    //--------------------------------------------------------------------------
+
+    arDiseaseEffects = GetEffects( oCharacter, EFFECT_TYPE_DISEASE );
+    nArraySize       = GetArraySize( arDiseaseEffects );
+
+    //--------------------------------------------------------------------------
+
+    if (nDiseaseID == -1)
+    {
+        return (nArraySize !=0 )   ;
+    }
+
+    if ( nDiseaseID &gt; 0 )
+    {
+        for ( nIndex = 0; nIndex &lt; nArraySize; nIndex++ )
+        {
+            if( GetEffectInteger(arDiseaseEffects[nIndex],0) == nDiseaseID )
+                return TRUE;
+        }
+    }
+
+    return FALSE;
+
+}
+
+//------------------------------------------------------------------------------
+// Disease_AddDisease
+//------------------------------------------------------------------------------
+
+void Disease_AddDisease( object oCharacter, int nDiseaseID, int nAbilityId =0 )
+{
+
+    effect eDisease;
+
+    //--------------------------------------------------------------------------
+
+    eDisease = EffectDisease(nDiseaseID);
+
+    //--------------------------------------------------------------------------
+
+    if ( !Disease_HasDisease(oCharacter,nDiseaseID) )
+    {
+        if (IsEffectValid(eDisease))
+        {
+            Log_Trace( LOG_CHANNEL_CHARACTER,"sys_disease.AddDisease", "Applying Disease " + ToString(nDiseaseID), oCharacter );
+            ApplyEffectOnObject( EFFECT_DURATION_TYPE_PERMANENT, eDisease, oCharacter, 0.0f, oCharacter, nAbilityId );
+        }     
+        else
+        {
+            Log_Trace( LOG_CHANNEL_CHARACTER,"sys_disease.AddDisease", "NOT Applying Disease (invalid effect)" + ToString(nDiseaseID), oCharacter );            
+        }
+    }
+    else
+    {
+        Log_Trace( LOG_CHANNEL_CHARACTER,"sys_disease.AddDisease","Not adding Disease, already present #" + ToString(nDiseaseID), oCharacter );
+    }
+
+}
+
+//------------------------------------------------------------------------------
+// Disease_RemoveDisease
+//------------------------------------------------------------------------------
+
+void Disease_RemoveDisease( object oCharacter, int nDiseaseID )
+{
+
+    int         nIndex;
+    int         nArraySize;
+    effect []   arDiseaseEffects;
+
+    //--------------------------------------------------------------------------
+
+    arDiseaseEffects = GetEffects( oCharacter, EFFECT_TYPE_DISEASE );
+    nArraySize       = GetArraySize( arDiseaseEffects );
+
+    //--------------------------------------------------------------------------
+
+    for ( nIndex = 0; nIndex &lt; nArraySize; nIndex++ )
+    {
+        if( GetEffectInteger(arDiseaseEffects[nIndex],0) == nDiseaseID )
+        {
+            RemoveEffect( oCharacter, arDiseaseEffects[nIndex] );
+            Log_Trace( LOG_CHANNEL_CHARACTER,"sys_disease.RemoveDisease","Removing Disease #" + ToString(nDiseaseID), oCharacter );
+        }
+    }
+
+}
+
+//------------------------------------------------------------------------------
+// Disease_RemoveAllDiseases
+//------------------------------------------------------------------------------
+
+void Disease_RemoveAllDiseases( object oCharacter )
+{
+
+    int         nIndex;
+    int         nArraySize;
+    effect []   arDiseaseEffects;
+
+    //--------------------------------------------------------------------------
+
+    arDiseaseEffects = GetEffects( oCharacter, EFFECT_TYPE_DISEASE );
+    nArraySize       = GetArraySize( arDiseaseEffects );
+
+    //--------------------------------------------------------------------------
+
+    for ( nIndex = 0; nIndex &lt; nArraySize; nIndex++ )
+    {
+        Log_Trace( LOG_CHANNEL_CHARACTER,"sys_disease.Disease_RemoveAllDiseases","Removing Disease #" + ToString(GetEffectInteger(arDiseaseEffects[nIndex],0)), oCharacter );
+        RemoveEffect( oCharacter, arDiseaseEffects[nIndex] );
+    }
+
+}
+
+//------------------------------------------------------------------------------
+// Disease_RemoveAllDiseasesFromParty
+//------------------------------------------------------------------------------
+
+void Disease_RemoveAllDiseasesFromParty()
+{
+
+    int         nIndex;
+    int         nArraySize;
+    object []   arPartyMembers;
+
+    //--------------------------------------------------------------------------
+
+    arPartyMembers = GetPartyList();
+    nArraySize     = GetArraySize( arPartyMembers );
+
+    //--------------------------------------------------------------------------
+
+    for ( nIndex = 0; nIndex &lt; nArraySize; nIndex++ )
+    {
+        Disease_RemoveAllDiseases( arPartyMembers[nIndex] );
+    }
+
+}</text>
+	</Agent>
+</Resource>

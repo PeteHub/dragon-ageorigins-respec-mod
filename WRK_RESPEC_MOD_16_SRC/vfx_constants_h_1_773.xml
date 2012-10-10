@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="773" Folder="\_Game Effects\Effects\" ResRefName="vfx_constants_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\vfx_constants_h.nss?moduleid=1&amp;resrefid=773" Requested="0">
+	<Agent type="empty">
+		<ResRefName>vfx_constants_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>const int VFX_IMP_NEGATIVE_ENERGY = 1;
+
+
+
+const int VFX_CRUST_PARALYZE = 1061;        
+
+
+
+
+
+// -----------------------------------------------------------------------------
+// AOE constants - AOE.xls
+// -----------------------------------------------------------------------------
+const int VFX_PER_DEN_GUARD_CLOSE   = 3;
+const int VFX_PER_DEN_GUARD_MEDIUM  = 4;</text>
+	</Agent>
+</Resource>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="99" Folder="\_Game Effects\Effects\" ResRefName="effect_paralyze_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_paralyze_h.nss?moduleid=1&amp;resrefid=99" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_paralyze_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_Paralyze_h
+// -----------------------------------------------------------------------------
+/*
+    Effect Paralyze
+
+        When applied to an object, this effect
+        * applies the Paralyze VFX
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+#include "log_h"
+#include "core_h"
+#include "wrappers_h"
+
+/**
+@brief Returns an effect which Paralyzes a creature
+* @author Georg Zoeller
+*
+* @return a valid effect of type EFFECT_TYPE_Paralyze.
+*/
+effect EffectParalyze(int nVfx  = 0);                                        
+effect EffectParalyze(int nVfx   = 0)
+{
+    effect eEffect = Effect(EFFECT_TYPE_PARALYZE);
+    
+    if (nVfx&gt;0)
+    {
+        eEffect = SetEffectEngineInteger(eEffect,EFFECT_INTEGER_VFX,nVfx);   
+    }
+    
+    return eEffect;
+}</text>
+	</Agent>
+</Resource>

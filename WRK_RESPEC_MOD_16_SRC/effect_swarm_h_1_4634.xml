@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="4634" Folder="\_Game Effects\Effects\" ResRefName="effect_swarm_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_swarm_h.nss?moduleid=1&amp;resrefid=4634" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_swarm_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------------------------------------------------------------------------------
+// effect_wbomb_h
+// -----------------------------------------------------------------------------
+/*
+    Effect: Walking Bomb
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "effect_constants_h"
+#include "effect_damage_h"
+#include "2da_data_h"
+#include "effect_visualeffect_h"
+
+const int SWARM_VFX = 90100;
+const float SWARM_RANGE = 10.0f;
+const int SWARM_PROJECTILE = 130;
+
+effect EffectSwarm(object oOwner, int nAbility, int nJumps, float fDamage);
+effect EffectSwarm(object oOwner, int nAbility, int nJumps, float fDamage)
+{
+    effect eEffect = Effect(EFFECT_TYPE_SWARM);
+    eEffect = SetEffectInteger(eEffect, 0, nAbility);
+    eEffect = SetEffectInteger(eEffect, 1, nJumps);
+    eEffect = SetEffectObject(eEffect, 0, oOwner);
+    eEffect = SetEffectFloat(eEffect, 0, fDamage);
+
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Swarm Owner = " + GetTag(oOwner));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Swarm Ability = " + ToString(nAbility));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Swarm Jumps = " + ToString(nJumps));
+
+    return eEffect;
+}
+
+
+
+// -----------------------------------------------------------------------------
+// This utility function handles the application of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleApplyEffectSwarm(effect eEffect);
+int Effects_HandleApplyEffectSwarm(effect eEffect)
+{
+    return TRUE;
+}
+
+// -----------------------------------------------------------------------------
+// This utility function handles the removal of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleRemoveEffectSwarm(effect eEffect);
+int Effects_HandleRemoveEffectSwarm(effect eEffect)
+{
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Swarm Removal = " + GetTag(OBJECT_SELF));
+
+    // if this ability is being removed from a dying/dead creature
+    if ((IsDeadOrDying(OBJECT_SELF) == TRUE) || (GetHasEffects(OBJECT_SELF, EFFECT_TYPE_DEATH) == TRUE) || (GetCreatureFlag(OBJECT_SELF, CREATURE_RULES_FLAG_DYING) == TRUE))
+    {
+        // if there are jumps left
+        int nJumps = GetEffectInteger(eEffect, 1);
+        LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "  Jumps Remaining = " + ToString(nJumps));
+        if (nJumps &gt; 0)
+        {
+            // find nearest enemy in range
+            object oOwner = GetEffectObject(eEffect, 0);
+            LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "  Owner = " + GetTag(oOwner));
+            object[] oTargets = GetObjectsInShape(OBJECT_TYPE_CREATURE, SHAPE_SPHERE, GetLocation(OBJECT_SELF), SWARM_RANGE, 0.0f, 0.0f, TRUE);
+            int nMax = GetArraySize(oTargets);
+            LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "  Non-Dead Creatures Nearby = " + ToString(nMax));
+            int nCount;
+            int nTarget = -1;
+
+            for (nCount = 0; nCount &lt; nMax; nCount++)
+            {
+                LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "    Creature " + ToString(nCount) + " = " + GetTag(oTargets[nCount]));
+                if (oTargets[nCount] != OBJECT_SELF)
+                {
+                    if (IsObjectHostile(oTargets[nCount], oOwner) == TRUE)
+                    {
+                        LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "      Hostile");
+                        if (CheckLineOfSightObject(OBJECT_SELF, oTargets[nCount]) == TRUE)
+                        {
+                            LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "      Line of Sight");
+                            nTarget = nCount;
+                            nCount = nMax;
+                        }
+                    }
+                }
+            }
+            LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "  Final Target = " + ToString(nTarget));
+
+            // if one exists
+            if ((nTarget &gt;= 0) &amp;&amp; (nTarget &lt; nMax))
+            {
+                int nAbility = GetEffectInteger(eEffect, 0);
+                float fDamage = GetEffectFloat(eEffect, 0);
+                nJumps--;
+
+                // create event
+                event ev = Event(90210);
+                ev = SetEventInteger(ev, 0, nAbility);
+                ev = SetEventInteger(ev, 1, nJumps);
+                ev = SetEventObject(ev, 0, oOwner);//oTargets[nTarget]);
+                ev = SetEventObject(ev, 1, oTargets[nTarget]);
+                //ev = SetEventObject(ev, 2, oOwner);
+                ev = SetEventFloat(ev, 0, fDamage);
+
+                // fire projectile
+                vector v = GetPosition(OBJECT_SELF);
+                v.z += 1.5f;
+                object oProjectile = FireHomingProjectile(SWARM_PROJECTILE, v, oTargets[nTarget], 0,  oTargets[nTarget]);
+                SetProjectileImpactEvent(oProjectile, ev);
+            }
+        }
+    }
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

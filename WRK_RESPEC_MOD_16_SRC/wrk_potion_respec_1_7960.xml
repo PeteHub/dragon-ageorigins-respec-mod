@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="7" ResRefID="7960" Folder="\WRK_RESPEC\" ResRefName="wrk_potion_respec" IsCore="1" OwnerIsCore="0" Type="3" State="0" ObjectName="Potion of Respecialization" Relationship="" ResType="uti" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\wrk_potion_respec.uti?moduleid=1&amp;resrefid=7960" Requested="1">
+	<Agent type="empty">
+		<ResRefName>wrk_potion_respec</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<Variable2da>var_item</Variable2da>
+		<VariableList>Variables</VariableList>
+		<name>Potion of Respecialization</name>
+		<NameStringID type="i4">1089623105</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<Description>&lt;title&gt;Do not drink it!&lt;/title&gt;
+An exotic venom from far away lands erases good and bad memories alike.</Description>
+		<DescriptionStringID type="i4">1089623106</DescriptionStringID>
+		<DescriptionRequiresReTranslation type="bool">False</DescriptionRequiresReTranslation>
+		<Ability type="i4">845715</Ability>
+		<ScriptURI/>
+		<BaseItemType type="i4">113</BaseItemType>
+		<RecipeType type="i4">1</RecipeType>
+		<Appearance type="i4">2</Appearance>
+		<MaterialType type="i4">-1</MaterialType>
+		<MaterialProgression type="i4">-1</MaterialProgression>
+		<TintOverride type="i4">0</TintOverride>
+		<Heraldry type="i4">0</Heraldry>
+		<Tag>wrk_potion_respec</Tag>
+		<Plot type="bool">False</Plot>
+		<Damaged type="bool">False</Damaged>
+		<icon>ico_quiet_death.dds</icon>
+		<CostOverride type="i4">100</CostOverride>
+		<Comments>Unlearns all attributes, skills and talents</Comments>
+		<ModelAppearance type="i4">15</ModelAppearance>
+		<ModelGender type="i4">1</ModelGender>
+		<Unique type="bool">False</Unique>
+		<InventorySubgroup type="i4">102000</InventorySubgroup>
+		<ItemPropertyList>Properties<Agent type="empty">
+				<PropertyID type="i4">6116</PropertyID>
+				<Power type="i4">0</Power>
+			</Agent>
+			<Agent type="empty">
+				<PropertyID type="i4">10000</PropertyID>
+				<Power type="i4">0</Power>
+			</Agent>
+		</ItemPropertyList>
+		<OnHitEffectID type="i4">0</OnHitEffectID>
+		<OnHitPower type="i4">0</OnHitPower>
+		<BodyTintMask type="i4">0</BodyTintMask>
+		<BodyTint type="i4">0</BodyTint>
+	</Agent>
+</Resource>

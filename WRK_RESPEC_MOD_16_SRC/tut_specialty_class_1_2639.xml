@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="2639" Folder="\_Tutorial\Controls\" ResRefName="tut_specialty_class" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="plo" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\tut_specialty_class.plo?moduleid=1&amp;resrefid=2639" Requested="0">
+	<Agent type="empty">
+		<ResRefName>tut_specialty_class</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<name>Specializations</name>
+		<NameStringID type="i4">48779</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<GUID>29A292CAF49240CF9E88E09ACB6F66F5</GUID>
+		<ScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7</ScriptURI>
+		<Priority type="i4">1</Priority>
+		<JournalImage/>
+		<ParentPlotURI/>
+		<EntryType type="i4">13</EntryType>
+		<AllowPausing type="bool">False</AllowPausing>
+		<StatusList type="empty">
+			<Agent type="empty">
+				<Flag type="i4">0</Flag>
+				<name>TUT_SPECIALTY_CLASS</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText>You have just qualified for a specialization, a customized form of a character's base class. Each offers a unique set of advanced talents and benefits. Characters may have up to two specializations, with the first becoming available at level 7 and the second at level 14... but first, you'll need to find a trainer.</JournalText>
+				<JournalTextStringID type="i4">48778</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+		</StatusList>
+	</Agent>
+</Resource>

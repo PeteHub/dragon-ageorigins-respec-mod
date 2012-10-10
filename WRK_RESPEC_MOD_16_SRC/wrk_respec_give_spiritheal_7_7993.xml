@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="7" OwnerModuleID="7" ResRefID="7993" Folder="\WRK_RESPEC\Merchant\SpecBooks\" ResRefName="wrk_respec_give_spiritheal" IsCore="0" OwnerIsCore="0" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\wrk_respec_give_spiritheal.nss?moduleid=7&amp;resrefid=7993" Requested="1">
+	<Agent type="empty">
+		<ResRefName>wrk_respec_give_spiritheal</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//////////////////////////////////////////////////////////////////
+//
+// Description: WRK_RESPEC mod dialog event script
+//              This is the script that is executed when the player picks
+//              the dialog choice to learn one of the class specializations
+//
+// Owner: Peter `weriK` Kovacs
+// Date: 11/12/2009 @ 9:22 PM
+//
+/////////////////////////////////////////////////////////////////
+
+#include "utility_h"
+
+void main()
+{
+    object oCharacter = GetHero();
+
+    // Only want to give the spec book once to the player
+    //
+    // This is only a sanity check, the dialog option
+    // itself should not pop up when the player already has one
+    if (!CountItemsByTag(oCharacter, "gen_im_manual_spirithealer"))
+    {
+        // Give the manual to the hero
+        UT_AddItemToInventory(R"gen_im_manual_spirithealer.uti", 1, oCharacter);
+    }
+}</text>
+	</Agent>
+</Resource>

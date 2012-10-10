@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="2486" Folder="\_Tutorial\Combat\" ResRefName="tut_friendly_aoe" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="plo" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\tut_friendly_aoe.plo?moduleid=1&amp;resrefid=2486" Requested="0">
+	<Agent type="empty">
+		<ResRefName>tut_friendly_aoe</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<name>Friendly Fire</name>
+		<NameStringID type="i4">40193</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<GUID>0DF43F85E145417C9EBAF6D27399AED7</GUID>
+		<ScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7</ScriptURI>
+		<Priority type="i4">1</Priority>
+		<JournalImage/>
+		<ParentPlotURI/>
+		<EntryType type="i4">13</EntryType>
+		<AllowPausing type="bool">False</AllowPausing>
+		<StatusList type="empty">
+			<Agent type="empty">
+				<Flag type="i4">0</Flag>
+				<name>TUT_FRIENDLY_AOE_1</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText>The powers of magic are significant, but can be uncontrollable. Mages have access to spells like Fireball that affect a whole area rather than just a single target. While these spells are useful against groups of enemies, they are also indiscriminate, and will harm friend and foe alike. (At the easy difficulty setting, however, party members take no damage from friendly fire.)</JournalText>
+				<JournalTextStringID type="i4">40192</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+		</StatusList>
+	</Agent>
+</Resource>

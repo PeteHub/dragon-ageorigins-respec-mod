@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="598" Folder="\_Game Effects\Effects\" ResRefName="effect_regeneration_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_regeneration_h.nss?moduleid=1&amp;resrefid=598" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_regeneration_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_modifystrengths.nss
+// -----------------------------------------------------------------------------
+/*
+    Effect: Modify Attribute
+
+
+    */
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+#include "2da_constants_h"
+#include "effect_constants_h"
+#include "log_h"
+
+
+effect EffectRegeneration(int nType )
+{
+    effect eEffect = Effect(EFFECT_TYPE_REGENERATION);
+
+    if (nType != 0)
+    {
+        eEffect = SetEffectInteger(eEffect,0, nType);
+    }
+    else
+    {
+        Warning("Invalid parameter passed to EffectRegeneration. -- contact georg");
+    }
+
+
+   return eEffect;
+
+}
+
+
+void _ReadAndApplyRegenerationEffect(int nType, int bApply = TRUE)
+{
+
+    float fModifier = (bApply)?1.0f:-1.0f;
+
+    int nProp1 = GetM2DAInt(TABLE_EFFECT_REGENERATION,"property1",nType);
+    int nProp2 = GetM2DAInt(TABLE_EFFECT_REGENERATION,"property2",nType);
+
+    float fVal1 = GetM2DAFloat(TABLE_EFFECT_REGENERATION,"modifier1",nType);
+    float fVal2 = GetM2DAFloat(TABLE_EFFECT_REGENERATION,"modifier2",nType);
+
+    if (nProp1 != 0)
+    {
+        UpdateCreatureProperty(OBJECT_SELF, nProp1,fVal1 * fModifier, PROPERTY_VALUE_MODIFIER);
+    }
+    if (nProp2 != 0 )
+    {
+        UpdateCreatureProperty(OBJECT_SELF, nProp2,fVal2* fModifier, PROPERTY_VALUE_MODIFIER);
+    }
+
+    Log_Trace(LOG_CHANNEL_EFFECTS,"EffectRegeneration", "Modifying properties " + ToString(nProp1) + "," + ToString(nProp2) +
+                                                        " by " + ToString(fVal1*fModifier) + "," + ToString(fVal2*fModifier));
+
+
+}
+
+int Effects_HandleApplyEffectRegeneration(effect eEffect)
+{
+    int nType  = GetEffectInteger(eEffect,0);
+
+    if (nType != 0)
+    {
+        _ReadAndApplyRegenerationEffect( nType, TRUE);
+    }
+    else
+    {
+        Log_Trace_Scripting_Error("effect_regeneration_h.Apply","Type was 0 for regeneration effect");
+        return FALSE;
+    }
+
+
+    return TRUE;
+}
+
+
+int Effects_HandleRemoveEffectRegeneration(effect eEffect)
+{
+    int nType  = GetEffectInteger(eEffect,0);
+
+    if (nType != 0)
+    {
+        _ReadAndApplyRegenerationEffect( nType, FALSE);
+    }
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

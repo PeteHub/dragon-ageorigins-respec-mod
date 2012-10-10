@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="119" Folder="\_Game Effects\Effects\" ResRefName="effect_modify_critchance_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_modify_critchance_h.nss?moduleid=1&amp;resrefid=119" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_modify_critchance_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_modify_critchance
+// -----------------------------------------------------------------------------
+/*
+    Modifies the critical chance of a character
+
+    */
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+#include "2da_constants_h"
+#include "events_h"
+#include "effect_constants_h"
+#include "attributes_h"
+
+
+
+
+effect EffectModifyCritChance(int nCritType, float fChange )
+{
+    effect eEffect = Effect(EFFECT_TYPE_MODIFY_CRITCHANCE);
+    eEffect = SetEffectInteger(eEffect, 0, nCritType);
+    eEffect = SetEffectFloat(eEffect, 0, fChange);
+    return eEffect;
+}
+
+
+int Effects_HandleApplyEffectModifyCritChance(effect eEffect)
+{
+    int nProperty = GetEffectInteger(eEffect,0);
+    float fChange = GetEffectFloat(eEffect,0);
+
+    UpdateCreatureProperty(OBJECT_SELF,nProperty,fChange,PROPERTY_VALUE_MODIFIER);
+
+    //&lt;Debug&gt;
+    float fNew = GetCreatureProperty(OBJECT_SELF,nProperty,PROPERTY_VALUE_TOTAL);
+    Log_Trace (LOG_CHANNEL_CHARACTER_STATS, "New Critical Chance (" + IntToString(nProperty) + ") = " + FloatToString(fNew));
+    // &lt;/Debug&gt;
+    return TRUE;
+}
+
+
+int Effects_HandleRemoveEffectModifyCritChance(effect eEffect)
+{
+    int nProperty = GetEffectInteger(eEffect,0);
+    float fChange = 0.0f - GetEffectFloat(eEffect,0) ;
+
+    UpdateCreatureProperty(OBJECT_SELF,nProperty,fChange,PROPERTY_VALUE_MODIFIER);
+
+    //&lt;Debug&gt;
+    float fNew = GetCreatureProperty(OBJECT_SELF,nProperty,PROPERTY_VALUE_TOTAL);
+    Log_Trace (LOG_CHANNEL_CHARACTER_STATS, "New Critical Chance (" + IntToString(nProperty) + ") = " + FloatToString(fNew));
+    //&lt;/Debug&gt;
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

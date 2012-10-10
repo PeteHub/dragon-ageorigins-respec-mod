@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="760" Folder="\_Systems\_Includes\" ResRefName="sys_stealth_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\sys_stealth_h.nss?moduleid=1&amp;resrefid=760" Requested="0">
+	<Agent type="empty">
+		<ResRefName>sys_stealth_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// sys_stealth
+// -----------------------------------------------------------------------------
+/*
+    Stealth Sytem Implementation
+*/
+// -----------------------------------------------------------------------------
+// owner: georg zoeller
+// -----------------------------------------------------------------------------
+#include "core_h"
+#include "effect_upkeep_h"
+
+const float RANK_MULTIPLIER = 10.0f;
+const float LEVEL_HIGHER_MODIFIER = 10.0f;
+const float LEVEL_LOWER_MODIFIER = 5.0f;
+//const int ARMOR_STEALTH_MODIFIER = 8;
+
+const int STEALTH_CRUST_VFX = 90284;
+const int STEALTH_IMPACT_VFX = 90285;
+
+int Stealth_GetStealthRank(object oCreature);
+int Stealth_GetStealthRank(object oCreature)
+{
+    int nStealthRank = -1;
+    if (HasAbility(oCreature, ABILITY_SKILL_STEALTH_4) == TRUE)
+    {
+        nStealthRank = 4;
+    } else if (HasAbility(oCreature, ABILITY_SKILL_STEALTH_3) == TRUE)
+    {
+        nStealthRank = 3;
+    } else if (HasAbility(oCreature, ABILITY_SKILL_STEALTH_2) == TRUE)
+    {
+        nStealthRank = 2;
+    } else if (HasAbility(oCreature, ABILITY_SKILL_STEALTH_1) == TRUE)
+    {
+        nStealthRank = 1;
+    }   
+    #ifdef DEBUG
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Stealth Rank = " + ToString(nStealthRank));
+    #endif
+
+    return nStealthRank;
+}
+
+int Stealth_GetPerceptionRank(object oCreature);
+int Stealth_GetPerceptionRank(object oCreature)
+{
+    int nCreatureRank = GetCreatureRank(oCreature);
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Creature Rank = " + ToString(nCreatureRank));
+    int nPerceptionRank = GetM2DAInt(Diff_GetAutoScaleTable(), "nStealthRank", nCreatureRank);
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Perception Rank = " + ToString(nPerceptionRank));
+
+    return nPerceptionRank;
+}
+
+int Stealth_CheckSuccess(object oStealther, object oPerceiver = OBJECT_SELF);
+int Stealth_CheckSuccess(object oStealther, object oPerceiver = OBJECT_SELF)
+{
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Perception check for " + GetTag(oPerceiver) + " detecting " + GetTag(oStealther));
+
+    int bCombatState = GetCombatState(oStealther);
+    int nStealthRank = Stealth_GetStealthRank(oStealther);
+    int nPerceptionRank = Stealth_GetPerceptionRank(oPerceiver);
+
+    if ((bCombatState == FALSE) || (nStealthRank &gt;= nPerceptionRank))
+    {
+        return TRUE;
+    } else
+    {   
+        #ifdef DEBUG
+        LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "DETECTED by " + GetTag(oPerceiver));
+        #endif
+
+        // display stealth detected UI message
+        UI_DisplayMessage(oStealther, 3511);
+        UI_DisplayMessage(oPerceiver, 3513);
+
+        return FALSE;
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// @brief  Returns if a target is visible nor not
+// @author georg
+// -----------------------------------------------------------------------------
+int IsInvisible(object oTarget)
+{
+    // Note: This may get more conditions
+    return IsModalAbilityActive(oTarget,ABILITY_SKILL_STEALTH_1);
+}
+
+
+// -----------------------------------------------------------------------------
+// @brief  Returns if a target is stealthy
+// @author georg
+// -----------------------------------------------------------------------------
+int IsStealthy(object oTarget)
+{
+    return IsModalAbilityActive(oTarget,ABILITY_SKILL_STEALTH_1);
+}
+
+
+// -----------------------------------------------------------------------------
+// @brief  Forces a target to become drop out of stealth mode
+// @author georg
+// -----------------------------------------------------------------------------
+void DropStealth(object oTarget)
+{
+
+    if (IsModalAbilityActive(oTarget,ABILITY_SKILL_STEALTH_1))
+    {
+        Effects_RemoveUpkeepEffect(oTarget, ABILITY_SKILL_STEALTH_1);
+    }
+
+}
+
+
+
+// -----------------------------------------------------------------------------
+// @brief  Forces two creatures to see each other,implicitly cancelling any stealth
+//         that might exist on the perceived creature
+// @author georg
+// -----------------------------------------------------------------------------
+int WR_TriggerPerception(object oPerceiver, object oPerceivedCreature);
+int WR_TriggerPerception(object oPerceiver, object oPerceivedCreature)
+{
+
+    DropStealth(oPerceivedCreature);  
+
+    event ev = GetCurrentEvent();
+      
+    #ifdef DEBUG
+    string sOut = ToString(oPerceiver) + " group: " + ToString(GetGroupId(oPerceiver)) +     " perceived ";
+    sOut += ToString(oPerceivedCreature) + " group: " + ToString(GetGroupId(oPerceivedCreature));    
+    Log_Trace(LOG_CHANNEL_EVENTS_PERCEPTION, GetCurrentScriptName() + ".TriggerPerception (" + ToString(GetEventType(ev)) + ")", sOut);
+    #endif
+
+    return TriggerPerception(oPerceiver, oPerceivedCreature);
+}</text>
+	</Agent>
+</Resource>

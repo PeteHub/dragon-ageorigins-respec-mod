@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="816" Folder="\_Systems\_Includes\" ResRefName="sys_lyrium_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\sys_lyrium_h.nss?moduleid=1&amp;resrefid=816" Requested="0">
+	<Agent type="empty">
+		<ResRefName>sys_lyrium_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//==============================================================================
+// sys_lyrium_h
+//------------------------------------------------------------------------------
+/*
+
+*/
+//------------------------------------------------------------------------------
+// Created By: Joshua Stiksma
+// Created On: January 21, 2007
+//==============================================================================</text>
+	</Agent>
+</Resource>

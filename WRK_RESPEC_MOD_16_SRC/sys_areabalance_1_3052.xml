@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="3052" Folder="\_Systems\_Includes\" ResRefName="sys_areabalance" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\sys_areabalance.nss?moduleid=1&amp;resrefid=3052" Requested="0">
+	<Agent type="empty">
+		<ResRefName>sys_areabalance</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// sys_areabalance
+// -----------------------------------------------------------------------------
+/*
+    Control of creature balancing per area
+
+
+*/
+// -----------------------------------------------------------------------------
+// owner: georg zoeller, agauthier
+// -----------------------------------------------------------------------------
+
+
+#include "core_h"
+#include "sys_rewards_h"
+const int TABLE_AREA_DATA = 225;
+const int TABLE_AREA_SCALEGROUP = 227;
+
+
+
+int _GetAreaId(object oArea)
+{
+    int nId = GetLocalInt(oArea, AREA_ID);
+    Log_Trace(LOG_CHANNEL_SYSTEMS,"sys_areabalance::_GetAreaId","ID: " + ToString(nId));
+
+
+    return nId;
+}
+
+
+
+int _GetScaleGroup (object oArea)
+{
+    int nId = _GetAreaId(oArea);
+    int nGroup = GetM2DAInt(TABLE_AREA_DATA,"ScaleGroup",nId);
+
+    Log_Trace(LOG_CHANNEL_SYSTEMS,"sys_areabalance::_GetScaleGroup","ScaleGroup: " + ToString(nGroup));
+
+    return nGroup;
+}
+
+int _GetAreaMinLevel(object oArea)
+{
+//    int nSg = _GetScaleGroup(oArea);
+//    int nMinLevel = GetM2DAInt(TABLE_AREA_SCALEGROUP,"MinLevel",nSg);
+
+
+     int nMinLevel = GetM2DAInt(TABLE_AREA_DATA,"MinLevel",_GetAreaId(oArea));
+
+    Log_Trace(LOG_CHANNEL_SYSTEMS,"sys_areabalance::_GetAreaMinLevel",GetTag(oArea) +  " MinLevel: " + ToString(nMinLevel));
+
+    return nMinLevel;
+}
+
+
+int AB_GetAreaTargetLevel(object oCreature)
+{
+    object oArea = GetArea(oCreature);
+    //    int nSg = _GetScaleGroup(oArea);
+//    int nMinLevel = GetM2DAInt(TABLE_AREA_SCALEGROUP,"MinLevel",nSg);
+
+     int nAid =_GetAreaId(oArea);
+
+     int nMinLevel = GetM2DAInt(TABLE_AREA_DATA,"MinLevel",nAid);
+     int nMaxLevel = GetM2DAInt(TABLE_AREA_DATA,"MaxLevel",nAid);
+
+     int nHero =  GetLevel(GetHero());
+     int nTarget = Max(Max(nMinLevel, Min(nHero,nMaxLevel)),1);
+
+
+     Log_Trace(LOG_CHANNEL_SYSTEMS,"sys_areabalance::_GetAreaMinLevel","MinLevel: " + ToString(nMinLevel));
+
+     return nTarget;
+}
+
+
+
+
+
+void AB_ForceToMinLevel(object oChar, object oArea)
+{
+    int nMinLevel = _GetAreaMinLevel(oArea);
+    int nXP = RW_GetXPNeededForLevel(nMinLevel);
+    int nCurrentXP = FloatToInt(GetCreatureProperty(oChar, PROPERTY_SIMPLE_EXPERIENCE));
+
+    if (nCurrentXP &lt; nXP)
+    {
+        Log_Trace(LOG_CHANNEL_SYSTEMS,"sys_areabalance::AB_ForceToMinLevel","Forcing MinLevel  " + ToString(nMinLevel) + " on " + ToString(oChar));
+        RewardXP(oChar,nXP - nCurrentXP);
+    }
+
+
+}</text>
+	</Agent>
+</Resource>

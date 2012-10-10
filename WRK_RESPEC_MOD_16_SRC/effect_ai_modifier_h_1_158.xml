@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="158" Folder="\_Game Effects\Effects\" ResRefName="effect_ai_modifier_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_ai_modifier_h.nss?moduleid=1&amp;resrefid=158" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_ai_modifier_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_ai_modifier
+// -----------------------------------------------------------------------------
+/*
+    Effect: AI Modifier
+
+            Used to apply modifiers taken into account by the game AI to the
+            creature
+
+            Example: AI_MODIFIER_IGNORE - AI ignores the target as if it was
+                                          not there
+
+            All these required manual integration into the game AI
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "2da_constants_h"
+#include "wrappers_h"
+#include "events_h"
+#include "effect_constants_h"
+
+
+const int AI_MODIFIER_IGNORE = 1;
+
+effect EffectAIModifier(int nModifier);
+effect EffectAIModifier(int nModifier)
+{
+    effect eEffect = Effect(EFFECT_TYPE_AI_MODIFIER);
+    eEffect = SetEffectInteger(eEffect, 0, nModifier);
+    return eEffect;
+}
+
+
+
+// -----------------------------------------------------------------------------
+// This utility function handles the application of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleApplyEffectAIModifier(effect eEffect);
+int Effects_HandleApplyEffectAIModifier(effect eEffect)
+{
+    return TRUE;
+}
+
+// -----------------------------------------------------------------------------
+// This utility function handles the removal of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleRemoveEffectAIModifier(effect eEffect);
+int Effects_HandleRemoveEffectAIModifier(effect eEffect)
+{
+    return TRUE;
+}
+
+
+int Effects_HasAIModifier(object oTarget, int nModifier)
+{
+
+    if (!IsObjectValid(oTarget))
+    {
+        return FALSE;
+    }
+
+    effect[] eEffects = GetEffects(oTarget, EFFECT_TYPE_AI_MODIFIER);
+
+    // Note: If this ends up to be a performance liability, we can make
+    //       the effect write a stat integer on the creature instead.
+
+    // In general I expect this loop to have 1 or 2 entries tops.
+
+    int nSize = GetArraySize(eEffects);
+    int i;
+
+    for (i = 0; i &lt; nSize; i++)
+    {
+        if (GetEffectInteger(eEffects[i],0) == nModifier)
+        {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+
+}</text>
+	</Agent>
+</Resource>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="430" Folder="\_Game Effects\Effects\" ResRefName="effect_impact_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_impact_h.nss?moduleid=1&amp;resrefid=430" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_impact_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_impact_h
+// -----------------------------------------------------------------------------
+/*
+    Effect Impact
+        Effect structure that stores impact information.
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+#include "effect_constants_h"
+#include "2da_constants_h"
+                
+// MGB - February 23, 2009
+// EffectImpact Constructor moved into Engine.
+
+// -----------------------------------------------------------------------------
+//  Effects_HandleApplyEffectImpact
+// -----------------------------------------------------------------------------
+//  Created By: Georg Zoeller
+//  Created On: July 2007
+// -----------------------------------------------------------------------------
+int Effects_HandleApplyEffectImpact(effect eEffect)
+{
+    return   TRUE;
+}
+
+// -----------------------------------------------------------------------------
+//  Effects_HandleRemoveEffectImpact
+// -----------------------------------------------------------------------------
+//  Created By: Georg Zoeller
+//  Created On: July 2007
+// -----------------------------------------------------------------------------
+int Effects_HandleRemoveEffectImpact(effect eEffect)
+{
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

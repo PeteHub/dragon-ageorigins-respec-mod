@@ -1,0 +1,3048 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="450" Folder="\_Core Includes\" ResRefName="ai_conditions_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\ai_conditions_h.nss?moduleid=1&amp;resrefid=450" Requested="0">
+	<Agent type="empty">
+		<ResRefName>ai_conditions_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//////////////////////////////////////////////
+// ai_conditions_h
+//
+// This script includes all tactics conditions related code
+//
+// Owner: Yaron Jakobs
+//
+/////////////////////////////////////////////
+
+/** @addtogroup scripting_ai_conditions Scripting AI Conditions handling
+*
+* This script includes all tactics conditions related code
+*/
+/** @{*/
+
+#include "ai_constants_h"
+#include "log_h"
+#include "ability_h"
+#include "items_h"
+#include "ai_threat_h"
+#include "party_h"
+#include "global_objects_h"
+#include "ai_behaviors_h"
+#include "monster_constants_h"
+
+
+/** @brief Checks a creature has a specific AI status applied
+*
+* @param oCreature the creature we are checking for an AI status
+* @nAIStatus the AI status we are checking on the creature (AI_STATUS_***)
+* @returns TRUE if the creature has the specified AI status, FALSE otherwise
+* @author Yaron
+*/
+int _AI_HasAIStatus(object oCreature, int nAIStatus);
+
+/** @brief Returns a creature with a specifc AI Status
+*
+* When looking for a target of type SELF: the function will return OBJECT_SELF if the status is valid
+* When looking for a target of type ALLY: the function will return the nearest ally with the status
+* When looking for a target of type ENEMY: the function will return the nearest enemy with the status
+*
+* @param nAIStatus the status being checked for if active on a creature
+* @param nTargetType the target type of creature we are looking for that might have the specified status
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns A creature of a specific type (self, ally, hostile) that has the status applied, OBJECT_INVALID otherwise
+* @author Yaron
+*/
+object _AI_Condition_GetCreatureWithAIStatus(int nAIStatus, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID);
+
+
+/** @brief Returns a creature with a specific HP level
+*
+* When looking for a target of type SELF: the function will return OBJECT_SELF if the creature HP at the specified level
+* When looking for a target of type ALLY: the function will return the nearest ally HP with the specified level
+* When looking for a target of type ENEMY: the function will return the nearest enemy with HP of the specified level
+*
+* @params nHPLevel a percentage value (25, 50, etc') representing a wounded level. A creature is considered 'wounded'
+* for that level if his HP are below the level specified. For positive values: the check is greater or equal (50% -&gt;
+* creature &gt;= 50%), for negative values: the check is lower (-50% -&gt; creature &lt; 50%)
+* @params nTargetType the target type of creature we are looking for that might have his HP at the specified level
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns A creature of a specific type (self, ally, hostile) that has his HP are at the specified level, OBJECT_INVALID otherwise
+* @author Yaron
+*/
+object _AI_Condition_GetCreatureWithHPLevel(int nHPLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Returns a creature with a specific Mana or Stamina level
+*
+* When looking for a target of type SELF: the function will return OBJECT_SELF if the creature Mana or Stamina at the specified level
+* When looking for a target of type ALLY: the function will return the nearest ally Mana or Stamina with the specified level
+* When looking for a target of type ENEMY: the function will return the nearest enemy with Mana or Stamina of the specified level
+*
+* @params nManaOrStaminaLevel a percentage value (25, 50, etc') representing a wounded level. A creature is considered 'wounded'
+* for that level if his Mana are below the level specified. For positive values: the check is greater or equal (50% -&gt;
+* creature &gt;= 50%), for negative values: the check is lower (-50% -&gt; creature &lt; 50%)
+* @params nTargetType the target type of creature we are looking for that might have his Mana or Stamina at the specified level
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns A creature of a specific type (self, ally, hostile) that has his Mana or Stamina are at the specified level, OBJECT_INVALID otherwise
+* @author Yaron
+*/
+object _AI_Condition_GetCreatureWithManaOrStaminaLevel(int nManaOrStaminaLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief A sub-condition function for the HPLevel and ManaStaminaLevel condition functions
+*
+* Contains all the logic for all related condition functions
+*
+* @params nStatType the stat type we are checking the level for (AI_STAT_TYPE_*)
+* @params nStatLevel a percentage value (25, 50, etc') representing a wounded level. A creature is considered 'wounded'
+* for that level if his Mana are below the level specified. For positive values: the check is greater or equal (50% -&gt;
+* creature &gt;= 50%), for negative values: the check is lower (-50% -&gt; creature &lt; 50%)
+* @params nTargetType the target type of creature we are looking for that might have his Mana or Stamina at the specified level
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns A creature of a specific type (self, ally, hostile) that has his stat at the specified level, OBJECT_INVALID otherwise
+* @author Yaron
+*/
+object _AI_SubCondition_GetCreatureWithStatLevel(int nStatType, int nStatLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID);
+
+
+/** @brief Returns the nth most damaged creature in a group
+*
+* When looking for a target of type ALLY: the function will return the Nth most damaged ally
+* When looking for a target of type ENEMY: the function will return the Nth most damaged enemy
+*
+* @params nMostDamagedNum to specify N for the Nth most damaged enemy
+* @params nTargetType the target type of group we're looking for the most damaged enemy in
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns the Nth most damaged creature in the group
+* @author Yaron
+*/
+object _AI_Condition_GetNthMostDamagedCreatureInGroup(int nMostDamagedNum, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Returns the nearest creature clustered with the same group of a minimum size
+*
+* It is assumed the cluster is for a generic AOE size, a bit smaller than a fireball.
+* The function only looks for enemies and does not care for distance or if the enemies are moving or not.
+*
+* @params nMinClusterSize the minimum number of enemies to be considered clustered
+* @returns the center location of the cluster
+* @author Yaron
+*/
+location _AI_Condition_GetEnemyClusteredWithSameGroup(int nMinClusterSize, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Returns the Nth nearest visible enemy
+*
+* @params n Nth nearest visible
+* @returns the Nth nearest visible enemy
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @author Yaron
+*/
+object _AI_Condition_GetNearestVisibleCreature(int nTargetType, int n, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Returns the Nth most hated enemy
+*
+* @params n the Nth most hated enemy
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns the Nth most hated enemy
+* @author Yaron
+*/
+object _AI_Condition_GetMostHatedEnemy(int n, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Returns the nearest visible enemy of a specific race
+*
+* @params nRace the race of the enemy being looked for
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns the nearest visible enemy of the specified race
+* @author Yaron
+*/
+object _AI_Condition_GetNearestVisibleCreatureByRace(int nTargetType, int nRace, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Returns the nearest visible enemy of a specific class
+*
+* @params nClass the class of the enemy being looked for
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns the nearest visible enemy of the specified class
+* @author Yaron
+*/
+object _AI_Condition_GetNearestVisibleCreatureByClass(int nTargetType, int nClass, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Returns the nearest visible enemy of a specific gender
+*
+* @params nGender the gender of the enemy being looked for
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns the nearest visible enemy of the specified gender
+* @author Yaron
+*/
+object _AI_Condition_GetNearestVisibleCreatureByGender(int nTargetType, int nGender, int nCommandType, int nCommandSubType, int nTacticID);
+
+
+/** @brief Returns the nearest enemy attacking any or a specific party member
+*
+* @params nTargetType the target follower
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns the nearest enemy attacking the specified party member
+* @author Yaron
+*/
+object _AI_Condition_GetNearestEnemyAttackingPartyMember(int nCommandType, int nCommandSubType, int nPartyMemberType, int nTacticID);
+
+/** @brief Returns the nearest enemy with any magical buff applied to it
+*
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nRangeID the type of range the enemy must be in
+* @returns the nearest enemy with any magical buff applied to it
+* @author Yaron
+*/
+object _AI_Condition_GetNearestEnemyWithAnyBuffEffect(int nCommandType, int nCommandSubType, int nRangeID, int nTacticID, int nTargetType);
+
+
+/** @brief Returns the nearest flip-cover placeable by state
+*
+* Can be used to look for placeables that are ready for flip-cover or being used by someone as flip cover
+*
+* @returns the nearest flip cover by the specified state, or OBJECT_INVALID if none
+* @param nFlipState State can be AI_FLIP_COVER_READY_FOR_USE or AI_FLIP_COVER_USED_BY_ENEMY.
+* @author Yaron
+*/
+object _AI_Condition_GetNearestFlipCoverByState(int nFlipState, int nTacticID);
+
+/** @brief Returns the nearest enemy vulnerable to a specific damage type
+*
+* 'Vulnerable' means the creature will be damaged more than usual with being hit by a damage of the specified type
+*
+* @returns the nearest enemy vulnerable to the specified damage
+* @param nDamageType the type of damage the creature should be vulnerable to
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @author Yaron
+*/
+object _AI_Condition_GetEnemyVulnerableToDamage(int nDamageType, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Returns the currently equipped weapon set
+*
+* @returns the currently equipped weapon set (AI_WEAPON_SET_*)
+* @author Yaron
+*/
+
+/** @brief Returns any target that fits the type
+*
+* If more than one target is optional than the nearest is returned
+*
+* @returns any target of a specific type
+* @param nTargetType the type of the target we are looking for
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @author Yaron
+*/
+object _AI_Condition_GetAnyTarget(int nTargetType, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Checks if a target is valid to be hostile target
+*
+* The checks includes: hostility, dead check, dying check, special AI ignore flags.
+*
+* @param oTarget the target being checked to see if valid as hostile target
+* @returns TRUE if target is valid as hostile target, FALSE otherwise
+* @author Yaron
+*/
+int _AI_IsHostileTargetValid(object oTarget);
+
+// Returns OBJECT_SELF if ammo level is appropriate
+object _AI_Condition_SelfHasAmmoLevel(int nAmmoLevel);
+
+// Returns OBJECT_SELF if the most hated enemy has the specified armor type
+object _AI_Condition_HasArmorType(int nTargetType, int nArmorType, int nCommandType, int nCommandSubType);
+
+// Returns OBJECT_SELF if the most enemies have the specified armor type
+object _AI_Condition_MostEnemiesHaveArmorType(int nArmorType);
+
+// Returns OBJECT_SELF if all enemies have the specified armor type
+object _AI_Condition_AllEnemiesHaveArmorType(int nArmorType);
+
+// If target type is SELF: returns OBJECT_SELF if the most hated enemy is at least at the specified rank
+// If target type is ENEMY: returns the most hated enemy if his rank is at least as the specified rank
+object _AI_Condition_TargetHasRank(int nTargetType, int nRank, int nTacticID, int nCommandType, int nCommandSubType);
+
+// If target type is SELF: Returns OBJECT_SELF if I'm being attacked by the specified attack type (melee, ranged or magic)
+// If target type is ALLY: Returns nearest ALLY that is being attacked by the specified attack type
+object _AI_Condition_BeingAttackedByAttackType(int nTargetType, int nAttackType, int nCommandType, int nCommandSubType, int nTacticID);
+
+// Returns OBJECT_SELF if most hated enemy is using the specified attack type
+object  _AI_Condition_UsingAttackType(int nTacticTargetType, int nTacticCondition_Parameter, int nTacticCommand, int nTacticSubCommand);
+
+// Returns OBJECT_SELF if most enemies are using the specified attack type
+object _AI_Condition_MostEnemiesUsingAttackType(int nAttackType);
+
+// Returns OBJECT_SELF if all enemies are using the specified attack type
+object _AI_Condition_AllEnemiesUsingAttackType(int nAttackType);
+
+// Returns OBJECT_SELF if at least X enemies are alive
+object _AI_Condition_AtLeastXEnemiesAreAlive(int nTargetType, int nNum);
+
+// Returns OBJECT_SELF if at least X enemies are dead
+object _AI_Condition_AtLeastXCreaturesAreDead(int nTacticTargetType, int nNum, int nTacticCommand, int nTacticSubCommand);
+
+// Returns OBJECT_SELF if at least X allies are alive
+object _AI_Condition_AtLeastXAlliesAreAlive(int nTargetType, int nNum, int nParam2);
+
+// Returns the nearest target within the specified range
+object _AI_Condition_GetTargetAtRange(int nTargetType, int nRange, int nCommandType, int nCommandSubType);
+
+// Returns a target at the specified flank or OBJECT_INVALID if none
+object _AI_Condition_GetTargetAtFlankLocation(int nFlankType, int nTargetType);
+
+// Returns OBJECT_SELF if surrounded by the specified number of enemies
+object _AI_Condition_SurroundedByAtLeastXEnemies(int nTacticCommand, int nTacticSubCommand, int nNumOfTargets, int nTacticID);
+
+// Returns a creature that currently uses a ranged attack while being at a certain distance
+object _AI_Condition_GetTargetUsingRangedWeaponsAtRange(int nTargetType, int nRange, int nCommandType, int nCommandSubType);
+
+// Returns the current target of a specific party member (nTargetType)
+object _AI_Condition_GetPartyMemberTarget(int nTacticCommand, int nTacticSubCommand, int nPartyMemberType, int nTacticID);
+
+// Returns the nearest target of the specified type if SELF HP level is valid
+object _AI_Condition_SelfHPLevel(int nHPLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID);
+
+// Returns the nearest target of the specified type if SELF Mana or stamina level is valid
+object _AI_Condition_SelfManaStaminaLevel(int nManaStaminaLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID);
+
+/** @brief Returns a list of creatures that are allied to the current creature
+*
+* Ally creatures are defined as creatures that are in the same group. This function
+* does not return all the allies - but a limited number of them. The returned list
+* is sorted by proximity to the current creature.
+*
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @returns an array of allied creatures sorted by distance
+* @author Yaron
+*/
+object[] _AI_GetAllies(int nCommandType, int nCommandSubType);
+
+/** @brief Returns a list of creatures that are hostile to the current creature
+*
+* Enemy creatures are defined as creatures that are hostile. This function
+* does not return all the allies - but a limited number of them. The returned list
+* is sorted by proximity to the current creature.
+*
+* @param nCommandType type of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nCommandSubType subtype of command - if ability the condition will avoid returning an enemy that has an ability applied
+* @param nTargetTypeOfFollower - used only for followers - if the follower already attacks someone in melee he'd prefer doing it in some cases
+* @returns an array of allied creatures sorted by distance
+* @author Yaron
+*/
+object[] _AI_GetEnemies(int nCommandType, int nCommandSubType, int nTargetTypeOfFollower = -1);
+
+/** @brief Checks a creature has a specific stat (HP, mana or stamina) within a specific range
+*
+* This function should be used when a creature has HP &gt;= 50% or mana &lt; 20% etc'.
+*
+* @param oCreature the creature we are checking for a stat level
+* nStatType the stat type we are looking for a range (AI_STAT_TYPE_*)
+* nStatLevel the level of the stat we are checking for. This should be a percentage number (50 for 50%).
+* A positive number should be for checks like HP &gt;= 50%, a negative number should be for checks like HP &lt; 50%.
+* @returns TRUE if the creature has the stat in the required level, FALSE otherwise
+* @author Yaron
+*/
+int _AI_HasStatLevel(object oCreature, int nStatType, int nStatLevel);
+
+// Returns creature with highest or lowest health in a group
+// This is a very good candidate for being in the engine
+// Currently supports only 1st most damaged, anything else will fail
+object _AI_GetNthDamagedCreatureInArray(object [] arCreatures, int nHighLow);
+
+/** @brief Returns override target, if any
+*
+* An override target can be specified when using the UT_CombatStart function. This
+* target will then be used instead of trying to find something with other target-looking routines
+* like GetNearest or GetMostHated.
+*
+* @returns override target, OBJECT_INVALID otherwise
+* @author Yaron
+*/
+object _AI_GetTargetOverride();
+
+float _AI_GetRangeFromID(int nRangeID);
+
+/** @brief Checks if a creature has any normal buff effect
+*
+* Normal buff effects are effects that can be displled.
+*
+* @returns TRUE if the creature has any buff effect active, FALSE otherwise
+* @author Yaron
+*/
+int _AI_HasAnyBuffEffect(object oCreature);
+
+
+/** @brief Checks if a creature is vulnerable to a specific damage type
+*
+* @returns TRUE if the creature is vulnerable, FALSE otherwise
+* @author Yaron
+*/
+int _AI_IsVulnerableToDamage(object oCreature, int nDamageType);
+
+// Returns a party member target, if valid
+object _AI_GetPartyTarget(int nTargetType, int nCommandType, int nCommandSubType, int nTacticID);
+
+// Checks if the target can make use of beneficial abilities like cure poison etc'
+int _AI_IsTargetValidForBeneficialAbility(object oCreature, int nAbilityID);
+
+
+int _AI_IsVulnerableToDamage(object oCreature, int nDamageType)
+{
+    // CUT
+    int nRet = FALSE;
+
+    return nRet;
+}
+
+int _AI_GetArmorType(object oCreature);
+
+// Returns the CURRENT attack type of the creature (using melee, ranged or magic)
+int _AI_GetAttackType(object oCreature);
+
+
+object _AI_Condition_GetCreatureWithAIStatus(int nAIStatus, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetCreatureWithAIStatus", "[START] AI Status:" + IntToString(nAIStatus) + ", Target Type: " + IntToString(nTargetType));
+    #endif
+
+    object oTarget = OBJECT_INVALID;
+    object [] arCreatures;
+    int nSize = 0;
+    object oCurrentCreature;
+    int i;
+
+    switch (nTargetType)
+    {
+        case AI_TARGET_TYPE_SELF:
+        {
+            // Making sure we're not trying to apply an ability that is already active
+            if(nCommandType == AI_COMMAND_USE_ABILITY &amp;&amp; !Ability_IsAbilityActive(OBJECT_SELF, nCommandSubType))
+                arCreatures[0] = OBJECT_SELF;
+            else if(nCommandType != AI_COMMAND_USE_ABILITY) // not an ability - can use self as target
+                arCreatures[0] = OBJECT_SELF;
+
+            break;
+        }
+        case AI_TARGET_TYPE_ALLY:
+        {
+            // Getting a list of the nearest creatures with the same group, alive and perceived, not including self
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            // Getting a list of the nearest hostiles, alive and preceived, not including self:
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+
+            break;
+        }
+        case AI_TARGET_TYPE_MOST_HATED:
+        {
+            arCreatures[0] =  _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, nTacticID);
+            break;
+        }
+        default: // It can still be a party target
+        {
+            arCreatures[0] = _AI_GetPartyTarget(nTargetType, nCommandType, nCommandSubType, nTacticID);
+            break;
+        }
+    }
+
+    nSize = GetArraySize(arCreatures);
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrentCreature = arCreatures[i];
+
+        if(_AI_HasAIStatus(oCurrentCreature, nAIStatus))
+        {
+            oTarget = oCurrentCreature;
+            break;
+         }
+    }
+
+    return oTarget;
+}
+
+object _AI_Condition_GetCreatureWithHPLevel(int nHPLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetCreatureWithHPLevel", "[START] HP Level: " + IntToString(nHPLevel));
+    #endif
+    return _AI_SubCondition_GetCreatureWithStatLevel(AI_STAT_TYPE_HP, nHPLevel, nTargetType, nCommandType, nCommandSubType, nTacticID);
+}
+
+object _AI_Condition_SelfHPLevel(int nHPLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_SelfHPLevel", "[START] HP Level: " + IntToString(nHPLevel));
+    #endif
+
+    object oTarget = _AI_SubCondition_GetCreatureWithStatLevel(AI_STAT_TYPE_HP, nHPLevel, AI_TARGET_TYPE_SELF, nCommandType, nCommandSubType, nTacticID);
+    if(oTarget != OBJECT_SELF)
+        return OBJECT_INVALID;
+
+    object [] arCreatures;
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+            break;
+        }
+        case AI_TARGET_TYPE_ALLY:
+        {
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+            break;
+        }
+        case AI_TARGET_TYPE_MOST_HATED:
+        {
+            arCreatures[0] = _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, nTacticID);
+            break;
+        }
+        default:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_SelfHPLevel", "INVALID Target Type: " + IntToString(nTargetType));
+            #endif
+            break;
+        }
+    }
+
+    return arCreatures[0];
+}
+
+object _AI_Condition_SelfManaStaminaLevel(int nManaStaminaLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_SelfManaStaminaLevel", "[START] Mana/Stamina Level: " + IntToString(nManaStaminaLevel));
+    #endif
+
+    object oTarget = _AI_SubCondition_GetCreatureWithStatLevel(AI_STAT_TYPE_MANA_OR_STAMINA, nManaStaminaLevel, AI_TARGET_TYPE_SELF, nCommandType, nCommandSubType, nTacticID);
+    if(oTarget != OBJECT_SELF)
+        return OBJECT_INVALID;
+
+    object [] arCreatures;
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+            break;
+        }
+        case AI_TARGET_TYPE_ALLY:
+        {
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+            break;
+        }
+        case AI_TARGET_TYPE_MOST_HATED:
+        {
+            arCreatures[0] = _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, nTacticID);
+            break;
+        }
+        default:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_SelfManaStaminaLevel", "INVALID Target Type: " + IntToString(nTargetType));
+            #endif
+            break;
+        }
+    }
+
+    return arCreatures[0];
+}
+
+object _AI_Condition_GetCreatureWithManaOrStaminaLevel(int nManaOrStaminaLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetCreatureWithManaOrStaminaLevel", "[START] Mana or Stamina Level: " + IntToString(nManaOrStaminaLevel));
+    #endif
+    return _AI_SubCondition_GetCreatureWithStatLevel(AI_STAT_TYPE_MANA_OR_STAMINA, nManaOrStaminaLevel, nTargetType, nCommandType, nCommandSubType, nTacticID);
+}
+
+object _AI_SubCondition_GetCreatureWithStatLevel(int nStatType, int nStatLevel, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_SubCondition_GetCreatureWithStatLevel", "[START] Stat level: " + IntToString(nStatLevel));
+    #endif
+    object oTarget = OBJECT_INVALID;
+    object [] arCreatures;
+    int nSize = 0;
+    object oCurrentCreature;
+    int i;
+    float fDistance;
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_SELF:
+        {
+
+            // Making sure we're not trying to apply an ability that is already active
+            if(nCommandType == AI_COMMAND_USE_ABILITY &amp;&amp; !Ability_IsAbilityActive(OBJECT_SELF, nCommandSubType))
+                arCreatures[0] = OBJECT_SELF;
+            else if(nCommandType != AI_COMMAND_USE_ABILITY) // not an ability - can use self as target
+                arCreatures[0] = OBJECT_SELF;
+
+            break;
+        }
+        case AI_TARGET_TYPE_ALLY:
+        {
+            // Getting a list of the nearest creatures with the same group, alive and perceived, not including self
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            // Getting a list of the nearest hostiles, alive and preceived, not including self:
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+            break;
+        }
+        case AI_TARGET_TYPE_MOST_HATED:
+        {
+            arCreatures[0] =  _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, nTacticID);
+            break;
+        }
+        default: // It can still be a party target
+        {
+            arCreatures[0] = _AI_GetPartyTarget(nTargetType, nCommandType, nCommandSubType, nTacticID);
+            break;
+        }
+    }
+
+    // If we have an array, and don't have a target yet, then try to find the target in the array
+    nSize = GetArraySize(arCreatures);
+
+    // This loops will be evaluated only if any array was generated above
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrentCreature = arCreatures[i];
+
+        if(_AI_HasStatLevel(oCurrentCreature, nStatType, nStatLevel))
+        {
+            oTarget = oCurrentCreature;
+            break; // got what we need
+        }
+
+    }
+
+    return oTarget;
+}
+
+object _AI_Condition_GetNthMostDamagedCreatureInGroup(int nHighLow, int nTargetType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetNthMostDamagedCreatureInGroup (=&gt; get creature with highest or lowest health)", "START");
+    #endif
+
+
+    object oTarget = OBJECT_INVALID;
+    object [] arCreatures;
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_ALLY:
+        {
+            // Getting a list of the nearest creatures with the same group, alive and perceived, not including self
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            // Getting a list of the nearest hostiles, alive and preceived, not including self:
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+            break;
+        }
+        default:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNthMostDamagedCreatureInGroup", "INVALID Target Type: " + IntToString(nTargetType));
+            #endif
+            break;
+        }
+    }
+
+    oTarget = _AI_GetNthDamagedCreatureInArray(arCreatures, nHighLow);
+
+
+
+    return oTarget;
+}
+
+location _AI_Condition_GetEnemyClusteredWithSameGroup(int nMinClusterSize, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetEnemyClusteredWithSameGroup", "START");
+    #endif
+    int nAllyFailChance = 0; // will be higher the smaller the cluster is
+
+    switch(nCommandSubType)
+    {
+        case ABILITY_SPELL_INFERNO: nAllyFailChance = 100; break;
+        case ABILITY_SPELL_FIREBALL: nAllyFailChance = 75; break;
+        case ABILITY_SPELL_MASS_PARALYSIS: nAllyFailChance = 0; break;
+        case ABILITY_SPELL_GREASE: nAllyFailChance = 50; break;
+        case ABILITY_SPELL_EARTHQUAKE: nAllyFailChance = 100; break;
+        case ABILITY_SPELL_SLEEP: nAllyFailChance = 0; break;
+        case ABILITY_SPELL_BLIZZARD: nAllyFailChance = 75; break;
+        case ABILITY_SPELL_TEMPEST: nAllyFailChance = 75; break;
+        case ABILITY_SPELL_DEATH_CLOUD: nAllyFailChance = 75; break;
+    }
+    if(IsFollower(OBJECT_SELF) &amp;&amp; nAllyFailChance &gt; 0)
+        nAllyFailChance = 100;
+
+    location lLoc;
+    if(GetCombatState(OBJECT_SELF) == FALSE)
+        return lLoc;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetEnemyClusteredWithSameGroup", "ability: " + IntToString(nCommandSubType) + ", cluster: " + IntToString(nMinClusterSize) + ", ally fail: " + IntToString(nAllyFailChance));
+    #endif
+    lLoc = GetClusterCenter(OBJECT_SELF, nCommandSubType, nMinClusterSize, nAllyFailChance, FALSE);
+    object [] arNearest = GetNearestObjectToLocation(lLoc, OBJECT_TYPE_CREATURE, 1);
+    object oNearestToCluster = arNearest[0];
+    if(!IsObjectValid(oNearestToCluster))
+    {
+        location lInvalid;
+        return lInvalid;
+    }
+    float fDistance = GetDistanceBetweenLocations(lLoc, GetLocation(oNearestToCluster));
+    if(fDistance &gt; 5.0)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_GetEnemyClusteredWithSameGroup", "can't perceive nearest creature to cluster - invalid cluster");
+        #endif
+        location lInvalid;
+        return lInvalid;
+    }
+
+    // special case for archdemon abilities - fail if they are too close
+    float fClusterDistance = GetDistanceBetweenLocations(GetLocation(OBJECT_SELF), lLoc);
+    if(nCommandSubType == ARCHDEMON_VORTEX || nCommandSubType == ARCHDEMON_SMITE)
+    {
+        if(fClusterDistance &lt; AI_RANGE_MID_LONG)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetEnemyClusteredWithSameGroup", "Archdemon abilities can't trigger too close");
+            #endif
+            location lInvalid;
+            return lInvalid;
+        }
+    }
+    return lLoc;
+}
+
+object _AI_Condition_GetMostHatedEnemy(int n, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    object oTarget;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetMostHatedEnemy", "START, command type: " + IntToString(nCommandType) + ", command sub type: " + IntToString(nCommandSubType));
+    #endif
+    object oTargetOverride = _AI_GetTargetOverride();
+    if(IsObjectValid(oTargetOverride))
+        return oTargetOverride;
+
+    int nSize = GetThreatTableSize(OBJECT_SELF);
+
+    oTarget = AI_Threat_GetThreatTarget(OBJECT_SELF);
+
+    // final check - if the action is ability and already active then not return this target
+    if(nCommandType == AI_COMMAND_USE_ABILITY &amp;&amp; Ability_IsAbilityActive(oTarget, nCommandSubType))
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_GetMostHatedEnemy", "Most hated already has this ability applied... aborting");
+        oTarget = OBJECT_INVALID;
+        #endif
+    }
+
+    return oTarget;
+}
+
+object _AI_Condition_GetNearestVisibleCreature(int nTargetType, int n, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetNearestVisibleCreature", "START, creature index: " + IntToString(n));
+    #endif
+    object oTarget = OBJECT_INVALID;
+    object [] arCreatures;
+
+    if(IsFollower(OBJECT_SELF) &amp;&amp; nTargetType == AI_TARGET_TYPE_ENEMY)
+    {
+        // A follower should prefer to keep his selected target in this case
+        object oSelectedTarget = GetAttackTarget(OBJECT_SELF);
+        if(_AI_IsHostileTargetValid(oSelectedTarget))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestVisibleCreature", "Follower - keeping selected target instead of picking nearest");
+            #endif
+            return oSelectedTarget;
+        }
+    }
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_ALLY:
+        {
+            // Getting a list of the nearest creatures with the same group, alive and perceived, not including self
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            // Getting a list of the nearest hostiles, alive and preceived, not including self:
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+            break;
+        }
+        default:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestVisibleCreature", "INVALID Target Type: " + IntToString(nTargetType));
+            #endif
+            break;
+        }
+    }
+
+
+    if(GetArraySize(arCreatures) + 1 &lt;= n)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_GetNearestVisibleCreature", "Invalid creature index requested: " + IntToString(n));
+        #endif
+        return OBJECT_INVALID;
+    }
+
+    return arCreatures[n - 1]; // function asks for 1st enemy - but array starts at 0
+}
+
+object _AI_Condition_GetNearestVisibleCreatureByRace(int nTargetType, int nRace, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetNearestVisibleCreatureByRace", "START, race: " + IntToString(nRace));
+    #endif
+    object [] arCreatures;
+    int nSize;
+    int i;
+    object oCurrent;
+
+    if(IsFollower(OBJECT_SELF) &amp;&amp; nTargetType == AI_TARGET_TYPE_ENEMY)
+    {
+        // A follower should prefer to keep his selected target in this case
+        object oSelectedTarget = GetAttackTarget(OBJECT_SELF);
+        if(_AI_IsHostileTargetValid(oSelectedTarget))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestVisibleCreatureByRace", "Follower - keeping selected target instead of picking nearest");
+            #endif
+            return oSelectedTarget;
+        }
+    }
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_ALLY:
+        {
+            // Getting a list of the nearest creatures with the same group, alive and perceived, not including self
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            // Getting a list of the nearest hostiles, alive and preceived, not including self:
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType);
+            break;
+        }
+        default:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestVisibleCreatureByRace", "INVALID Target Type: " + IntToString(nTargetType));
+            #endif
+            break;
+        }
+    }
+
+    nSize = GetArraySize(arCreatures);
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arCreatures[i];
+        if(GetCreatureRacialType(oCurrent) == nRace)
+            return oCurrent;
+    }
+
+    return OBJECT_INVALID;
+}
+
+object _AI_Condition_GetNearestVisibleCreatureByClass(int nTargetType, int nClass, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetNearestVisibleCreatureByClass", "START, class:" + IntToString(nClass));
+    #endif
+
+    object [] arCreatures;
+    int nSize;
+    int i;
+    object oCurrent;
+
+    if(IsFollower(OBJECT_SELF) &amp;&amp; nTargetType == AI_TARGET_TYPE_ENEMY)
+    {
+        // A follower should prefer to keep his selected target in this case
+        object oSelectedTarget = GetAttackTarget(OBJECT_SELF);
+        if(_AI_IsHostileTargetValid(oSelectedTarget))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestVisibleCreatureByClass", "Follower - keeping selected target instead of picking nearest");
+            #endif
+            return oSelectedTarget;
+        }
+    }
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_ALLY:
+        {
+            // Getting a list of the nearest creatures with the same group, alive and perceived, not including self
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            // Getting a list of the nearest hostiles, alive and preceived, not including self:
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType);
+            break;
+        }
+        default:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestVisibleCreatureByClass", "INVALID Target Type: " + IntToString(nTargetType));
+            #endif
+            break;
+        }
+    }
+
+    nSize = GetArraySize(arCreatures);
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arCreatures[i];
+        if(GetCreatureCoreClass(oCurrent) == nClass)
+            return oCurrent;
+    }
+
+    return OBJECT_INVALID;
+}
+
+object _AI_Condition_GetNearestVisibleCreatureByGender(int nTargetType, int nGender, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetNearestVisibleCreatureByGender", "START, gender: " + IntToString(nGender));
+    #endif
+
+    object [] arCreatures;
+    int nSize ;
+    int i;
+    object oCurrent;
+
+    if(IsFollower(OBJECT_SELF) &amp;&amp; nTargetType == AI_TARGET_TYPE_ENEMY)
+    {
+        // A follower should prefer to keep his selected target in this case
+        object oSelectedTarget = GetAttackTarget(OBJECT_SELF);
+        if(_AI_IsHostileTargetValid(oSelectedTarget))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestVisibleCreatureByGender", "Follower - keeping selected target instead of picking nearest");
+            #endif
+            return oSelectedTarget;
+        }
+    }
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_ALLY:
+        {
+            // Getting a list of the nearest creatures with the same group, alive and perceived, not including self
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            // Getting a list of the nearest hostiles, alive and preceived, not including self:
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType);
+            break;
+        }
+        default:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestVisibleCreatureByGender", "INVALID Target Type: " + IntToString(nTargetType));
+            #endif
+            break;
+        }
+    }
+
+    nSize = GetArraySize(arCreatures);
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arCreatures[i];
+        if(GetCreatureGender(oCurrent) == nGender)
+            return oCurrent;
+    }
+
+    return OBJECT_INVALID;
+}
+
+object _AI_Condition_GetNearestEnemyAttackingPartyMember(int nCommandType, int nCommandSubType, int nPartyMemberType, int nTacticID)
+{
+    object [] arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType);
+    object oFollower;
+    if(nPartyMemberType == AI_TARGE_TYPE_HERO)
+        oFollower = GetPartyLeader();
+    else if(nPartyMemberType == AI_TARGET_TYPE_MAIN_CONTROLLED)
+        oFollower = GetMainControlled();
+    else
+        oFollower = GetTacticConditionObject(OBJECT_SELF, nTacticID);
+    if(!IsObjectValid(oFollower))
+        return OBJECT_INVALID;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetNearestEnemyAttackingPartyMember", "START, party member: " + GetTag(oFollower));
+    #endif
+
+    int nSize = GetArraySize(arCreatures);
+    int i;
+    object oCurrent;
+    object oTarget;
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arCreatures[i];
+        oTarget = GetAttackTarget(oCurrent);
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_GetNearestEnemyAttackingPartyMember", "Attack target of:[" + GetTag(oCurrent) +
+        "] is: " + GetTag(oTarget));
+        #endif
+
+        if(oTarget == oFollower)
+            return oCurrent;
+    }
+    return OBJECT_INVALID;
+}
+
+object _AI_Condition_GetNearestEnemyWithAnyBuffEffect(int nCommandType, int nCommandSubType, int nRangeID, int nTacticID, int nTargetType)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetNearestEnemyWithAnyBuffEffect", "START, rangeID: " + IntToString(nRangeID));
+    #endif
+
+    if(IsFollower(OBJECT_SELF))
+    {
+        // A follower should prefer to keep his selected target in this case
+        object oSelectedTarget = GetAttackTarget(OBJECT_SELF);
+        if(_AI_IsHostileTargetValid(oSelectedTarget) &amp;&amp; _AI_HasAnyBuffEffect(oSelectedTarget))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestEnemyWithAnyBuffEffect", "Follower - keeping selected target");
+            #endif
+            return oSelectedTarget;
+        }
+    }
+
+    object [] arCreatures;
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+            break;
+        }
+        case AI_TARGET_TYPE_MOST_HATED:
+        {
+            arCreatures[0] =  _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, nTacticID);
+            break;
+        }
+    }
+
+    int nSize = GetArraySize(arCreatures);
+    int i;
+    object oCurrent;
+    float fDistance;
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arCreatures[i];
+        fDistance = GetDistanceBetween(OBJECT_SELF, oCurrent);
+        if(nRangeID != AI_RANGE_ID_INVALID &amp;&amp; fDistance &gt; _AI_GetRangeFromID(nRangeID))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetNearestEnemyWithAnyBuffEffect", "This target not valid (not in proper range)");
+            #endif
+            continue;
+        }
+        if(_AI_HasAnyBuffEffect(oCurrent))
+            return oCurrent;
+    }
+    return OBJECT_INVALID;
+}
+
+object _AI_Condition_GetNearestFlipCoverByState(int nFlipState, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetNearestFlipCoverByState", "START, state: " + IntToString(nFlipState));
+    #endif
+    object oTarget = OBJECT_INVALID;
+
+    /*if(nFlipState != 0)
+    {
+        Log_Trace_AI("_AI_Condition_GetNearestFlipCoverByState", "Invalid state requested for flipcover (currently supporting only Idle state)");
+            return OBJECT_INVALID;
+    }*/
+
+    object [] arPlaceables = GetNearestObject(OBJECT_SELF, OBJECT_TYPE_PLACEABLE, AI_MAX_NEAREST_PLACEABLE);
+    int nSize = GetArraySize(arPlaceables);
+    // Return first flip cover placeable in an Idle state, the does not yet have anyone registering a flipcover
+    // on it.
+    int i;
+    object oCurrent;
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arPlaceables[i];
+        if(GetPlaceableBaseType(oCurrent) != PLACEABLE_TYPE_FLIPCOVER)
+            continue;
+        if(GetPlaceableState(oCurrent) != nFlipState)
+            continue;
+        if(GetLocalInt(oCurrent, PLC_FLIP_COVER_USE_COUNT) &gt; 0) // Got users already
+            continue;
+        oTarget = oCurrent;
+        break;
+    }
+    return oTarget;
+}
+
+object _AI_Condition_GetEnemyVulnerableToDamage(int nDamageType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetEnemyVulnerableToDamage", "START, damage type: " + IntToString(nDamageType));
+    #endif
+
+    int i;
+    object oCurrent;
+
+    if(IsFollower(OBJECT_SELF))
+    {
+        // A follower should prefer to keep his selected target in this case
+        object oSelectedTarget = GetAttackTarget(OBJECT_SELF);
+        if(_AI_IsHostileTargetValid(oSelectedTarget) &amp;&amp; _AI_IsVulnerableToDamage(oSelectedTarget, nDamageType))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetEnemyVulnerableToDamage", "Follower - keeping selected target");
+            #endif
+            return oSelectedTarget;
+        }
+        else if(_AI_IsHostileTargetValid(oSelectedTarget))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetEnemyVulnerableToDamage", "Follower - selected target not fitting condition");
+            #endif
+            return OBJECT_INVALID;
+        }
+    }
+
+    object [] arCreatures = _AI_GetEnemies(nCommandType, nCommandSubType, AI_TARGET_TYPE_ENEMY);
+    int nSize = GetArraySize(arCreatures);
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arCreatures[i];
+        if(_AI_IsVulnerableToDamage(oCurrent, nDamageType))
+            return oCurrent;
+    }
+    return OBJECT_INVALID;
+}
+
+object _AI_Condition_GetAnyTarget(int nTargetType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetAnyTarget", "START, target type: " + IntToString(nTargetType));
+    #endif
+    object oTarget = OBJECT_INVALID;
+    object [] arCreatures;
+
+    if(IsFollower(OBJECT_SELF) &amp;&amp; nTargetType == AI_TARGET_TYPE_ENEMY)
+    {
+        // A follower should prefer to keep his selected target in this case
+        object oSelectedTarget = GetAttackTarget(OBJECT_SELF);
+        if(_AI_IsHostileTargetValid(oSelectedTarget))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetAnyTarget", "Follower - keeping selected target");
+            #endif
+            return oSelectedTarget;
+        }
+    }
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_SELF:
+        {
+            // Making sure we're not trying to apply an ability that is already active
+            if(nCommandType == AI_COMMAND_USE_ABILITY &amp;&amp; !Ability_IsAbilityActive(OBJECT_SELF, nCommandSubType))
+                oTarget = OBJECT_SELF;
+            else if(nCommandType != AI_COMMAND_USE_ABILITY) // not an ability - can use self as target
+                oTarget = OBJECT_SELF;
+            break;
+        }
+        case AI_TARGET_TYPE_ALLY:
+        {
+            arCreatures = _AI_GetAllies(nCommandType, nCommandSubType);
+            oTarget = arCreatures[0];
+            break;
+        }
+        case AI_TARGET_TYPE_MOST_HATED:
+        {
+            oTarget =  _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, nTacticID);
+            break;
+        }
+        default: // It can still be a party target
+        {
+            oTarget = _AI_GetPartyTarget(nTargetType, nCommandType, nCommandSubType, nTacticID);
+            break;
+        }
+    }
+
+    return oTarget;
+}
+
+object _AI_Condition_SelfHasAmmoLevel(int nAmmoLevel)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_SelfHasAmmoLevel", "START, ammo level: " + IntToString(nAmmoLevel));
+    #endif
+    object oRet = OBJECT_INVALID;
+
+    int nCurrentStackSize = Items_CheckAmmo(OBJECT_SELF);
+    int nMaxStackSize = Items_CheckMaxAmmo(OBJECT_SELF);
+    if(nMaxStackSize == 0)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_SelfHasAmmoLevel", "Invalid stack size for ammo: 0");
+        #endif
+        return OBJECT_INVALID;
+    }
+
+    //float fStackRatio = fCurrentStackSize / fMaxStackSize * 100.0; // should give a percentage ratio
+    //float fCheckRatio;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_SelfHasAmmoLevel", "current ammo: " + IntToString(nCurrentStackSize));
+    #endif
+
+
+    switch(nAmmoLevel)
+    {
+        case AI_AMMO_LEVEL_LOW: // valid if between 0 and low ration
+        {
+            if(nCurrentStackSize &gt;= 0 &amp;&amp; nCurrentStackSize &lt;= AI_AMMO_RATIO_LOW)
+                oRet = OBJECT_SELF;
+            break;
+        }
+        case AI_AMMO_LEVEL_MEDIUM: // valid if between low and high ratio
+        {
+            if(nCurrentStackSize &gt; AI_AMMO_RATIO_LOW &amp;&amp; nCurrentStackSize &lt; AI_AMMO_RATIO_HIGH)
+                oRet = OBJECT_SELF;
+            break;
+        }
+        case AI_AMMO_LEVEL_HIGH: // valid if high and max ratio
+        {
+            if(nCurrentStackSize &gt;= AI_AMMO_RATIO_HIGH)
+                oRet = OBJECT_SELF;
+            break;
+        }
+    }
+
+    return oRet;
+}
+
+object _AI_Condition_HasArmorType(int nTargetType, int nArmorType, int nCommandType, int nCommandSubType)
+{
+    object oTarget = OBJECT_INVALID;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_HasArmorType", "Target type: " + IntToString(nTargetType) + ", Armor Type: " + IntToString(nArmorType));
+    #endif
+
+    object [] arEnemies;
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_SELF:
+        {
+            arEnemies[0] = _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, -1);
+            break;
+        }
+        case AI_TARGET_TYPE_MOST_HATED:
+        {
+            arEnemies[0] = _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, -1);
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            arEnemies = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+            break;
+        }
+        default:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_HasArmorType", "Invalid target type");
+            #endif
+            return OBJECT_INVALID;
+        }
+
+    }
+
+    int nSize = GetArraySize(arEnemies);
+    int i;
+    object oCurrent;
+    int nEnemyArmorType;
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arEnemies[i];
+        nEnemyArmorType = _AI_GetArmorType(oCurrent);
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_HasArmorType", "Enemy: " + GetTag(oCurrent) + ", Enemy's armor type: " +
+            IntToString(nEnemyArmorType) + ", requested armor bit field: " + IntToString(nArmorType));
+        #endif
+
+         if(nEnemyArmorType &amp; nArmorType)
+         {
+            if(nTargetType == AI_TARGET_TYPE_SELF)
+                oTarget = OBJECT_SELF; // creature's armor fits in the requested armor bit field (nArmorType)
+            else
+                oTarget = oCurrent;
+
+            break;
+         }
+    }
+
+    return oTarget;
+}
+
+object _AI_Condition_MostEnemiesHaveArmorType(int nArmorType)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_MostEnemiesHaveArmorType", "START, looking for armor type: " + IntToString(nArmorType));
+    #endif
+    int nSize = GetThreatTableSize(OBJECT_SELF);
+    int i;
+    int nEnemiesWithArmorType = 0;
+    object oCurrentEnemy;
+    int nEnemyArmorType;
+    object oRet = OBJECT_INVALID;
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrentEnemy = GetThreatEnemy(OBJECT_SELF, i);
+        nEnemyArmorType = _AI_GetArmorType(oCurrentEnemy);
+        if(nEnemyArmorType &amp; nArmorType)
+            nEnemiesWithArmorType++;
+    }
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_MostEnemiesHaveArmorType", "number of enemies with armor type: " + IntToString(nEnemiesWithArmorType) +
+        ", Total number of enemies: " + IntToString(nSize));
+    #endif
+
+    if(nEnemiesWithArmorType &gt;= nSize / 2)
+        oRet = OBJECT_SELF;
+
+    return oRet;
+}
+
+object _AI_Condition_AllEnemiesHaveArmorType(int nArmorType)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_AllEnemiesHaveArmorType", "START, looking for armor type: " + IntToString(nArmorType));
+    #endif
+    int nSize = GetThreatTableSize(OBJECT_SELF);
+    int i;
+    object oCurrentEnemy;
+    int nEnemyArmorType;
+    object oRet = OBJECT_SELF;
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrentEnemy = GetThreatEnemy(OBJECT_SELF, i);
+        nEnemyArmorType = _AI_GetArmorType(oCurrentEnemy);
+        if(!(nEnemyArmorType &amp; nArmorType))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_AllEnemiesHaveArmorType", "found one enemy with wrong armor type: " + GetTag(oCurrentEnemy));
+            #endif
+            oRet = OBJECT_INVALID;
+            break;
+        }
+    }
+
+    return oRet;
+}
+
+object _AI_Condition_TargetHasRank(int nTargetType, int nTargetRank, int nTacticID, int nTacticCommand, int nTacticSubCommand)
+{
+    object oRet = OBJECT_INVALID;
+    object [] arEnemies = _AI_GetEnemies(nTacticCommand, nTacticSubCommand, nTargetType);
+    int nEnemyRank;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_TargetHasRank", "START, target rank: " + IntToString(nTargetRank));
+    #endif
+
+    object oEnemy;
+    int i;
+    int nSize = GetArraySize(arEnemies);
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oEnemy = arEnemies[i];
+        nEnemyRank = GetCreatureRank(oEnemy);
+
+        if(nTargetRank &gt; 0) // looking for specific rank
+        {
+            if(nEnemyRank == nTargetRank)
+                oRet = oEnemy;
+        }
+        else if(nTargetRank &lt; 0) // looking for a range of ranks
+        {
+            switch(nTargetRank)
+            {
+                case AI_RANK_RANGE_BOSS_OR_HIGHER:
+                {
+                    if(nEnemyRank == CREATURE_RANK_BOSS || nEnemyRank == CREATURE_RANK_ELITE_BOSS)
+                        oRet = oEnemy;
+                    break;
+                }
+                case AI_RANK_RANGE_ELITE_OR_HIGER:
+                {
+                    if(nEnemyRank == CREATURE_RANK_LIEUTENANT || nEnemyRank == CREATURE_RANK_BOSS || nEnemyRank == CREATURE_RANK_ELITE_BOSS)
+                        oRet = oEnemy;
+                    break;
+                }
+                case AI_RANK_RANGE_ELITE_OR_LOWER:
+                {
+                    if(nEnemyRank == CREATURE_RANK_LIEUTENANT || nEnemyRank == CREATURE_RANK_NORMAL || nEnemyRank == CREATURE_RANK_CRITTER ||
+                            nEnemyRank == CREATURE_RANK_ONE_HIT_KILL || nEnemyRank == CREATURE_RANK_WEAK_NORMAL)
+                        oRet = oEnemy;
+                    break;
+                }
+                case AI_RANK_RANGE_NORMAL_OR_HIGHER:
+                {
+                    if(nEnemyRank == CREATURE_RANK_NORMAL || nEnemyRank == CREATURE_RANK_LIEUTENANT || nEnemyRank == CREATURE_RANK_BOSS || nEnemyRank == CREATURE_RANK_ELITE_BOSS)
+                        oRet = oEnemy;
+                    break;
+                }
+                case AI_RANK_RANGE_NORMAL_OR_LOWER:
+                {
+                    if(nEnemyRank == CREATURE_RANK_NORMAL || nEnemyRank == CREATURE_RANK_CRITTER ||
+                            nEnemyRank == CREATURE_RANK_ONE_HIT_KILL || nEnemyRank == CREATURE_RANK_WEAK_NORMAL)
+                        oRet = oEnemy;
+                    break;
+                }
+            }
+        }
+    }
+
+    return oRet;
+}
+
+object _AI_Condition_BeingAttackedByAttackType(int nTargetType, int nAttackType, int nTacticCommand, int nTacticSubCommand, int nTacticID)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_BeingAttackedByAttackType", "START, attack type: " + IntToString(nAttackType));
+    #endif
+    object oTarget = OBJECT_INVALID;
+    object oCurrentEnemy;
+    int i;
+    int j;
+    object [] arAllies = _AI_GetAllies(nTacticCommand, nTacticSubCommand);
+    int nAlliesNum = GetArraySize(arAllies);
+    object [] arEnemies = _AI_GetEnemies(nTacticCommand, nTacticSubCommand, nTargetType);
+    int nEnemiesNum = GetArraySize(arEnemies);
+    object oCurrentAlly;
+    object oAlly;
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_SELF:
+        {
+            for(i = 0; i &lt; nEnemiesNum; i++)
+            {
+                oCurrentEnemy = arEnemies[i];
+                if(GetAttackTarget(oCurrentEnemy) == OBJECT_SELF &amp;&amp; (_AI_GetAttackType(oCurrentEnemy) &amp; nAttackType))
+                {
+                    // if melee need to check range
+                    if(nAttackType == AI_ATTACK_TYPE_MELEE)
+                    {
+                        float fRange = GetDistanceBetween(OBJECT_SELF, oCurrentEnemy);
+                        if(fRange &lt;= AI_MELEE_RANGE)
+                        {
+                            oTarget = OBJECT_SELF;
+                            break;
+                        }
+                    }
+                    else // non melee
+                    {
+                        oTarget = OBJECT_SELF; // found one enemy that attacks with the specified type - that's all we need
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            // Checking all enemies - stopping when finding first ally being attack by a specific type
+            for(i = 0; i &lt; nEnemiesNum &amp;&amp; oTarget == OBJECT_INVALID; i++)
+            {
+                oCurrentEnemy = arEnemies[i];
+                for(j = 0; j &lt; nAlliesNum &amp;&amp; oTarget == OBJECT_INVALID; j++)
+                {
+                    oCurrentAlly = arAllies[j];
+                    if(GetAttackTarget(oCurrentAlly) == oCurrentEnemy &amp;&amp; (_AI_GetAttackType(oCurrentAlly) &amp; nAttackType))
+                    {
+                        // if melee need to check range
+                        if(nAttackType == AI_ATTACK_TYPE_MELEE)
+                        {
+                            float fRange = GetDistanceBetween(oCurrentAlly, oCurrentEnemy);
+                            if(fRange &lt;= AI_MELEE_RANGE)
+                            {
+                                oTarget = oCurrentEnemy;
+                                break;
+                            }
+                        }
+                        else // non melee
+                        {
+                            oTarget = oCurrentEnemy; // found one enemy that attacks with the specified type - that's all we need
+                            break;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        case AI_TARGET_TYPE_ALLY:
+        {
+            // Checking all allies - stopping when finding first ally being attack by a specific type
+            for(i = 0; i &lt; nAlliesNum &amp;&amp; oTarget == OBJECT_INVALID; i++)
+            {
+                oCurrentAlly = arAllies[i];
+                for(j = 0; j &lt; nEnemiesNum &amp;&amp; oTarget == OBJECT_INVALID; j++)
+                {
+                    oCurrentEnemy = arEnemies[j];
+                    if(GetAttackTarget(oCurrentEnemy) == oCurrentAlly &amp;&amp; (_AI_GetAttackType(oCurrentEnemy) &amp; nAttackType))
+                    {
+                        // if melee need to check range
+                        if(nAttackType == AI_ATTACK_TYPE_MELEE)
+                        {
+                            float fRange = GetDistanceBetween(oCurrentAlly, oCurrentEnemy);
+                            if(fRange &lt;= AI_MELEE_RANGE)
+                            {
+                                oTarget = oCurrentAlly;
+                                break;
+                            }
+                        }
+                        else // non melee
+                        {
+                            oTarget = oCurrentAlly; // found one enemy that attacks with the specified type - that's all we need
+                            break;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        case AI_TARGET_TYPE_MOST_HATED:
+        {
+            object oMostHated = _AI_Condition_GetMostHatedEnemy(1, nTacticCommand, nTacticSubCommand, nTacticID);
+            if((_AI_GetAttackType(oMostHated) &amp; nAttackType) &amp;&amp; GetAttackTarget(oMostHated) == OBJECT_SELF)
+                oTarget = OBJECT_SELF;
+            break;
+        }
+        default: // It can still be a party target
+        {
+            oAlly = _AI_GetPartyTarget(nTargetType, nTacticCommand, nTacticSubCommand, nTacticID);
+            for(j = 0; j &lt; nEnemiesNum &amp;&amp; oTarget == OBJECT_INVALID; j++)
+            {
+                oCurrentEnemy = arEnemies[j];
+                if((_AI_GetAttackType(oCurrentEnemy) &amp; nAttackType) &amp;&amp; GetAttackTarget(oCurrentEnemy) == oAlly)
+                {
+                    // if melee need to check range
+                    if(nAttackType == AI_ATTACK_TYPE_MELEE)
+                    {
+                        float fRange = GetDistanceBetween(oAlly, oCurrentEnemy);
+                        if(fRange &lt;= AI_MELEE_RANGE)
+                        {
+                            oTarget = oAlly;
+                            break;
+                        }
+                    }
+                    else // non melee
+                    {
+                        oTarget = oAlly; // found one enemy that attacks with the specified type - that's all we need
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+
+    }
+
+    return oTarget;
+}
+
+object  _AI_Condition_UsingAttackType(int nTargetType, int nAttackType, int nCommandType, int nCommandSubType)
+{
+    object oTarget = OBJECT_INVALID;
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_UsingAttackType", "START, attack type: " + IntToString(nAttackType));
+    #endif
+    object [] arTargets;
+
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_SELF:
+        {
+            arTargets[0] = _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, -1);
+            break;
+        }
+        case AI_TARGET_TYPE_MOST_HATED:
+        {
+            arTargets[0] = _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, -1);
+            break;
+        }
+        case AI_TARGET_TYPE_ENEMY:
+        {
+            arTargets = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+            break;
+        }
+        case AI_TARGET_TYPE_ALLY:
+        {
+            arTargets = _AI_GetAllies(nCommandType, nCommandSubType);
+            break;
+        }
+        default:
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_UsingAttackType", "Invalid target type");
+            #endif
+            return OBJECT_INVALID;
+        }
+
+    }
+
+    int nSize = GetArraySize(arTargets);
+    int i;
+    object oCurrent;
+    int nEnemyAttackType;
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arTargets[i];
+        nEnemyAttackType = _AI_GetAttackType(oCurrent);
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_UsingAttackType", "Target: " + GetTag(oCurrent) + ", Target's attack type: " +
+            IntToString(nEnemyAttackType) + ", requested attack bit field: " + IntToString(nAttackType));
+        #endif
+
+         if(nEnemyAttackType &amp; nAttackType)
+         {
+            if(nTargetType == AI_TARGET_TYPE_SELF)
+                oTarget = OBJECT_SELF; // creature's armor fits in the requested armor bit field (nArmorType)
+            else
+                oTarget = oCurrent;
+
+            break;
+         }
+    }
+
+    return oTarget;
+}
+
+object _AI_Condition_MostEnemiesUsingAttackType(int nAttackType)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_MostEnemiesUsingAttackType", "START, looking for attack type: " + IntToString(nAttackType));
+    #endif
+    object [] arEnemies = _AI_GetEnemies(-1, -1, AI_TARGET_TYPE_ENEMY);
+    int nSize = GetArraySize(arEnemies);
+    int i;
+    int nEnemiesWithAttackType = 0;
+    object oCurrentEnemy;
+    int nEnemyAttackType;
+    object oRet = OBJECT_INVALID;
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrentEnemy = arEnemies[i];
+        nEnemyAttackType = _AI_GetAttackType(oCurrentEnemy);
+        if(nEnemyAttackType &amp; nAttackType)
+            nEnemiesWithAttackType++;
+    }
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_MostEnemiesUsingAttackType", "number of enemies with attack type: " + IntToString(nEnemiesWithAttackType) +
+        ", Total number of enemies: " + IntToString(nSize));
+    #endif
+
+    if(nEnemiesWithAttackType &gt; nSize - nEnemiesWithAttackType)
+        oRet = OBJECT_SELF;
+
+    return oRet;
+}
+
+object _AI_Condition_AllEnemiesUsingAttackType(int nAttackType)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_AllEnemiesUsingAttackType", "START, looking for attack type: " + IntToString(nAttackType));
+    #endif
+    int nSize = GetThreatTableSize(OBJECT_SELF);
+    int i;
+    object oCurrentEnemy;
+    int nEnemyAttackType;
+    object oRet = OBJECT_SELF;
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrentEnemy = GetThreatEnemy(OBJECT_SELF, i);
+        nEnemyAttackType = _AI_GetAttackType(oCurrentEnemy);
+        if(!(nEnemyAttackType &amp; nAttackType))
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_AllEnemiesUsingAttackType", "found one enemy with wrong attack type: " + GetTag(oCurrentEnemy));
+            #endif
+            oRet = OBJECT_INVALID;
+            break;
+        }
+    }
+
+    return oRet;
+}
+
+object _AI_Condition_AtLeastXEnemiesAreAlive(int nTargetType, int nNum)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_AtLeastXEnemiesAreAlive", "START, X=: " + IntToString(nNum));
+    #endif
+    object [] arEnemies = _AI_GetEnemies(-1, -1, nTargetType);
+
+    object oTarget = OBJECT_INVALID;
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_SELF: oTarget = OBJECT_SELF; break;
+        case AI_TARGET_TYPE_ENEMY: oTarget = arEnemies[0]; break;
+        case AI_TARGET_TYPE_MOST_HATED: oTarget = _AI_Condition_GetMostHatedEnemy(1, -1, -1, -1); break;
+    }
+
+    int nCount = 0;
+    int nEnemiesNum = GetThreatTableSize(OBJECT_SELF);
+    if(nEnemiesNum &lt; nNum)
+        oTarget = OBJECT_INVALID;
+    return oTarget;
+}
+
+object _AI_Condition_AtLeastXCreaturesAreDead(int nTargetType, int nNum, int nTacticCommand, int nTacticSubCommand)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_AtLeastXCreaturesAreDead", "START, X=: " + IntToString(nNum));
+    #endif
+
+    object [] arEnemies = _AI_GetEnemies(-1, -1, nTargetType);
+
+    object oTarget = OBJECT_INVALID;
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_SELF: oTarget = OBJECT_SELF; break;
+        case AI_TARGET_TYPE_ENEMY: oTarget = arEnemies[0]; break;
+        case AI_TARGET_TYPE_MOST_HATED: oTarget = _AI_Condition_GetMostHatedEnemy(1, -1, -1, -1); break;
+    }
+
+    object [] arCorpses = GetNearestObject(OBJECT_SELF,
+                                            OBJECT_TYPE_CREATURE,
+                                            AI_MAX_CREATURES_NEAREST);
+
+    float fRange;
+    if(nTacticCommand == AI_COMMAND_USE_ABILITY &amp;&amp;
+        (nTacticSubCommand == ABILITY_TALENT_DEVOUR || nTacticSubCommand == ABILITY_SPELL_ANIMATE_DEAD))
+    {
+        int nRangeID = GetM2DAInt(TABLE_ABILITIES_SPELLS, "range", nTacticSubCommand);
+        float fRange = GetM2DAFloat(TABLE_RANGES, "PrimaryRange", nRangeID);
+    }
+
+    int nSize = GetArraySize(arCorpses);
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_AtLeastXCreaturesAreDead", "Total corpses found: " + IntToString(nSize) +
+        ", looking for range: " + FloatToString(fRange));
+    #endif
+
+    int i;
+    object oCurrent;
+    int nCorpseCount = 0;
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arCorpses[i];
+        if(IsDead(oCurrent))
+        {
+            if(fRange &gt; 0.0) // range check
+            {
+                float fDistance = GetDistanceBetween(OBJECT_SELF, oCurrent);
+                if(fDistance &lt;= fRange)
+                    nCorpseCount++;
+            }
+            else // no need for range check
+                nCorpseCount++;
+        }
+    }
+
+    if(nCorpseCount &lt; nNum)
+        oTarget = OBJECT_INVALID;
+
+    return oTarget;
+}
+
+object _AI_Condition_AtLeastXAlliesAreAlive(int nTargetType, int nNum, int nParam2)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_AtLeastXAlliesAreAlive", "START, X=: " + IntToString(nNum));
+    #endif
+
+    object [] arEnemies = _AI_GetEnemies(-1, -1, nTargetType);
+
+    object oTarget = OBJECT_INVALID;
+    switch(nTargetType)
+    {
+        case AI_TARGET_TYPE_SELF: oTarget = OBJECT_SELF; break;
+        case AI_TARGET_TYPE_ENEMY: oTarget = arEnemies[0]; break;
+        case AI_TARGET_TYPE_MOST_HATED: oTarget = _AI_Condition_GetMostHatedEnemy(1, -1, -1, -1); break;
+    }
+
+    int nCount = 0;
+    object [] arAllies = _AI_GetAllies(COMMAND_TYPE_INVALID, -1);
+    int nAlliesNum = GetArraySize(arAllies);
+
+    if(nParam2 == 0) // normal check of "at least alive"
+    {
+        if(nAlliesNum &lt; nNum)
+            oTarget = OBJECT_INVALID;
+    }
+    else if(nParam2 == 1) // special check if at least wounded 50%
+    {
+        int i;
+        object oCurrent;
+        for(i = 0; i &lt; nAlliesNum; i++)
+        {
+            oCurrent = arAllies[i];
+            if(_AI_HasStatLevel(oCurrent, AI_STAT_TYPE_HP, -50))
+                nCount++;
+        }
+        if(nCount &lt; nNum)
+            oTarget = OBJECT_INVALID;
+    }
+    else if(nParam2 == 2) // special check if at least has curable effect
+    {
+        int i;
+        object oCurrent;
+        for(i = 0; i &lt; nAlliesNum; i++)
+        {
+            oCurrent = arAllies[i];
+            if(_AI_IsTargetValidForBeneficialAbility(oCurrent, ABILITY_SPELL_CURE))
+                nCount++;
+        }
+        if(nCount &lt; nNum)
+            oTarget = OBJECT_INVALID;
+    }
+    return oTarget;
+}
+
+int _AI_HasAIStatus(object oCreature, int nAIStatus)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_HasAIStatus", "checking for creature: " + GetTag(oCreature) + ", status: " + IntToString(nAIStatus));
+    #endif
+    int nRet = FALSE;
+
+    switch(nAIStatus)
+    {
+        case AI_STATUS_POLYMORPH: nRet = GetHasEffects(oCreature, EFFECT_TYPE_SHAPECHANGE); break;
+        case AI_STATUS_CHARM: nRet = GetHasEffects(oCreature, EFFECT_TYPE_CHARM); break;
+        case AI_STATUS_PARALYZE: nRet = GetHasEffects(oCreature, EFFECT_TYPE_PARALYZE); break;
+        case AI_STATUS_STUN: nRet = GetHasEffects(oCreature, EFFECT_TYPE_STUN); break;
+        case AI_STATUS_SLEEP: nRet = GetHasEffects(oCreature, EFFECT_TYPE_SLEEP); break;
+        case AI_STATUS_ROOT: nRet = GetHasEffects(oCreature, EFFECT_TYPE_ROOT); break;
+        case AI_STATUS_DAZE: nRet = GetHasEffects(oCreature, EFFECT_TYPE_DAZE); break;
+        case AI_STATUS_SLOW: nRet = GetHasEffects(oCreature, EFFECT_TYPE_MOVEMENT_RATE); break;
+        case AI_STATUS_STEALTH: nRet = GetHasEffects(oCreature, EFFECT_TYPE_STEALTH); break;
+        case AI_STATUS_DISEASED: nRet = GetHasEffects(oCreature, EFFECT_TYPE_DISEASE); break;
+        case AI_STATUS_DEAD: nRet = GetHasEffects(oCreature, EFFECT_TYPE_DEATH); break;
+        case AI_STATUS_UNCONSIOUS: nRet = GetHasEffects(oCreature, EFFECT_TYPE_DEATH); break;
+        case AI_STATUS_KNOCKDOWN: nRet = GetHasEffects(oCreature, EFFECT_TYPE_KNOCKDOWN) || GetHasEffects(oCreature, EFFECT_TYPE_SLIP); break;
+        case AI_STATUS_GRABBED: nRet = GetHasEffects(oCreature, EFFECT_TYPE_GRABBED) || GetHasEffects(oCreature, EFFECT_TYPE_OVERWHELMED); break;
+        case AI_STATUS_GRABBING: nRet = GetHasEffects(oCreature, EFFECT_TYPE_GRABBING) || GetHasEffects(oCreature, EFFECT_TYPE_OVERWHELMING); break;
+        case AI_STATUS_BERSERK: nRet = IsModalAbilityActive(oCreature, ABILITY_TALENT_BERSERK); break;
+        case AI_STATUS_CONFUSED: nRet = GetHasEffects(oCreature, EFFECT_TYPE_CONFUSION); break;
+        case AI_STATUS_IMMOBLIZED:
+        {
+            int nFlags = GetEffectsFlags(oCreature);
+            if(nFlags &amp; EFFECT_FLAG_DISABLE_MOVEMENT)
+                nRet = TRUE;
+            break;
+        }
+        case AI_STATUS_MOVEMENT_IMPAIRED:
+        {
+            int nFlags = GetEffectsFlags(oCreature);
+            if((nFlags &amp; EFFECT_FLAG_DISABLE_MOVEMENT) || GetHasEffects(oCreature, EFFECT_TYPE_MOVEMENT_RATE))
+                nRet = TRUE;
+
+            break;
+        }
+        case AI_STATUS_CANT_ATTACK:
+        {
+            int nFlags = GetEffectsFlags(oCreature);
+            if(nFlags &amp; EFFECT_FLAG_DISABLE_COMBAT)
+                nRet = TRUE;
+
+            break;
+        }
+    }
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_HasAIStatus", "return: " + IntToString(nRet));
+    #endif
+
+    return nRet;
+}
+
+object _AI_Condition_GetTargetUsingRangedWeaponsAtRange(int nTargetType, int nRange, int nCommandType, int nCommandSubType)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetTargetUsingRangedWeaponsAtRange", "START, looking for range: " + IntToString(nRange));
+    #endif
+
+    object [] arEnemies;
+    if(nTargetType == AI_TARGET_TYPE_ENEMY)
+        arEnemies = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+    else // most hatd
+        arEnemies[0] = _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, -1);
+
+    int nSize = GetArraySize(arEnemies);
+    int i;
+    object oCurrent;
+    float fDistance;
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arEnemies[i];
+        fDistance = GetDistanceBetween(OBJECT_SELF, oCurrent);
+
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_GetTargetUsingRangedWeaponsAtRange", "Current Target: " + GetTag(oCurrent) + ", Distance: " + FloatToString(fDistance) + ", attack type: " +
+            IntToString(_AI_GetAttackType(oCurrent)));
+        #endif
+
+        if(_AI_GetAttackType(oCurrent) == AI_ATTACK_TYPE_RANGED || _AI_GetAttackType(oCurrent) == AI_ATTACK_TYPE_MAGIC)
+        {
+
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_Condition_GetTargetUsingRangedWeaponsAtRange", "Target using ranged or magic! - checking range");
+            #endif
+
+            // Target is ranged or magic
+            switch(nRange)
+            {
+                case AI_RANGE_ID_SHORT:
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_Condition_GetTargetUsingRangedWeaponsAtRange", "Checking for range lower than: " + FloatToString(AI_RANGE_SHORT));
+                    #endif
+                    if(fDistance &lt;= AI_RANGE_SHORT)
+                        return oCurrent;
+                    break;
+                }
+                case AI_RANGE_ID_MEDIUM:
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_Condition_GetTargetUsingRangedWeaponsAtRange", "Checking for range between: " + FloatToString(AI_RANGE_SHORT) + " and " + FloatToString(AI_RANGE_MEDIUM));
+                    #endif
+                    if(fDistance &gt; AI_RANGE_SHORT &amp;&amp; fDistance &lt;= AI_RANGE_MEDIUM)
+                        return oCurrent;
+                    break;
+                }
+                case AI_RANGE_ID_LONG:
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_Condition_GetTargetUsingRangedWeaponsAtRange", "Checking for range between: " + FloatToString(AI_RANGE_MEDIUM) + " and " + FloatToString(AI_RANGE_LONG));
+                    #endif
+                    if(fDistance &gt; AI_RANGE_MEDIUM &amp;&amp; fDistance &lt;= AI_RANGE_LONG)
+                        return oCurrent;
+                    break;
+                }
+
+            }
+        }
+    }
+
+    return OBJECT_INVALID;
+}
+
+object _AI_Condition_GetTargetAtRange(int nTargetType, int nRange, int nCommandType, int nCommandSubType)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetTargetAtRange", "START, looking for range: " + IntToString(nRange));
+    #endif
+
+    float fDistance;
+
+    object [] arTargets;
+    if(nTargetType == AI_TARGET_TYPE_ALLY)
+        arTargets = _AI_GetAllies(nCommandType, nCommandSubType);
+    else if(nTargetType == AI_TARGET_TYPE_ENEMY)
+        arTargets = _AI_GetEnemies(nCommandType, nCommandSubType, nTargetType);
+    else // most hated OR self
+        arTargets[0] = _AI_Condition_GetMostHatedEnemy(1, nCommandType, nCommandSubType, -1);
+
+    int nSize = GetArraySize(arTargets);
+    int i;
+    object oCurrent;
+    object oTarget = OBJECT_INVALID;
+
+
+    for(i = 0; i &lt; nSize &amp;&amp; oTarget == OBJECT_INVALID; i++)
+    {
+        oCurrent = arTargets[i];
+        fDistance = GetDistanceBetween(OBJECT_SELF, oCurrent);
+
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_GetTargetAtRange", "Current Target: " + GetTag(oCurrent) + ", Distance: " + FloatToString(fDistance));
+        #endif
+
+        switch(nRange)
+        {
+            case AI_RANGE_ID_SHORT:
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_Condition_GetTargetAtRange", "Checking for range lower than: " + FloatToString(AI_RANGE_SHORT));
+                #endif
+                if(fDistance &lt;= AI_RANGE_SHORT)
+                    oTarget = oCurrent;
+                break;
+            }
+            case AI_RANGE_ID_MEDIUM:
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_Condition_GetTargetAtRange", "Checking for range between: " + FloatToString(AI_RANGE_SHORT) + " and " + FloatToString(AI_RANGE_MEDIUM));
+                #endif
+                if(fDistance &gt; AI_RANGE_SHORT &amp;&amp; fDistance &lt;= AI_RANGE_MEDIUM)
+                    oTarget = oCurrent;
+                break;
+            }
+            case AI_RANGE_ID_LONG:
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_Condition_GetTargetAtRange", "Checking for range between: " + FloatToString(AI_RANGE_MEDIUM) + " and " + FloatToString(AI_RANGE_LONG));
+                #endif
+                if(fDistance &gt; AI_RANGE_MEDIUM &amp;&amp; fDistance &lt;= AI_RANGE_LONG)
+                    oTarget = oCurrent;
+                break;
+            }
+
+        }
+
+    }
+
+    if(nTargetType == AI_TARGET_TYPE_SELF &amp;&amp; IsObjectValid(oTarget))
+        oTarget = OBJECT_SELF;
+
+    if(IsFollower(OBJECT_SELF) &amp;&amp; nTargetType == AI_TARGET_TYPE_ENEMY)
+    {
+        object oSelectedTarget;
+        if(_AI_IsHostileTargetValid(oSelectedTarget) &amp;&amp; oSelectedTarget != oTarget)
+            oTarget = OBJECT_INVALID; // for followers this is valid only if they current target is in the specified range
+    }
+
+    return oTarget;
+}
+object _AI_Condition_GetTargetAtFlankLocation(int nFlankType, int nTargetType)
+{
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetTargetAtFlankLocation", "START, flank type: " + IntToString(nFlankType));
+    #endif
+    float fAngleStart;
+    float fAngleEnd;
+    object oTarget = OBJECT_INVALID;
+    float fAbilityFacing;
+    int nMeleeRing = 0; // for creatures with multiple rings (high dragon)
+    int nApp = GetAppearanceType(OBJECT_SELF);
+    float fRange = 0.0;
+    int bCheckShape = FALSE;
+    float fMinRange = 0.0;
+
+    switch(nFlankType)
+    {
+        case AI_FLANK_DRAGON_FR:
+        case AI_FLANK_RIGHT:
+        {
+            if(nApp == APR_TYPE_BROODMOTHER)
+            {
+                fAngleStart = ABILITY_FLANK_FACING_RIGHT - ABILITY_FLANK_SIZE_SIDE / 2;
+                fAngleEnd = ABILITY_FLANK_FACING_RIGHT + ABILITY_FLANK_SIZE_SIDE / 2;
+                fAbilityFacing = ABILITY_FLANK_FACING_RIGHT;
+            }
+            else
+            {
+                float fAttackFR = GetM2DAFloat(TABLE_APPEARANCE, "AttackFR", nApp);
+                float fAttackFRWidth = GetM2DAFloat(TABLE_APPEARANCE, "AttackFRWidth", nApp);
+                fAngleStart = fAttackFR - fAttackFRWidth/2;
+                fAngleEnd = fAttackFR + fAttackFRWidth/2;
+                fAbilityFacing = fAttackFR;
+                nMeleeRing = GetM2DAInt(TABLE_APPEARANCE, "AttackFRRing", nApp);
+            }
+            break;
+        }
+        case AI_FLANK_DRAGON_FL:
+        case AI_FLANK_LEFT:
+        {
+            if(nApp == APR_TYPE_BROODMOTHER)
+            {
+                fAngleStart = ABILITY_FLANK_FACING_LEFT - ABILITY_FLANK_SIZE_SIDE / 2;
+                fAngleEnd = ABILITY_FLANK_FACING_LEFT + ABILITY_FLANK_SIZE_SIDE / 2;
+                fAbilityFacing = ABILITY_FLANK_FACING_LEFT;
+            }
+            else
+            {
+                float fAttackFL = GetM2DAFloat(TABLE_APPEARANCE, "AttackFL", nApp);
+                float fAttackFLWidth = GetM2DAFloat(TABLE_APPEARANCE, "AttackFLWidth", nApp);
+                fAngleStart = fAttackFL - fAttackFLWidth/2;
+                fAngleEnd = fAttackFL + fAttackFLWidth/2;
+                fAbilityFacing = fAttackFL;
+                nMeleeRing = GetM2DAInt(TABLE_APPEARANCE, "AttackFLRing", nApp);
+            }
+            break;
+        }
+        case AI_FLANK_DRAGON_BR:
+        case AI_FLANK_BRIGHT:
+        {
+            float fAttackBR = GetM2DAFloat(TABLE_APPEARANCE, "AttackBR", nApp);
+            float fAttackBRWidth = GetM2DAFloat(TABLE_APPEARANCE, "AttackBRWidth", nApp);
+            fAngleStart = fAttackBR - fAttackBRWidth/2;
+            fAngleEnd = fAttackBR + fAttackBRWidth/2;
+            fAbilityFacing = fAttackBR;
+            nMeleeRing = GetM2DAInt(TABLE_APPEARANCE, "AttackBRRing", nApp);
+            break;
+        }
+        case AI_FLANK_DRAGON_BL:
+        case AI_FLANK_BLEFT:
+        {
+            float fAttackBL = GetM2DAFloat(TABLE_APPEARANCE, "AttackBL", nApp);
+            float fAttackBLWidth = GetM2DAFloat(TABLE_APPEARANCE, "AttackBLWidth", nApp);
+            fAngleStart = fAttackBL - fAttackBLWidth/2;
+            fAngleEnd = fAttackBL + fAttackBLWidth/2;
+            fAbilityFacing = fAttackBL;
+            nMeleeRing = GetM2DAInt(TABLE_APPEARANCE, "AttackBLRing", nApp);
+            break;
+        }
+        case AI_FLANK_LARGE_LEFT:
+        {
+            fAngleStart = ABILITY_FLANK_FACING_LARGE_LEFT - ABILITY_FLANK_SIZE_LARGE_SIDE / 2;
+            fAngleEnd = ABILITY_FLANK_FACING_LARGE_LEFT + ABILITY_FLANK_SIZE_LARGE_SIDE / 2;
+            fAbilityFacing = ABILITY_FLANK_FACING_LARGE_LEFT;
+            break;
+        }
+        case AI_FLANK_LARGE_RIGHT:
+        {
+            fAngleStart = ABILITY_FLANK_FACING_LARGE_RIGHT - ABILITY_FLANK_SIZE_LARGE_SIDE / 2;
+            fAngleEnd = ABILITY_FLANK_FACING_LARGE_RIGHT + ABILITY_FLANK_SIZE_LARGE_SIDE / 2;
+            fAbilityFacing = ABILITY_FLANK_FACING_LARGE_RIGHT;
+            break;
+        }
+        case AI_FLANK_FRONT:
+        {
+            fAngleStart = ABILITY_FLANK_FACING_FRONT - ABILITY_FLANK_SIZE_FRONT / 2;
+            fAngleEnd = ABILITY_FLANK_FACING_FRONT + ABILITY_FLANK_SIZE_FRONT / 2;
+            fAbilityFacing = ABILITY_FLANK_FACING_FRONT;
+            break;
+        }
+        case AI_FLANK_BRIGHT2:
+        {
+            fAngleStart = ABILITY_FLANK_FACING_BACK_RIGHT2 - ABILITY_FLANK_SIZE_BACK2 / 2;
+            fAngleEnd = ABILITY_FLANK_FACING_BACK_RIGHT2 + ABILITY_FLANK_SIZE_BACK2 / 2;
+            fAbilityFacing = ABILITY_FLANK_FACING_BACK_RIGHT2;
+            break;
+        }
+        case AI_FLANK_BLEFT2:
+        {
+            fAngleStart = ABILITY_FLANK_FACING_BACK_LEFT2 - ABILITY_FLANK_SIZE_BACK2 / 2;
+            fAngleEnd = ABILITY_FLANK_FACING_BACK_LEFT2 + ABILITY_FLANK_SIZE_BACK2 / 2;
+            fAbilityFacing = ABILITY_FLANK_FACING_BACK_LEFT2;
+            break;
+        }
+        case AI_FLANK_DRAGON_BACK:
+        case AI_FLANK_DRAGON_BACK_2:
+        case AI_FLANK_DRAGON_BACK_3:
+        {
+            fAngleStart = HIGH_TAIL_FLAP_ANGLE_START;
+            fAngleEnd = HIGH_TAIL_FLAP_ANGLE_END;
+            fAbilityFacing = GetFacing(OBJECT_SELF) - HIGH_TAIL_FLAP_FACING;
+            fRange = HIGH_TAIL_FLAP_RANGE;
+            bCheckShape = TRUE;
+            fMinRange = HIGH_TAIL_MIN_RANGE;
+            break;
+        }
+        case AI_FLANK_DRAGON_FRONT_FAR:
+        case AI_FLANK_DRAGON_FRONT_FAR_2:
+        case AI_FLANK_DRAGON_FRONT_FAR_3:
+        {
+            fAngleStart = HIGH_BREATH_ANGLE_START;
+            fAngleEnd = HIGH_BREATH_ANGLE_END;
+            fAbilityFacing = GetFacing(OBJECT_SELF) - HIGH_BREATH_FACING;
+            fRange = HIGH_BREATH_RANGE;
+            fMinRange = HIGH_BREATH_MIN_RANGE;
+            bCheckShape = TRUE;
+            break;
+        }
+        case AI_FLANK_DRAGON_FRONT_CLOSE:
+        case AI_FLANK_DRAGON_FRONT_CLOSE_2:
+        case AI_FLANK_DRAGON_FRONT_CLOSE_3:
+        {
+            fAngleStart = HIGH_SWEEP_ANGLE_START;
+            fAngleEnd = HIGH_SWEEP_ANGLE_END;
+            fAbilityFacing = GetFacing(OBJECT_SELF) - HIGH_SWEEP_FACING;
+            //fAbilityFacing = HIGH_SWEEP_FACING;
+            fRange = HIGH_SWEEP_RANGE;
+            bCheckShape = TRUE;
+            break;
+        }
+
+
+    }
+
+    if(fRange == 0.0)
+    {
+        switch(nApp)
+        {
+            case APR_TYPE_OGRE: fRange = MONSTER_MELEE_RANGE_OGRE; break;
+            case APR_TYPE_BROODMOTHER: fRange = MONSTER_MELEE_RANGE_BROODMOTHER; break;
+            case APP_TYPE_ARCHDEMON: fRange = MONSTER_MELEE_RANGE_HIGHDRAGON; break;
+            case APP_TYPE_HIGHDRAGON: fRange = MONSTER_MELEE_RANGE_HIGHDRAGON; break;
+            case APP_TYPE_WILD_SYLVAN: fRange = MONSTER_MELEE_RANGE_WILD_SYLVAN; break;
+            case APP_TYPE_DRAGON: fRange = MONSTER_MELEE_RANGE_DRAGON; break;
+            case APP_TYPE_DRAKE: fRange = MONSTER_MELEE_RANGE_DRAGON; break;
+            case APP_TYPE_PRIDE_DEMON: fRange = MONSTER_MELEE_RANGE_PRIDE_DEMON; break;
+        }
+    }
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetTargetAtFlankLocation", "ability facing: " + FloatToString(fAbilityFacing));
+    #endif
+
+    location lConeLocation = Location(GetArea(OBJECT_SELF), GetPosition(OBJECT_SELF), fAbilityFacing);
+    object [] arEnemies;
+    if(bCheckShape)
+    {
+
+        arEnemies = GetObjectsInShape(OBJECT_TYPE_CREATURE, SHAPE_SPHERE, lConeLocation, fRange);
+        arEnemies = FilterObjectsInShape(arEnemies, OBJECT_TYPE_CREATURE, SHAPE_CONE, lConeLocation, fAngleEnd - fAngleStart, fRange, 0.0, TRUE);
+    }
+    else
+    {
+        if(fAngleEnd == 360.0)
+            fAngleEnd = 359.9;
+        arEnemies = GetCreaturesInMeleeRing(OBJECT_SELF, fAngleStart, fAngleEnd, TRUE, nMeleeRing);
+    }
+
+    // Main filter - no need to check anything if not surrounded by enough enemies
+
+    int nSize = GetArraySize(arEnemies);
+    #ifdef DEBUG
+    if(nMeleeRing != 0)
+        Log_Trace_AI("_AI_Condition_GetTargetAtFlankLocation", "Melee Ring: " + IntToString(nMeleeRing));
+
+    Log_Trace_AI("_AI_Condition_GetTargetAtFlankLocation", "Looking between angle: " + IntToString(FloatToInt(fAngleStart)) +
+        ", and: " + IntToString(FloatToInt(fAngleEnd)) + ", number of creatures between angles: " + IntToString(nSize));
+    #endif
+    if(nSize == 1 &amp;&amp; arEnemies[0] == OBJECT_SELF)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_GetTargetAtFlankLocation", "ERROR: found self in target AOE", LOG_SEVERITY_CRITICAL);
+        #endif
+        return OBJECT_INVALID;
+    }
+
+    // filter min range if needed
+    if(fMinRange &gt; 0.0)
+    {
+        int i;
+        object oCurrent;
+        int nNewSize = 0;
+        float fDistance;
+        for(i = 0; i &lt; nSize; i++)
+        {
+            oCurrent = arEnemies[i];
+            fDistance = GetDistanceBetween(OBJECT_SELF, oCurrent);
+            if(fDistance &gt; fMinRange)
+                nNewSize++;
+        }
+        nSize = nNewSize;
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_GetTargetAtFlankLocation", "Ability has min range. Num of targets after filter: " + IntToString(nSize));
+        #endif
+
+    }
+
+    int nMinTargets = 1;
+    if(nFlankType == AI_FLANK_DRAGON_BACK_2 || nFlankType == AI_FLANK_DRAGON_FRONT_CLOSE_2 || nFlankType == AI_FLANK_DRAGON_FRONT_FAR_2)
+        nMinTargets = 2;
+    else if(nFlankType == AI_FLANK_DRAGON_BACK_3 || nFlankType == AI_FLANK_DRAGON_FRONT_CLOSE_3 || nFlankType == AI_FLANK_DRAGON_FRONT_FAR_3)
+        nMinTargets = 2;
+
+    if(nSize &gt;= nMinTargets &amp;&amp; nTargetType == AI_TARGET_TYPE_SELF)
+        oTarget = OBJECT_SELF;
+    else if(nTargetType == AI_TARGET_TYPE_ENEMY)
+        oTarget = arEnemies[0];
+    return oTarget;
+}
+
+object _AI_Condition_SurroundedByAtLeastXEnemies(int nTacticCommand, int nTacticSubCommand, int nNumOfTargets, int nTacticID)
+{
+    object oTarget = OBJECT_INVALID;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_SurroundedByAtLeastXEnemies", "START, Min num of enemies: " + IntToString(nNumOfTargets));
+    #endif
+
+    float fStart = 0.0;
+    float fEnd = 359.0;
+
+    if(nTacticCommand == AI_COMMAND_USE_ABILITY &amp;&amp; nTacticSubCommand == ABILITY_TALENT_DUAL_WEAPON_SWEEP)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_Condition_SurroundedByAtLeastXEnemies", "Using a SWEEP talent - narrowing angles");
+        #endif
+        fStart = 0.0;
+        fEnd = 180.0;
+    }
+    else if(nTacticCommand == AI_COMMAND_USE_ABILITY &amp;&amp; nTacticSubCommand == MONSTER_DRAGON_BREATH)
+    {
+        fStart = BREATH_ANGLE_START;
+        fEnd = BREATH_ANGLE_END;
+    }
+    int nApp = GetAppearanceType(OBJECT_SELF);
+    object [] arEnemies;
+    if(nApp == APP_TYPE_ARCHDEMON || nApp == APP_TYPE_HIGHDRAGON)
+    {
+        arEnemies = GetObjectsInShape(OBJECT_TYPE_CREATURE, SHAPE_SPHERE, GetLocation(OBJECT_SELF), MONSTER_MELEE_RANGE_HIGHDRAGON);
+        arEnemies = FilterObjectsInShape(arEnemies, OBJECT_TYPE_CREATURE, SHAPE_SPHERE, GetLocation(OBJECT_SELF), MONSTER_MELEE_RANGE_HIGHDRAGON, 0.0, 0.0, TRUE);
+    }
+    else if(nTacticCommand == AI_COMMAND_USE_ABILITY &amp;&amp; nTacticSubCommand == ABILITY_TALENT_MONSTER_ARCANEHORROR_AOE)
+    {
+        arEnemies = GetObjectsInShape(OBJECT_TYPE_CREATURE, SHAPE_SPHERE, GetLocation(OBJECT_SELF), ARCANEHORROR_AOE_RADIUS);
+        arEnemies = FilterObjectsInShape(arEnemies, OBJECT_TYPE_CREATURE, SHAPE_SPHERE, GetLocation(OBJECT_SELF), ARCANEHORROR_AOE_RADIUS, 0.0, 0.0, TRUE);
+    }
+    else
+        arEnemies = GetCreaturesInMeleeRing(OBJECT_SELF, fStart, fEnd, TRUE);
+
+    int nSize = GetArraySize(arEnemies);
+    int nEnemiesCount = nSize;
+    if(nApp == APP_TYPE_ARCHDEMON || nApp == APP_TYPE_HIGHDRAGON)
+    {
+        nEnemiesCount = 0;
+        int i;
+        object oCurrent;
+        for(i = 0; i &lt; nSize; i++)
+        {
+            oCurrent = arEnemies[i];
+            if(oCurrent != OBJECT_SELF &amp;&amp; IsObjectHostile(OBJECT_SELF, oCurrent))
+                nEnemiesCount++;
+        }
+    }
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_SurroundedByAtLeastXEnemies", "Number of enemies around self: " + IntToString(nEnemiesCount));
+    #endif
+
+    // If nNumofTargets is 0 - then we want NO enemies
+    if(nNumOfTargets == 0 &amp;&amp; nEnemiesCount == 0)
+        oTarget = OBJECT_SELF;
+    else if(nNumOfTargets != 0 &amp;&amp; nEnemiesCount &gt;= nNumOfTargets)
+        oTarget = OBJECT_SELF;
+    return oTarget;
+}
+
+object _AI_Condition_GetPartyMemberTarget(int nTacticCommand, int nTacticSubCommand, int nPartyMemberType, int nTacticID)
+{
+    object oFollower;
+    if(nPartyMemberType == AI_TARGE_TYPE_HERO)
+        oFollower = GetPartyLeader();
+    else if(nPartyMemberType == AI_TARGET_TYPE_MAIN_CONTROLLED)
+        oFollower = GetMainControlled();
+    else
+        oFollower = GetTacticConditionObject(OBJECT_SELF, nTacticID);
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_Condition_GetPartyMemberTarget", "START, looking for target of party member: " + GetTag(oFollower));
+    #endif
+
+    return GetAttackTarget(oFollower);
+}
+
+object[] _AI_GetAllies(int nCommandType, int nCommandSubType)
+{
+    object[] arAllies;
+    object[] arAlliesFinal;
+
+    // This is the top candidate for being in the engine.
+    // It is called a lot of times and the second distance filter is not efficient.
+
+    arAllies = GetNearestObjectByGroup(OBJECT_SELF,
+                                                 GetGroupId(OBJECT_SELF),
+                                                 OBJECT_TYPE_CREATURE,
+                                                 AI_MAX_CREATURES_NEAREST,
+                                                 TRUE,      // Living
+                                                 TRUE,      // Perceived
+                                                 FALSE);    // Not including self
+
+    // Filter distance - NOT EFFICIENT! - MOVE TO ENGINE!
+    // This includes also ability filter - if the action related to the condition for which we retrieve
+    // the list of allies/enemies is a duration ability then we will targeting creatures which already
+    // have the specified ability active
+
+    int i;
+    int nSize = GetArraySize(arAllies);
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_GetAllies", "INITIAL LIST SIZE: " + IntToString(nSize) + ", command type: " + IntToString(nCommandType) + ", sub command: " + IntToString(nCommandSubType));
+    #endif
+
+    object oCurrent;
+    float fDistance;
+    int j = 0;
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arAllies[i];
+        fDistance = GetDistanceBetween(OBJECT_SELF, oCurrent);
+
+        // Evaluating allies outside of combat ONLY if they are within a cerain range
+        if(fDistance &gt; AI_RANGE_MAX_ALLY_HELP &amp;&amp; GetCombatState(oCurrent) == FALSE)
+            continue;
+
+        if(IsDying(oCurrent))
+            continue; // dead are not included in the array already
+
+        // certain creatures may be filtered out if they have the abiliy active
+        if(nCommandType == AI_COMMAND_USE_ABILITY)
+        {
+            if(Ability_IsAbilityActive(oCurrent, nCommandSubType))
+                continue; // just ignore the creature
+            if(!_AI_IsTargetValidForBeneficialAbility(oCurrent, nCommandSubType))
+                continue;
+        }
+        else if(Effects_HasAIModifier(oCurrent, AI_MODIFIER_IGNORE))
+            continue; // ignore this target
+        // Creature is valid to be a target - update final array:
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetAllies", "Adding creature to list of allies: [" + GetTag(oCurrent) + "]");
+        #endif
+        arAlliesFinal[j] = oCurrent;
+        j++;
+    }
+
+    return arAlliesFinal;
+}
+
+object[] _AI_GetEnemies(int nCommandType, int nCommandSubType, int nTargetTypeOfFollower = -1)
+{
+    object[] arEnemies;
+    object[] arEnemiesFinal;
+    object oTargetOverride = _AI_GetTargetOverride();
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_GetEnemies", "nTargetTypeOfFollower: " + IntToString(nTargetTypeOfFollower) + ", commandtype: " + IntToString(nCommandType)
+        +", nCommandSubType: " + IntToString(nCommandSubType));
+    #endif
+    // if there is target override, then the array of enemies has one object with the overriden target
+    if(IsObjectValid(oTargetOverride))
+    {
+        arEnemies[0] = oTargetOverride;
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetEnemies", "Got override target: " + GetTag(oTargetOverride));
+        #endif
+        return arEnemies;
+    }
+    else if(IsFollower(OBJECT_SELF) &amp;&amp; nTargetTypeOfFollower == AI_TARGET_TYPE_ENEMY &amp;&amp; nCommandType == AI_COMMAND_USE_ABILITY)
+    {
+        object oCurrentTarget = GetAttackTarget(OBJECT_SELF);
+
+        if(IsObjectValid(oCurrentTarget))
+        {
+            float fRangeToTarget = GetDistanceBetween(OBJECT_SELF, oCurrentTarget);
+            int nAbilityTargetType = GetM2DAInt(TABLE_ABILITIES_TALENTS, "range", nCommandSubType);
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_GetEnemies", "Follower current target: " + GetTag(oCurrentTarget) + ", range: " + FloatToString(fRangeToTarget)
+                + ", ability range: " + IntToString(GetM2DAInt(TABLE_ABILITIES_TALENTS, "range", nCommandSubType)));
+            #endif
+            if((nAbilityTargetType == 1 || nAbilityTargetType == 0) &amp;&amp;
+                fRangeToTarget &lt;= AI_MELEE_RANGE &amp;&amp;
+                IsUsingMeleeWeapon(OBJECT_SELF))
+            {
+                arEnemies[0] = oCurrentTarget;
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_GetEnemies", "Follower keeping melee target for melee use-ability: " + GetTag(oCurrentTarget));
+                #endif
+                return arEnemies;
+            }
+        }
+    }
+
+    // This is the top candidate for being in the engine.
+    // It is called a lot of times and the second distance filter is not efficient.
+
+    arEnemies = GetNearestObjectByHostility(OBJECT_SELF,
+                                                      TRUE,
+                                                      OBJECT_TYPE_CREATURE,
+                                                      AI_MAX_CREATURES_NEAREST,
+                                                      TRUE,   // Living
+                                                      TRUE,   // Perceived
+                                                      FALSE); // Not including self
+
+    // Filter distance - NOT EFFICIENT! - MOVE TO ENGINE!
+
+    // This includes also ability filter - if the action related to the condition for which we retrieve
+    // the list of allies/enemies is a duration ability then we will targeting creatures which already
+    // have the specified ability active
+
+    int i;
+    int nSize = GetArraySize(arEnemies);
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_GetEnemies", "Initial size: " + IntToString(nSize));
+    #endif
+
+    // check what distance to evalulate targets from main controlled
+    float fFollowerMaxEngageRange = AI_FOLLOWER_ENGAGE_DISTANCE_LONG;
+    if(IsFollower(OBJECT_SELF) &amp;&amp; AI_BehaviorCheck_ChaseEnemy() == FALSE)
+        fFollowerMaxEngageRange = AI_FOLLOWER_ENGAGE_DISTANCE_CLOSE;
+
+    object oCurrent;
+    float fDistance;
+    float fEnemyDistanceToMainControlled;
+    int j = 0;
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arEnemies[i];
+        fDistance = GetDistanceBetween(OBJECT_SELF, oCurrent);
+        if(IsFollower(OBJECT_SELF))
+        {
+            fEnemyDistanceToMainControlled = GetDistanceBetween(oCurrent, GetMainControlled());
+            if(fEnemyDistanceToMainControlled &gt; fFollowerMaxEngageRange)
+            {
+                // Filter only if trying melee attack or 0/touch range ability
+                if(nCommandType == AI_COMMAND_ATTACK &amp;&amp; IsUsingMeleeWeapon(OBJECT_SELF))
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_GetEnemies", "Stopping to evaluate enemies for MELEE ATTACK - too far from main controlled follower");
+                    #endif
+                }
+                else if(nCommandType == AI_COMMAND_USE_ABILITY &amp;&amp; GetM2DAInt(TABLE_ABILITIES_SPELLS, "Range", nCommandSubType) == 1)
+                {
+                    #ifdef DEBUG
+                    Log_Trace_AI("_AI_GetEnemies", "Stopping to evaluate enemies for TOUCH RANGE ABILITY - too far from main controlled follower");
+                    #endif
+                }
+
+                break;
+            }
+        }
+
+        // certain creatures may be filtered out if they have the abiliy active
+        if(nCommandType == AI_COMMAND_USE_ABILITY)
+        {
+            if(Ability_IsAbilityActive(oCurrent, nCommandSubType))
+                continue; // just ignore the creature
+        }
+        else if(Effects_HasAIModifier(oCurrent, AI_MODIFIER_IGNORE))
+            continue; // ignore this target
+        // Creature is valid to be a target - update final array:
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetEnemies", "Adding creature to list of enemies: [" + GetTag(oCurrent) + "]");
+        #endif
+        arEnemiesFinal[j] = oCurrent;
+        j++;
+    }
+
+    nSize = GetArraySize(arEnemiesFinal);
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_GetEnemies", "Final size: " + IntToString(nSize));
+    #endif
+
+    return arEnemiesFinal;
+}
+
+int _AI_HasStatLevel(object oCreature, int nStatType, int nStatLevel)
+{
+    float fCurrentStat;
+    float fMaxStat;
+    int nCurrentStatLevel;
+    int nRet = FALSE;
+
+    switch(nStatType)
+    {
+        case AI_STAT_TYPE_HP:
+        {
+            fCurrentStat = GetCurrentHealth(oCreature);
+            fMaxStat = GetMaxHealth(oCreature);
+            break;
+        }
+        case AI_STAT_TYPE_MANA_OR_STAMINA:
+        {
+            fCurrentStat = GetCreatureProperty(oCreature, PROPERTY_DEPLETABLE_MANA_STAMINA, PROPERTY_VALUE_CURRENT);
+            fMaxStat = GetCreatureProperty(oCreature, PROPERTY_DEPLETABLE_MANA_STAMINA, PROPERTY_VALUE_TOTAL);
+
+            if(fMaxStat &lt;= 0.0)
+            {
+                #ifdef DEBUG
+                Log_Trace_AI("_AI_HasStatLevel", "ERRRO! bad value for max stamina or mana: " + FloatToString(fMaxStat));
+                #endif
+                return FALSE;
+            }
+            break;
+        }
+    }
+
+
+    // Determine what type of stat we are dealing with
+    nCurrentStatLevel = FloatToInt(fCurrentStat / fMaxStat * 100);
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_HasStatLevel", "Creature: " + GetTag(oCreature) + ", MAX: " + FloatToString(fMaxStat) +
+        ", Current: " + FloatToString(fCurrentStat));
+    #endif
+
+    if(nStatLevel &gt; 0) // For example: creature &gt;= 50%
+    {
+        if(nCurrentStatLevel &gt;= nStatLevel)
+        nRet = TRUE;
+    }
+    else // For example: creature &lt; 50% - use absolute value of function parameter
+    {
+        if(nCurrentStatLevel &lt; abs(nStatLevel))
+        nRet = TRUE;
+    }
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_HasStatLevel", "Creature: " + GetTag(oCreature) + ", Current: " + IntToString(nCurrentStatLevel) +
+        ", Required: " + IntToString(nStatLevel) + ", return: " + IntToString(nRet));
+    #endif
+
+    return nRet;
+
+}
+
+object _AI_GetNthDamagedCreatureInArray(object [] arCreatures, int nHighLow)
+{
+    // NOTE: this function actually returns the creature with highest or lower hp
+    int nSize = GetArraySize(arCreatures);
+    object oMostDamagedCreature = OBJECT_INVALID;
+    object oCurrent;
+    int i;
+    float fCurrentHP;
+    float fLowestHP = -1.0;
+    float fHighestHP = 0.0;
+    object oLowestHealthCreature;
+    object oHighestHealthCreature;
+
+
+    if(nHighLow != 0 &amp;&amp; nHighLow != 1)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetNthDamagedCreatureInArray (=&gt; get creature with highest or lowest health)",
+            "ERROR! wrong value", LOG_SEVERITY_WARNING);
+        #endif
+
+        return OBJECT_INVALID;
+    }
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        oCurrent = arCreatures[i];
+        fCurrentHP = GetCurrentHealth(oCurrent);
+        if(fCurrentHP &lt; fLowestHP || fLowestHP == -1.0)
+        {
+            fLowestHP = fCurrentHP;
+            oLowestHealthCreature = oCurrent;
+        }
+        if(fCurrentHP &gt; fHighestHP)
+        {
+            fHighestHP = fCurrentHP;
+            oHighestHealthCreature = oCurrent;
+        }
+    }
+
+    if(nHighLow == 0) // =&gt; return lowest health
+        return oLowestHealthCreature;
+    else // 1 =&gt; return highest health
+        return oHighestHealthCreature;
+}
+
+object _AI_GetTargetOverride()
+{
+    object oTarget = OBJECT_INVALID;
+    object oTargetOverride = GetLocalObject(OBJECT_SELF, AI_TARGET_OVERRIDE); // if overriden by UT_CombatStart
+    int nTargetOverrideCount = GetLocalInt(OBJECT_SELF, AI_TARGET_OVERRIDE_DUR_COUNT); // how long was overriden
+
+    if(!IsObjectValid(oTargetOverride) || IsDead(oTargetOverride))
+    {
+        SetLocalInt(OBJECT_SELF, AI_TARGET_OVERRIDE_DUR_COUNT, 0);
+        SetLocalObject(OBJECT_SELF, AI_TARGET_OVERRIDE, OBJECT_INVALID);
+        return OBJECT_INVALID;
+    }
+
+    if(nTargetOverrideCount &lt; AI_TARGET_OVERRIDE_DURATION)
+    {
+        // Has override target and override duration is still valid -&gt; use override target
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetTargetOverride", "Using target override: " + GetTag(oTargetOverride));
+        #endif
+        oTarget = oTargetOverride;
+        // Increase counter, only if not permanent
+        if(nTargetOverrideCount != -1)
+        {
+            nTargetOverrideCount++;
+            SetLocalInt(OBJECT_SELF, AI_TARGET_OVERRIDE_DUR_COUNT, nTargetOverrideCount);
+        }
+    }
+    else if(nTargetOverrideCount &gt;= AI_TARGET_OVERRIDE_DURATION)
+    {
+        Log_Trace_AI("_AI_GetTargetOverride", "Stopping target override (timed out) - will try to pick new target. Override target: " + GetTag(oTargetOverride));
+        SetLocalInt(OBJECT_SELF, AI_TARGET_OVERRIDE_DUR_COUNT, 0);
+        SetLocalObject(OBJECT_SELF, AI_TARGET_OVERRIDE, OBJECT_INVALID);
+    }
+
+    return oTarget;
+}
+
+float _AI_GetRangeFromID(int nRangeID)
+{
+    float fRet = 0.0;
+    switch(nRangeID)
+    {
+        case AI_RANGE_ID_SHORT: fRet = AI_RANGE_SHORT; break;
+        case AI_RANGE_ID_MEDIUM: fRet = AI_RANGE_MEDIUM; break;
+        case AI_RANGE_ID_LONG: fRet = AI_RANGE_LONG; break;
+    }
+    return fRet;
+}
+
+int _AI_HasAnyBuffEffect(object oCreature)
+{
+    effect [] arEffects = GetEffects(oCreature);
+    int nSize = GetArraySize(arEffects);
+    int i;
+    effect eCurrent;
+    int nEffectAbility;
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_HasAnyBuffEffect", "START, number of effects: " + IntToString(nSize));
+    #endif
+
+    for(i = 0; i &lt; nSize; i++)
+    {
+        eCurrent = arEffects[i];
+        nEffectAbility = GetEffectAbilityID(eCurrent);
+        if(GetM2DAInt(TABLE_AI_ABILITY_COND, "MagicalBuff", nEffectAbility) == 1)
+        {
+            #ifdef DEBUG
+            Log_Trace_AI("_AI_HasAnyBuffEffect", "Creature has buff ability applied: " + Log_GetAbilityNameById(nEffectAbility));
+            #endif
+            return TRUE;
+
+        }
+
+    }
+    return FALSE;
+}
+
+int _AI_GetArmorType(object oCreature)
+{
+    int nArmorType = AI_ARMOR_TYPE_INVALID;
+
+    // Trying to find if humanoid
+    object oArmor;
+    int nBaseItemType;
+
+    oArmor = GetItemInEquipSlot(INVENTORY_SLOT_CHEST, oCreature);
+    if(!IsObjectValid(oArmor))
+        nArmorType = AI_ARMOR_TYPE_LOW;
+    else
+    {
+        nBaseItemType = GetBaseItemType(oArmor);
+        switch(nBaseItemType)
+        {
+            case BASE_ITEM_TYPE_ARMOR_LIGHT:
+            {
+                nArmorType = AI_ARMOR_TYPE_LOW;
+                break;
+            }
+            case BASE_ITEM_TYPE_ARMOR_MEDIUM:
+            {
+                nArmorType = AI_ARMOR_TYPE_MEDIUM;
+                break;
+            }
+            case BASE_ITEM_TYPE_ARMOR_HEAVY:
+            case BASE_ITEM_TYPE_ARMOR_MASSIVE:
+            case BASE_ITEM_TYPE_ARMOR_SUPERMASSIVE:
+            {
+                nArmorType = AI_ARMOR_TYPE_HIGH;
+                break;
+            }
+        }
+    }
+
+    return nArmorType;
+}
+
+int _AI_GetAttackType(object oCreature)
+{
+    int nRet = AI_ATTACK_TYPE_INVALID;
+
+    int nItemType = -1;
+    int nHasAIStatusCantAttack = _AI_HasAIStatus(oCreature, AI_STATUS_CANT_ATTACK);
+
+    #ifdef DEBUG
+    Log_Trace_AI("_AI_GetAttackType", "creature core class: " + IntToString(GetCreatureCoreClass(oCreature)));
+    Log_Trace_AI("_AI_GetAttackType", "IsMelee: " + IntToString(IsUsingMeleeWeapon(oCreature)));
+    Log_Trace_AI("_AI_GetAttackType", "IsRanged: " + IntToString(IsUsingRangedWeapon(oCreature)));
+    #endif
+
+    // Removed the commandtype conditions so AI can detect the player as melee/range even before he started attacking
+
+    if(!nHasAIStatusCantAttack &amp;&amp;
+        (GetCreatureCoreClass(oCreature) == CLASS_WIZARD || GetCreatureCoreClass(oCreature) == 25)) // not a perfect check but covers 99% of the cases. Good enough.
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetAttackType", "MAGIC attack type for: " + GetTag(oCreature));
+        #endif
+        nRet = AI_ATTACK_TYPE_MAGIC;
+    }
+    else if(IsUsingRangedWeapon(oCreature) &amp;&amp; !nHasAIStatusCantAttack)
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetAttackType", "RANGED attack type for: " + GetTag(oCreature));
+        #endif
+        nRet = AI_ATTACK_TYPE_RANGED;
+    }
+    else if(!nHasAIStatusCantAttack)// melee
+    {
+        #ifdef DEBUG
+        Log_Trace_AI("_AI_GetAttackType", "MELEE attack type for: " + GetTag(oCreature));
+        #endif
+        nRet = AI_ATTACK_TYPE_MELEE;
+    }
+
+    return nRet;
+}
+
+int _AI_IsTargetValidForBeneficialAbility(object oCreature, int nAbilityID)
+{
+    int nRet = TRUE;
+    float fMaxHealth = GetMaxHealth(oCreature);
+    float fCurrentHealth = GetCurrentHealth(oCreature);
+    int nDebuf = GetM2DAInt(TABLE_AI_ABILITY_COND, "MagicalDebuf", nAbilityID);
+
+    //Log_Trace_AI("_AI_IsTargetValidForBeneficialAbility", "Creature: " + GetTag(oCreature) + ", current health: " + FloatToString(fCurrentHealth) +
+    //    ", max health: " + FloatToString(fMaxHealth));
+
+    int nWounded = fCurrentHealth &lt; fMaxHealth ? TRUE:FALSE;
+
+    //Log_Trace_AI("_AI_IsTargetValidForBeneficialAbility", "Wounded: " + IntToString(nWounded));
+
+    switch(nAbilityID)
+    {
+        case ARCHDEMON_DETONATE_DARKSPAWN:
+        {
+            if(GetCreatureRank(oCreature) == CREATURE_RANK_LIEUTENANT || GetCreatureRank(oCreature) == CREATURE_RANK_BOSS)
+            {
+                nRet = FALSE;
+                break;
+            }
+            // Special case... a darkspawn is 'valid' if he has some enemies near him
+            object [] arEnemies = GetNearestObjectByHostility(oCreature, TRUE, OBJECT_TYPE_CREATURE, 5, TRUE, FALSE, FALSE);
+            int i;
+            int nSize = GetArraySize(arEnemies);
+            //Log_Trace_AI("_AI_IsTargetValidForBeneficialAbility", "array size: " + IntToString(nSize));
+
+            object oCurrent;
+            float fDistance;
+            nRet = FALSE;
+            for(i = 0; i &lt; nSize; i++)
+            {
+                oCurrent = arEnemies[i];
+                fDistance = GetDistanceBetween(oCurrent, oCreature);
+                if(fDistance &lt;= ARCHDEMON_DETONATE_RADIUS)
+                {
+                    //Log_Trace_AI("_AI_IsTargetValidForBeneficialAbility", "Got enemy near detonate darkspawn: " + GetTag(oCurrent));
+                    nRet = TRUE;
+                    break;
+                }
+            }
+            break;
+        }
+        case ABILITY_SPELL_HEAL:
+        {
+            if(nWounded)
+                nRet = TRUE;
+            else
+                nRet = FALSE;
+            break;
+        }
+        case ABILITY_SPELL_CURE:
+        {
+            nRet = TRUE;
+            // valid if mana/stamina is not maxed
+
+            float fCurrentManaStamina = GetCreatureProperty(oCreature, PROPERTY_DEPLETABLE_MANA_STAMINA, PROPERTY_VALUE_CURRENT);
+            float fMaxManaStamina = GetCreatureProperty(oCreature, PROPERTY_DEPLETABLE_MANA_STAMINA, PROPERTY_VALUE_BASE);
+            if(fCurrentManaStamina == fMaxManaStamina)
+                nRet = FALSE;
+
+            break;
+        }
+        case ABILITY_SPELL_PURIFY:
+        {
+            // check wounds
+            if(nWounded)
+                nRet = TRUE;
+            else
+                nRet = FALSE;
+
+            // .. and curable effects
+            effect[] eEffects = GetEffects(oCreature);
+            int nAbility;
+
+            // cycle through effects
+            int nCount = 0;
+            int nMax = GetArraySize(eEffects);
+            for (nCount = 0; nCount &lt; nMax; nCount++)
+            {
+                // get effect ability id
+                nAbility = GetEffectAbilityID(eEffects[nCount]);
+
+                // is ability curable
+                if (Ability_CheckFlag(nAbility, ABILITY_FLAG_CURABLE) == TRUE)
+                {
+                    nRet = TRUE;
+                    break;
+                }
+            }
+            break;
+        }
+        case ABILITY_SPELL_SHIELD_PARTY: // dispel magic
+        case ABILITY_SPELL_ANTIMAGIC_BURST:
+        {
+            if(nDebuf)
+                nRet = TRUE;
+            else
+                nRet = FALSE;
+
+            break;
+        }
+    }
+    return nRet;
+}
+
+object _AI_GetPartyTarget(int nTargetType, int nCommandType, int nCommandSubType, int nTacticID)
+{
+    object oTarget = OBJECT_INVALID;
+
+    object oTacticTargetObject = GetTacticTargetObject(OBJECT_SELF, nTacticID);
+
+    if(nTargetType == AI_TARGE_TYPE_HERO)
+        oTarget = GetHero();
+    else if(nTargetType == AI_TARGET_TYPE_MAIN_CONTROLLED)
+        oTarget = GetMainControlled();
+    else
+        oTarget = oTacticTargetObject;
+
+    if(IsObjectValid(oTarget) &amp;&amp; nCommandType == AI_COMMAND_USE_ABILITY &amp;&amp; Ability_IsAbilityActive(oTarget, nCommandSubType))
+        oTarget = OBJECT_INVALID;
+
+    return oTarget;
+}
+
+int _AI_IsHostileTargetValid(object oTarget)
+{
+    int nRet = TRUE;
+    #ifdef DEBUG
+    string DEBUG_sInvalidReason = "";
+    #endif
+
+    if(!IsObjectValid(oTarget))
+    {
+        #ifdef DEBUG
+        DEBUG_sInvalidReason = "INVALID OBJECT";
+        #endif
+        nRet = FALSE;
+    }
+    else if(IsDead(oTarget))
+    {
+        #ifdef DEBUG
+        DEBUG_sInvalidReason = "DEAD";
+        #endif
+        nRet = FALSE;
+    }
+    else if(IsDying(oTarget))
+    {
+        #ifdef DEBUG
+        DEBUG_sInvalidReason = "DYING";
+        #endif
+        nRet = FALSE;
+    }
+    else if(!GetObjectActive(oTarget))
+    {
+        #ifdef DEBUG
+        DEBUG_sInvalidReason = "TARGET INACTIVE";
+        #endif
+        nRet = FALSE;
+    }
+    else if(!IsObjectHostile(OBJECT_SELF, oTarget))
+    {
+        #ifdef DEBUG
+        DEBUG_sInvalidReason = "NOT HOSTILE";
+        #endif
+        nRet = FALSE;
+    }
+    else if(Effects_HasAIModifier(OBJECT_SELF, AI_MODIFIER_IGNORE))
+    {
+        #ifdef DEBUG
+        DEBUG_sInvalidReason = "AI IGNORE FLAG ACTIVE";
+        #endif
+        nRet = FALSE;
+    }
+    else if(!IsPerceiving(OBJECT_SELF, oTarget))
+    {
+        #ifdef DEBUG
+        DEBUG_sInvalidReason = "TARGET NOT PERCEIVED";
+        #endif
+        nRet = FALSE;
+    }
+    else if(IsStealthy(oTarget))
+    {
+        #ifdef DEBUG
+        DEBUG_sInvalidReason = "TARGET STEALTHY";
+        #endif
+        nRet = FALSE;
+    }
+
+    #ifdef DEBUG
+    if(nRet == FALSE)
+    {
+        Log_Trace_AI("_AI_IsHostileTargetValid", "Target invalid: " + DEBUG_sInvalidReason);
+    }
+    #endif
+
+    return nRet;
+}</text>
+	</Agent>
+</Resource>

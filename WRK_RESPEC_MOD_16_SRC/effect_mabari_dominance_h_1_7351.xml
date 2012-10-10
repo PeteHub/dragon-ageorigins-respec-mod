@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="7351" Folder="\_Game Effects\Effects\" ResRefName="effect_mabari_dominance_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_mabari_dominance_h.nss?moduleid=1&amp;resrefid=7351" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_mabari_dominance_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_mabari_dominance_h
+// -----------------------------------------------------------------------------
+/*
+*/
+// -----------------------------------------------------------------------------
+// Owner: PeterT
+// -----------------------------------------------------------------------------
+
+effect EffectMabariDominance();
+effect EffectMabariDominance()
+{
+    effect eEffect = Effect(EFFECT_TYPE_MABARI_DOMINANCE);
+    return eEffect;
+}
+
+const float MABARI_DOMINANCE_STRENGTH_BONUS = 2.0f;
+const float MABARI_DOMINANCE_CONSTITUTION_BONUS = 2.0f;
+const float MABARI_DOMINANCE_WILLPOWER_BONUS = 2.0f;
+int Effects_HandleApplyEffectMabariDominance(effect eEffect)
+{
+    // add buff
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_STRENGTH, MABARI_DOMINANCE_STRENGTH_BONUS, PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_CONSTITUTION, MABARI_DOMINANCE_CONSTITUTION_BONUS, PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_WILLPOWER, MABARI_DOMINANCE_WILLPOWER_BONUS, PROPERTY_VALUE_MODIFIER);
+
+    return   TRUE;
+}
+
+int Effects_HandleRemoveEffectMabariDominance(effect eEffect)
+{
+    // remove buff
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_STRENGTH, MABARI_DOMINANCE_STRENGTH_BONUS * -1.0f, PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_CONSTITUTION, MABARI_DOMINANCE_CONSTITUTION_BONUS * -1.0f, PROPERTY_VALUE_MODIFIER);
+    UpdateCreatureProperty(OBJECT_SELF, PROPERTY_ATTRIBUTE_WILLPOWER, MABARI_DOMINANCE_WILLPOWER_BONUS * -1.0f, PROPERTY_VALUE_MODIFIER);
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

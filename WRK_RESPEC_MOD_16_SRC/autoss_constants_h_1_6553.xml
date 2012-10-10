@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="6553" Folder="\_Core Includes\" ResRefName="autoss_constants_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\autoss_constants_h.nss?moduleid=1&amp;resrefid=6553" Requested="0">
+	<Agent type="empty">
+		<ResRefName>autoss_constants_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//::///////////////////////////////////////////////
+//:: Autoscreenshot constants
+//:://////////////////////////////////////////////
+//
+// These are the constants for the automatic
+// screenshot system.
+//
+//:://////////////////////////////////////////////
+//:: Created By: Ian Morrison
+//:: Created On: Jan. 28th, 2009
+//:://////////////////////////////////////////////
+
+//2DA column references
+const string AUTOSS_2DA_TITLE = "titlestrref";
+const string AUTOSS_2DA_DESC = "descstrref";
+const string AUTOSS_2DA_SSID = "screenshotID";
+const string AUTOSS_2DA_PRIORITY = "priority";
+const string AUTOSS_2DA_OVERRIDE = "override";
+
+//Constant for the screenshot type
+const int AUTOSS_SCREENSHOT_STORY_HIGH_PRIORITY = 2;
+const int AUTOSS_SCREENSHOT_STORY_LOW_PRIORITY = 0;
+
+//Constants for screenshot priority
+const int AUTOSS_PRIORITY_DISABLED = 0;
+const int AUTOSS_PRIORITY_PRIMARY = 1;
+const int AUTOSS_PRIORITY_SECONDARY = 2;
+const int AUTOSS_PRIORITY_TERTIARY = 3;
+const int AUTOSS_PRIORITY_TOTAL_FLUFF = 4;
+
+const int AUTOSS_PRIORITY_CUTOFF = 1; //Set the threshhold</text>
+	</Agent>
+</Resource>

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="1854" Folder="\_Core Includes\" ResRefName="ai_ballista_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\ai_ballista_h.nss?moduleid=1&amp;resrefid=1854" Requested="0">
+	<Agent type="empty">
+		<ResRefName>ai_ballista_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>#include "ai_constants_h"
+#include "log_h"
+#include "utility_h"
+#include "ai_conditions_h"
+
+/**
+ * @brief Has the subject move to the nearest ballista.
+ *
+ * Finds the nearest ballista, clears the subject's actions and moves them
+ * to the ballista. Sets the custom AI to the next succesive action, in this
+ * case using the ballista.
+ *
+ * @author Grant Mackay
+ */
+void AI_Ballista_MoveToBallista();
+
+
+/**
+ * @brief Has the subject use the nearest ballista.
+ *
+ * Finds the nearest ballista, clears the subject's action queue and has
+ * them use the ballista. Sets the custom AI to the next succesive action, in
+ * this case waiting for the ballista to be available for usage again or
+ * alternately deactivating custom AI if enemies are drawing near.
+ *
+ * @author Grant Mackay
+ */
+void AI_Ballista_UseBallista();
+
+/**
+ * @brief Has the subject wait until the ballista has fired before using it.
+ *
+ * Queues a wait command on the creature and sets the Custom AI to use the
+ * ballista on the next command.
+ *
+ * @author Grant Mackay
+ */
+void AI_Ballista_WaitForBallista();
+
+                                 
+// fire the thing
+void  AI_Ballista_FireBallista();
+
+ /**
+ * @brief Clears the in-use flag of a ballista the creature might be using.
+ *
+ * Checks to see if the creature has flagged a Ballista for use and, if so,
+ * un-flags the Ballista.
+ *
+ * @author Grant Mackay
+ */
+void AI_Ballista_HandleDeath();
+
+/**
+ * @brief Handles custom AI for a ballista using creature.
+ *
+ * Determines which custom AI action should be taken fromt he creature's local
+ * custom AI variables and attempts to execute the appropriate action. Sets
+ * the creature's AI variable to the next sequential action or clears it.
+ *
+ * @author Grant Mackay
+ */
+
+
+int AI_Ballista_HandleAI()
+{
+    int nBallistaAIStatus = GetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS);
+
+    Log_Trace_AI("AI_Ballista_HandleAI", "Ballista AI value: " + IntToString(nBallistaAIStatus));
+
+    // abort AI if enemies are within melee range
+    object [] arEnemies = _AI_GetEnemies(-1, -1);
+    object oNearestEnemy = arEnemies[0];
+    float fDistance = GetDistanceBetween(OBJECT_SELF, oNearestEnemy);
+    if(IsObjectValid(oNearestEnemy) &amp;&amp; fDistance &lt;= AI_MELEE_RANGE)
+    {
+        Log_Trace_AI("AI_Ballista_HandleAI", "Got enemy in melee ranged - aborting ballista AI");
+        return FALSE;
+    }
+
+    // First, try to find a ballista if one is nearby
+    if(nBallistaAIStatus == AI_BALLISTA_SHOOTER_STATUS_AVAILABLE)
+    {
+        object oBallista = UT_GetNearestObjectByTag(OBJECT_SELF, AI_BALLISTA_TAG);
+        if(!IsObjectValid(oBallista) || IsDead(oBallista))
+        {
+            Log_Trace_AI("AI_Ballista_HandleAI", "Could not find a valid and non-destroyed ballista - aborting ballista AI");
+            SetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS, AI_BALLISTA_SHOOTER_STATUS_AVAILABLE);
+            return FALSE;
+        }
+        float fDistance = GetDistanceBetween(oBallista, OBJECT_SELF);
+        if (GetLocalInt(oBallista, PLC_COUNTER_1) == 0 &amp;&amp; fDistance &lt;= AI_BALLISTA_MAX_USE_DISTANCE)
+        {
+            Log_Trace_AI("AI_Ballista_HandleAI", "Assigning creature to ballista: " + GetTag(oBallista));
+            // Flag the ballista as in use.
+            SetLocalInt(oBallista, PLC_COUNTER_1, TRUE);
+            SetLocalObject(OBJECT_SELF, AI_PLACEABLE_BEING_USED, oBallista);
+            SetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS, AI_BALLISTA_SHOOTER_STATUS_MOVE_TO_BALLISTA);
+            nBallistaAIStatus = AI_BALLISTA_SHOOTER_STATUS_MOVE_TO_BALLISTA;
+        }
+        else // balista is in use or too far away
+        {
+            Log_Trace_AI("AI_Ballista_HandleAI", "Could not find a ballista - reverting to normal AI for 1 round");
+            return FALSE;
+        }
+    }
+
+
+    // found a ballista - do something with it
+    object oCurrentBallista = GetLocalObject(OBJECT_SELF, AI_PLACEABLE_BEING_USED);
+    if(!IsObjectValid(oCurrentBallista) || IsDead(oCurrentBallista))
+    {
+        Log_Trace_AI("AI_Ballista_HandleAI", "INVALID OR DEAD BALLISTA OBJECT - aborting ballista AI");
+        SetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS, AI_BALLISTA_SHOOTER_STATUS_AVAILABLE);
+        return FALSE;
+    }
+
+    switch (nBallistaAIStatus)
+    {
+        case AI_BALLISTA_SHOOTER_STATUS_MOVE_TO_BALLISTA:
+        {
+            AI_Ballista_MoveToBallista();
+            break;
+        }
+        // Use the ballista.
+        case AI_BALLISTA_SHOOTER_STATUS_USE_BALLISTA:
+        {
+            AI_Ballista_UseBallista();
+            break;
+        } 
+        // Fire the ballista (user animation)
+        case AI_BALLISTA_SHOOTER_STATUS_FIRE:
+        {  
+            AI_Ballista_FireBallista();
+            break;
+        }
+        // Waiting for reload.
+        case AI_BALLISTA_SHOOTER_STATUS_WAIT_FOR_BALLISTA:
+        {
+            AI_Ballista_WaitForBallista();
+            break;
+        }
+        // Reset the custom AI variable.
+        default:
+        {
+            SetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS, AI_BALLISTA_SHOOTER_STATUS_INACTIVE);
+            return FALSE;
+         }
+    }
+    return TRUE;
+}
+
+void AI_Ballista_MoveToBallista()
+{
+    Log_Trace_AI("AI_Ballista_MoveToBallista", "START");
+    object oBallista = GetLocalObject(OBJECT_SELF, AI_PLACEABLE_BEING_USED);
+
+    command cMove = CommandMoveToObject(oBallista, TRUE, 1.5);
+    WR_AddCommand(OBJECT_SELF, cMove);
+    SetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS, AI_BALLISTA_SHOOTER_STATUS_FIRE);
+}
+
+void AI_Ballista_UseBallista()
+{
+    Log_Trace_AI("AI_Ballista_UseBallista", "START");
+    object oBallista = GetLocalObject(OBJECT_SELF, AI_PLACEABLE_BEING_USED);
+
+    // Use the ballista 
+    command cUse = CommandUseObject(oBallista, PLACEABLE_ACTION_USE);
+    WR_AddCommand(OBJECT_SELF, cUse);
+    
+    SetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS, AI_BALLISTA_SHOOTER_STATUS_WAIT_FOR_BALLISTA);
+}
+
+void AI_Ballista_WaitForBallista()
+{
+    Log_Trace_AI("AI_Ballista_WaitForBallista", "START");
+    command cReload = CommandWait(2.5); // should be a re-load animation of some sort
+    //command cReload = CommandPlayAnimation(259);
+
+    WR_AddCommand(OBJECT_SELF, cReload);
+
+    SetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS, AI_BALLISTA_SHOOTER_STATUS_FIRE);
+}  
+
+void AI_Ballista_FireBallista()
+{   
+    Log_Trace_AI("AI_Ballista_FireBallista", "START");  
+    
+    command cFire = CommandPlayAnimation(107);
+    WR_AddCommand(OBJECT_SELF, cFire);   
+    SetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS, AI_BALLISTA_SHOOTER_STATUS_USE_BALLISTA);
+}
+
+void AI_Ballista_HandleDeath()
+{
+    int nBallistaAI = GetLocalInt(OBJECT_SELF, AI_BALLISTA_SHOOTER_STATUS);
+    // Using or about to use a ballista.
+    if (nBallistaAI)
+    {
+        object oBallista = GetLocalObject(OBJECT_SELF, AI_PLACEABLE_BEING_USED);
+        SetLocalObject(OBJECT_SELF, AI_PLACEABLE_BEING_USED, OBJECT_INVALID);
+
+        // Clear the ballista's 'in-use' flag.
+        SetLocalInt(oBallista, PLC_COUNTER_1, 0);
+    }
+}</text>
+	</Agent>
+</Resource>

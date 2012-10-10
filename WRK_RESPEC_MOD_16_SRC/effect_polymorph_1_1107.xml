@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="1107" Folder="\_Game Effects\Effects\" ResRefName="effect_polymorph" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_polymorph.nss?moduleid=1&amp;resrefid=1107" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_polymorph</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------------------------------------------------------------------------------
+// effect_Shapechange_h
+// -----------------------------------------------------------------------------
+/*
+    Effect: Shapechange
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "effect_constants_h"
+#include "effect_death_h"
+#include "2da_data_h"
+#include "wrappers_h"
+#include "effect_upkeep_h"
+
+
+
+
+effect EffectShapechange(int nType, object oTarget);
+effect EffectShapechange(int nType, object oTarget)
+{
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Shapechange create effect");
+
+    effect eEffect  = Effect(EFFECT_TYPE_SHAPECHANGE);
+
+
+    int nShape = 0;
+     int bMaster = HasAbility(oTarget, ABILITY_SPELL_SHAPESHIFTER);
+
+    if (bMaster)
+    {
+        nShape = GetM2DAInt(TABLE_SHAPECHANGE, "UpgradeApr", nType);
+    }
+    else
+    {
+        nShape = GetM2DAInt(TABLE_SHAPECHANGE, "Appearance", nType);
+    }
+
+    int bPlotShape = GetM2DAInt(TABLE_SHAPECHANGE, "IsPlotShape", nType);
+
+    int    nAbi1    = GetM2DAInt(TABLE_SHAPECHANGE,"Abi1", nType)     ;
+    int    nAbi2    = GetM2DAInt(TABLE_SHAPECHANGE,"Abi2", nType)     ;
+    int    nAbi3    = GetM2DAInt(TABLE_SHAPECHANGE,"Abi3", nType)     ;
+    int    nAbi4    = GetM2DAInt(TABLE_SHAPECHANGE,"PassiveTalent", nType)     ;
+    int    nAbi5    = GetM2DAInt(TABLE_SHAPECHANGE,"PassiveTalent2", nType)     ;
+    int    nCrust   = GetM2DAInt(TABLE_SHAPECHANGE,"Crust", nType)     ;
+
+
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi1 = " + ToString(nAbi1));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi2 = " + ToString(nAbi2));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi3 = " + ToString(nAbi3));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi4 = " + ToString(nAbi4));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi5 = " + ToString(nAbi5));
+
+    eEffect = SetEffectInteger(eEffect, 0, nShape);
+    eEffect = SetEffectInteger(eEffect, 1, nCrust);
+    eEffect = SetEffectEngineInteger(eEffect, EFFECT_INTEGER_VFX, nCrust);
+    int nAbiCount = 2;
+
+    // -------------------------------------------------------------------------
+    // Protect the player from losing abilities he already has...
+    // -------------------------------------------------------------------------
+
+    // if the shape has an ability
+    if (nAbi1 &gt; 0)
+    {
+        // if the player doesn't already have the ability
+        if (HasAbility(oTarget, nAbi1) == FALSE)
+        {
+            eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi1);
+        } else
+        {
+            // negative ability ID means the character already has it (for quickslotting)
+            eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi1 * -1);
+        }
+
+        nAbiCount++;
+    }
+
+    // if the shape has an ability
+    if (nAbi2 &gt; 0)
+    {
+        // if the player doesn't already have the ability
+        if (HasAbility(oTarget, nAbi2) == FALSE)
+        {
+            eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi2);
+        } else
+        {
+            // negative ability ID means the character already has it (for quickslotting)
+            eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi2 * -1);
+        }
+
+        nAbiCount++;
+    }
+
+    // if the shape has an ability
+    if (nAbi3 &gt; 0)
+    {
+        // ability 3 is limited to shape mastery and plot forms
+        if (bMaster || bPlotShape)
+        {
+            // if the player doesn't already have the ability
+            if (HasAbility(oTarget, nAbi3) == FALSE)
+            {
+                eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi3);
+            } else
+            {
+                // negative ability ID means the character already has it (for quickslotting)
+                eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi3 * -1);
+            }
+
+            nAbiCount++;
+        }
+    }
+
+    // if the shape has an ability
+    if (nAbi4 &gt; 0)
+    {
+        // if the player doesn't already have the ability
+        if (HasAbility(oTarget, nAbi4) == FALSE)
+        {
+            eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi4);
+        } else
+        {
+            // negative ability ID means the character already has it (for quickslotting)
+            eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi4 * -1);
+        }
+
+        nAbiCount++;
+    }
+
+    // if the shape has an ability
+    if (nAbi5 &gt; 0)
+    {
+        // if the player doesn't already have the ability
+        if (HasAbility(oTarget, nAbi5) == FALSE)
+        {
+            eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi5);
+        } else
+        {
+            // negative ability ID means the character already has it (for quickslotting)
+            eEffect = SetEffectInteger(eEffect, nAbiCount, nAbi5 * -1);
+        }
+
+        nAbiCount++;
+    }
+
+    return eEffect;
+}
+
+
+void _NotifyAreaOfShapeshift(int bShifted, int nShape)
+{
+     event eNotify = Event(EVENT_TYPE_CREATURE_SHAPESHIFTED);
+    eNotify = SetEventCreator(eNotify, OBJECT_SELF);
+    eNotify = SetEventInteger(eNotify,0, bShifted);
+    eNotify = SetEventInteger(eNotify,1, nShape);
+    DelayEvent(0.0f, GetArea(OBJECT_SELF),eNotify);
+}
+
+
+// -----------------------------------------------------------------------------
+// This utility function handles the application of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleApplyEffectShapechange(effect eEffect);
+int Effects_HandleApplyEffectShapechange(effect eEffect)
+{
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Shapechange apply effect");
+
+    int nShape = GetEffectInteger(eEffect,0);
+    int nCrust = GetEffectInteger(eEffect,1);
+    int nAbi1 = GetEffectInteger(eEffect,2);
+    int nAbi2 = GetEffectInteger(eEffect,3);
+    int nAbi3 = GetEffectInteger(eEffect,4);
+    int nAbi4 = GetEffectInteger(eEffect,5);
+    int nAbi5 = GetEffectInteger(eEffect,6);
+
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi1 = " + ToString(nAbi1));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi2 = " + ToString(nAbi2));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi3 = " + ToString(nAbi3));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi4 = " + ToString(nAbi4));
+    LogTrace(LOG_CHANNEL_COMBAT_ABILITY, "Abi5 = " + ToString(nAbi5));
+
+    SetAppearanceType(OBJECT_SELF, nShape);
+
+    // -------------------------------------------------------------------------
+    // Switch to a seperate quickbar
+    // -------------------------------------------------------------------------
+    SetQuickslotBar(OBJECT_SELF, 1);
+
+    // -------------------------------------------------------------------------
+    // Mapping the polymorph ability onto quickbar slot 0 to allow the player
+    // to actually deactivate it again...
+    // -------------------------------------------------------------------------
+    int nId = GetEffectAbilityID(eEffect);
+    SetQuickslot(OBJECT_SELF, 0, nId);
+
+    // reset quickbar
+    SetQuickslot(OBJECT_SELF, 1, 0);
+    SetQuickslot(OBJECT_SELF, 2, 0);
+    SetQuickslot(OBJECT_SELF, 3, 0);
+    SetQuickslot(OBJECT_SELF, 4, 0);
+    SetQuickslot(OBJECT_SELF, 5, 0);
+
+    // -------------------------------------------------------------------------
+    // Now map the creature abilities
+    // -------------------------------------------------------------------------
+    if (nAbi1)
+    {
+        if (nAbi1 &gt; 0)
+        {
+`           AddAbilityEx(OBJECT_SELF, nAbi1, 1);
+        } else
+        {
+            if (IsFollower(OBJECT_SELF))
+            {
+                SetQuickslot(OBJECT_SELF, 1, nAbi1 * -1);
+            }
+        }
+    }
+
+    if (nAbi2)
+    {
+        if (nAbi2 &gt; 0)
+        {
+`           AddAbilityEx(OBJECT_SELF, nAbi2, 2);
+        } else
+        {
+            if (IsFollower(OBJECT_SELF))
+            {
+                SetQuickslot(OBJECT_SELF, 2, nAbi2 * -1);
+            }
+        }
+    }
+
+    if (nAbi3)
+    {
+        if (nAbi3 &gt; 0)
+        {
+`           AddAbilityEx(OBJECT_SELF, nAbi3, 3);
+        } else
+        {
+            if (IsFollower(OBJECT_SELF))
+            {
+                SetQuickslot(OBJECT_SELF, 3, nAbi3 * -1);
+            }
+        }
+    }
+
+    if (nAbi4)
+    {
+        if (nAbi4 &gt; 0)
+        {
+`           AddAbilityEx(OBJECT_SELF, nAbi4, 4);
+        } else
+        {
+            if (IsFollower(OBJECT_SELF))
+            {
+                SetQuickslot(OBJECT_SELF, 4, nAbi4 * -1);
+            }
+        }
+    }
+
+    if (nAbi5)
+    {
+        if (nAbi5 &gt; 0)
+        {
+`           AddAbilityEx(OBJECT_SELF, nAbi5, 5);
+        } else
+        {
+            if (IsFollower(OBJECT_SELF))
+            {
+                SetQuickslot(OBJECT_SELF, 5, nAbi5 * -1);
+            }
+        }
+    }
+
+    switch (nId)
+    {
+        case ABILITY_SPELL_BEAR:
+        {
+            break;
+        }
+        case ABILITY_SPELL_SPIDER_SHAPE:
+        {
+            break;
+        }
+        case ABILITY_SPELL_FLYING_SWARM:
+        {
+            //Apply any effects that could not be handled via upkeep
+            //SetCreatureIsGhost(OBJECT_SELF, TRUE);
+
+            break;
+        }
+    }
+
+    _NotifyAreaOfShapeshift(TRUE,nShape);
+
+    return TRUE;
+}
+
+// -----------------------------------------------------------------------------
+// This utility function handles the removal of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleRemoveEffectShapechange(effect eEffect);
+int Effects_HandleRemoveEffectShapechange(effect eEffect)
+{
+
+    SetAppearanceType(OBJECT_SELF, -1);
+    int nShape = GetEffectInteger(eEffect,0);
+    int nAbi1 = GetEffectInteger(eEffect,2);
+    int nAbi2 = GetEffectInteger(eEffect,3);
+    int nAbi3 = GetEffectInteger(eEffect,4);
+    int nAbi4 = GetEffectInteger(eEffect,5);
+    int nAbi5 = GetEffectInteger(eEffect,6);
+
+
+
+    if (nAbi1 &gt; 0)
+`       RemoveAbility(OBJECT_SELF, nAbi1);
+
+    if (nAbi2 &gt; 0)
+`       RemoveAbility(OBJECT_SELF, nAbi2);
+
+    if (nAbi3 &gt; 0)
+`       RemoveAbility(OBJECT_SELF, nAbi3);
+
+    if (nAbi4 &gt; 0)
+`       RemoveAbility(OBJECT_SELF, nAbi4);
+
+    if (nAbi5 &gt; 0)
+`       RemoveAbility(OBJECT_SELF, nAbi5);
+
+    SetQuickslotBar(OBJECT_SELF, 0);
+
+    int nId = GetEffectAbilityID(eEffect);
+    switch (nId)
+    {
+        case ABILITY_SPELL_BEAR:
+        {
+            break;
+        }
+        case ABILITY_SPELL_SPIDER_SHAPE:
+        {
+            break;
+        }
+        case ABILITY_SPELL_FLYING_SWARM:
+        {
+            //Remove any effects that could not be handled via upkeep
+            //SetCreatureIsGhost(OBJECT_SELF, FALSE);
+            break;
+        }
+    }
+
+    _NotifyAreaOfShapeshift(FALSE,nShape);
+
+
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

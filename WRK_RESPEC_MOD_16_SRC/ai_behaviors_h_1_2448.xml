@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="2448" Folder="\_Core Includes\" ResRefName="ai_behaviors_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\ai_behaviors_h.nss?moduleid=1&amp;resrefid=2448" Requested="0">
+	<Agent type="empty">
+		<ResRefName>ai_behaviors_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>#include "ai_constants_h"
+#include "core_h"
+#include "2da_constants_h"
+
+int AI_BehaviorCheck(string sBehaviorType)
+{
+    int nBehavior = GetAIBehavior(OBJECT_SELF);
+    string sLabel = GetM2DAString(TABLE_AI_BEHAVIORS, "Label", nBehavior);
+    int nRet = GetM2DAInt(TABLE_AI_BEHAVIORS, sBehaviorType, nBehavior);
+    #ifdef DEBUG
+    Log_Trace_AI("AI_BehaviorCheck", "*" + sLabel + "* [" + sBehaviorType + "]: "+ IntToString(nRet));
+    #endif
+    return nRet;
+}
+
+int AI_BehaviorCheck_AvoidAOE()
+{
+    return AI_BehaviorCheck(AI_BEHAVIOR_AVOID_AOE);
+}
+
+int AI_BehaviorCheck_AttackBack()
+{
+    return AI_BehaviorCheck(AI_BEHAVIOR_ATTACK_BACK);
+}
+
+int AI_BehaviorCheck_ChaseEnemy()
+{
+    return AI_BehaviorCheck(AI_BEHAVIOR_CHASE_ENEMY);
+}
+
+int AI_BehaviorCheck_AttackOnCombatStart()
+{
+    return AI_BehaviorCheck(AI_BEHAVIOR_ATTACK_ON_COMBAT_START);
+}
+
+int AI_BehaviorCheck_PreferRange()
+{
+    return AI_BehaviorCheck(AI_BEHAVIOR_PREFER_RANGE);
+}
+
+int AI_BehaviorCheck_PreferMelee()
+{
+    return AI_BehaviorCheck(AI_BEHAVIOR_PREFER_MELEE);
+}
+
+int AI_BehaviorCheck_AvoidNearbyEnemies()
+{
+    return AI_BehaviorCheck(AI_BEHAVIOR_AVOID_NEARBY_ENEMIES);
+}
+
+int AI_BehaviorCheck_AvoidMelee()
+{
+    return AI_BehaviorCheck(AI_BEHAVIOR_AVOID_MELEE_ENEMIES);
+}
+
+int AI_BehaviorCheck_DefaultAttack()
+{
+    return AI_BehaviorCheck(AI_BEHAVIOR_DEFAULT_ATTACK);
+}</text>
+	</Agent>
+</Resource>

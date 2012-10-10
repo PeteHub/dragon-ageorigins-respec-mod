@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="1002" Folder="\_Game Effects\Effects\" ResRefName="effect_wbomb_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_wbomb_h.nss?moduleid=1&amp;resrefid=1002" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_wbomb_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------------------------------------------------------------------------------
+// effect_wbomb_h
+// -----------------------------------------------------------------------------
+/*
+    Effect: Walking Bomb
+
+*/
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+
+#include "log_h"
+#include "core_h"
+#include "effect_constants_h"
+#include "effect_damage_h"
+#include "2da_data_h"
+#include "effect_visualeffect_h"
+
+const int WALKING_BOMB_VFX = 90169;
+const float WALKING_BOMB_HEALTH_DEGENERATION = 15.0f;
+const float WALKING_BOMB_DAMAGE_START = 1.5f;
+const float WALKING_BOMB_DAMAGE_RADIUS = 5.0f;
+const float WALKING_BOMB_INFECTION_RADIUS = 3.0f;
+const float WALKING_BOMB_INFECTION_CHANCE = 0.5f;
+const float WALKING_BOMB_FRIENDLY_MODIFIER = 0.5f;
+const int WALKING_BOMB_INFECTION_LIMIT = 3;
+const string WALKING_BOMB_SCRIPT = "spell_singletarget";
+const float WALKING_BOMB_EVENT_DELAY = 0.1f;
+
+effect EffectWalkingBomb(object oOwner, int bVirulent = FALSE, float fDamage = 0.0f, int nVFX = 90169);
+effect EffectWalkingBomb(object oOwner, int bVirulent = FALSE, float fDamage = 0.0f, int nVFX = 90169)
+{
+    effect eEffect = Effect(EFFECT_TYPE_WALKING_BOMB);
+    eEffect = SetEffectObject(eEffect, 0, oOwner);
+    eEffect = SetEffectFloat(eEffect, 0, GetCreatureSpellPower(oOwner));
+    eEffect = SetEffectInteger(eEffect, 0, bVirulent);
+    eEffect = SetEffectFloat(eEffect, 1, fDamage);
+    eEffect = SetEffectInteger(eEffect, 1, nVFX);
+
+    return eEffect;
+}
+
+
+
+// -----------------------------------------------------------------------------
+// This utility function handles the application of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleApplyEffectWalkingBomb(effect eEffect);
+int Effects_HandleApplyEffectWalkingBomb(effect eEffect)
+{
+    return TRUE;
+}
+
+// -----------------------------------------------------------------------------
+// This utility function handles the removal of the effect and
+// should never be called directly except in Effects_h
+// -----------------------------------------------------------------------------
+int Effects_HandleRemoveEffectWalkingBomb(effect eEffect);
+int Effects_HandleRemoveEffectWalkingBomb(effect eEffect)
+{
+    LogTrace(LOG_CHANNEL_TEMP, "Removing walking bomb.");
+
+    // if this ability is being removed from a dying/dead creature
+    if ((IsDeadOrDying(OBJECT_SELF) == TRUE) || (GetHasEffects(OBJECT_SELF, EFFECT_TYPE_DEATH) == TRUE) || (GetCreatureFlag(OBJECT_SELF, CREATURE_RULES_FLAG_DYING) == TRUE))
+    {
+        LogTrace(LOG_CHANNEL_TEMP, "  Creature is dead or dying.");
+
+        float fDamage = GetEffectFloat(eEffect, 1);
+        int nVFX = GetEffectInteger(eEffect, 1);
+        effect eVFX = EffectVisualEffect(nVFX);
+//        ApplyEffectOnObject(EFFECT_DURATION_TYPE_INSTANT, eVFX, OBJECT_SELF, 0.0f, OBJECT_SELF, ABILITY_SPELL_WALKING_BOMB);
+        Engine_ApplyEffectAtLocation(EFFECT_DURATION_TYPE_INSTANT, EffectVisualEffect(nVFX), GetLocation(OBJECT_SELF), 0.0f, OBJECT_SELF, ABILITY_SPELL_WALKING_BOMB);
+
+        float  fSpellPower = GetEffectFloat(eEffect,0);
+        LogTrace(LOG_CHANNEL_TEMP, "    Initial Damage = " + ToString(fDamage));
+        LogTrace(LOG_CHANNEL_TEMP, "    SpellPower = " + ToString(fSpellPower));
+        if (fDamage == 0.0f)
+        {
+            fDamage = GetAutoScaleDataFloat(GetCreatureRank(OBJECT_SELF), AS_RANK_SCALE_FACTOR) * (fSpellPower / 2.0f);
+        }
+        LogTrace(LOG_CHANNEL_TEMP, "    Final Damage = " + ToString(fDamage));
+        object oCaster = GetEffectObject(eEffect,0);
+        int bViral = GetEffectInteger(eEffect, 0);
+
+        object [] oVictims = GetNearestObject(OBJECT_SELF, OBJECT_TYPE_CREATURE, 20, 1, 0, 0); //GetObjectsInShape(OBJECT_TYPE_CREATURE, SHAPE_SPHERE, GetLocation(OBJECT_SELF), WALKING_BOMB_DAMAGE_RADIUS);
+        int nSize = GetArraySize(oVictims);
+        LogTrace(LOG_CHANNEL_TEMP, "    Number of Victims = " + ToString(nSize));
+
+        int i;
+        object oVictim;
+
+        effect eViral = EffectWalkingBomb(oCaster, bViral, fDamage, nVFX);
+        int nAbilityId =  GetEffectAbilityID(eEffect);
+        float fDamageInst;
+        int bHostile;
+        float fDistance;
+        int nViral = 0;
+
+        // cycle through blast victims
+        for (i = 0; i &lt; nSize; i++)
+        {
+            oVictim = oVictims[i];
+            LogTrace(LOG_CHANNEL_TEMP, "      Victim " + ToString(i) + " " + GetTag(oVictim));
+
+            // not self
+            if (oVictim != OBJECT_SELF)
+            {
+                LogTrace(LOG_CHANNEL_TEMP, "        Not self.");
+
+                // if the victim is not also dead or dying
+                if ((IsDeadOrDying(oVictim) == FALSE) &amp;&amp; (GetHasEffects(oVictim, EFFECT_TYPE_DEATH) == FALSE) &amp;&amp; (GetCreatureFlag(oVictim, CREATURE_RULES_FLAG_DYING) == FALSE))
+                {
+                    LogTrace(LOG_CHANNEL_TEMP, "        Not dead or dying.");
+
+                    // if the caster still lives and is hostile
+                    if (IsDead(oCaster) == FALSE)
+                    {
+                        LogTrace(LOG_CHANNEL_TEMP, "        Caster living.");
+
+                        // get distance
+                        fDistance = GetDistanceBetween(OBJECT_SELF, oVictim);
+                        LogTrace(LOG_CHANNEL_TEMP, "        Distance = " + ToString(fDistance));
+
+                        // if within infection range
+                        if (fDistance &lt;= WALKING_BOMB_DAMAGE_RADIUS)
+                        {
+                            LogTrace(LOG_CHANNEL_TEMP, "        Within range.");
+
+                            bHostile = IsObjectHostile(oVictim, oCaster);
+                            if ((fDistance &lt;= WALKING_BOMB_INFECTION_RADIUS) &amp;&amp; (bHostile == TRUE))
+                            {
+                                LogTrace(LOG_CHANNEL_TEMP, "        Within infection range and hostile.");
+
+                                // if the target isn't already a walking bomb
+                                if (GetHasEffects(oVictim, EFFECT_TYPE_WALKING_BOMB, nAbilityId) == FALSE)
+                                {
+                                    LogTrace(LOG_CHANNEL_TEMP, "        No bomb effects.");
+
+                                    // if the current walking bomb is viral
+                                    if (bViral == TRUE)
+                                    {
+                                        LogTrace(LOG_CHANNEL_TEMP, "        Checking Viral.");
+
+                                        if ((RandomFloat() &lt; WALKING_BOMB_INFECTION_CHANCE) &amp;&amp; (nViral &lt; WALKING_BOMB_INFECTION_LIMIT))
+                                        {
+                                            LogTrace(LOG_CHANNEL_TEMP, "        Adding Viral " + ToString(nViral));
+                                            nViral++;
+
+                                            event ev = Event(EVENT_TYPE_SPELLSCRIPT_IMPACT);
+                                            ev = SetEventInteger(ev, 0, nAbilityId);
+                                            ev = SetEventObject(ev, 0, oCaster);
+                                            ev = SetEventObject(ev, 1, oVictim);
+
+                                            DelayEvent(WALKING_BOMB_EVENT_DELAY, oVictim, ev, WALKING_BOMB_SCRIPT);
+
+                                        }
+                                    }
+                                }
+                            }
+
+                            // if creature is hostile
+                            if (bHostile == TRUE)
+                            {
+                                LogTrace(LOG_CHANNEL_TEMP, "        Hostile.");
+
+                                fDamageInst = fDamage;
+                            } else
+                            {
+                                fDamageInst = fDamage * WALKING_BOMB_FRIENDLY_MODIFIER;
+                            }
+                            LogTrace(LOG_CHANNEL_TEMP, "        Instance Start Damage = " + ToString(fDamageInst));
+
+                            // modified by distance
+                            if (fDistance &gt; WALKING_BOMB_DAMAGE_START)
+                            {
+                                fDamageInst *= (1.0f - ((fDistance - WALKING_BOMB_DAMAGE_START) / (WALKING_BOMB_DAMAGE_RADIUS - WALKING_BOMB_DAMAGE_START)));
+                            }
+                            LogTrace(LOG_CHANNEL_TEMP, "        Instance Final Damage = " + ToString(fDamageInst));
+
+                            if (fDamageInst &gt; 0.0f)
+                            {
+                                Effects_ApplyInstantEffectDamage(oVictim, oCaster, fDamageInst, DAMAGE_TYPE_PHYSICAL, DAMAGE_EFFECT_FLAG_UPDATE_GORE, nAbilityId);
+                            }
+                        } else
+                        {
+                            i = nSize;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+
+
+void Effect_DoOnDeathExplosion(object oExploder, int bDamageFriendly = FALSE, float fRadius = 3.75, int nVfx = VFX_CRUST_WBOMB, int nDamageType = DAMAGE_TYPE_SPIRIT, float fScale=0.0f, float fDamageFactor = 0.075f)
+{
+    object [] oVictims = GetObjectsInShape(OBJECT_TYPE_CREATURE, SHAPE_SPHERE, GetLocation(oExploder),fRadius);
+    int nSize = GetArraySize(oVictims);
+    int i;
+    object oVictim;
+    float fDamage = (GetMaxHealth(oExploder) * fDamageFactor);
+    int bHostile;
+
+
+    effect eVFX =EffectVisualEffect(nVfx);
+    if (fScale &gt; 0.0f)
+    {
+        eVFX = SetEffectEngineFloat(eVFX,EFFECT_FLOAT_SCALE, fScale);
+    }
+    // Apply the VFX.
+    Engine_ApplyEffectAtLocation(EFFECT_DURATION_TYPE_INSTANT,eVFX , GetLocation(oExploder), 0.0f, oExploder);
+
+    for (i = 0; i &lt; nSize &amp;&amp; i &lt; 5 /*limit to 5 victims tops*/; i++)
+    {
+        oVictim = oVictims[i];
+         bHostile = IsObjectHostile(oVictim,oExploder);
+
+        if (bHostile || bDamageFriendly)
+        {
+            if (!IsDead(oVictim) &amp;&amp; !IsDying(oVictim))
+            {
+                   Effects_ApplyInstantEffectDamage(oVictim, oExploder ,fDamage, nDamageType, DAMAGE_EFFECT_FLAG_UPDATE_GORE, 0);
+            }
+        }
+    }
+
+
+
+}</text>
+	</Agent>
+</Resource>

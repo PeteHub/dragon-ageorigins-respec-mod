@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="27" Folder="\_Core Includes\" ResRefName="global_objects_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\global_objects_h.nss?moduleid=1&amp;resrefid=27" Requested="0">
+	<Agent type="empty">
+		<ResRefName>global_objects_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// This include file defines global objects used all through the game
+
+
+/*******************************************************************************
+* CORE RESOURCES
+*******************************************************************************/
+
+const resource RESOURCE_SCRIPT_RULES_CORE = R"rules_core.ncs";
+const resource RESOURCE_SCRIPT_ABILITY_CORE = R"ability_core.ncs";
+const resource RESOURCE_SCRIPT_CREATURE_CORE = R"creature_core.ncs";
+const resource RESOURCE_SCRIPT_PLAYER_CORE = R"player_core.ncs";
+const resource RESOURCE_SCRIPT_AOE_CORE = R"aoe_core.ncs";
+const resource RESOURCE_SCRIPT_AREA_CORE = R"area_core.ncs";
+const resource RESOURCE_SCRIPT_MODULE_CORE = R"module_core.ncs";
+const resource RESOURCE_SCRIPT_PLACEABLE_CORE = R"placeable_core.ncs";
+const resource RESOURCE_SCRIPT_TRIGGER_CORE = R"trigger_core.ncs";
+const resource RESOURCE_SCRIPT_TRAP_STATUE = R"trap_statue.ncs";
+const resource RESOURCE_SCRIPT_MODULE_CORE_START = R"sp_module_start.ncs";
+const resource RESOURCE_SCRIPT_MODULE_CORE_TRAVEL = R"sp_module_travel.ncs";
+const resource RESOURCE_SCRIPT_MODULE_ITEM_ACQUIRED = R"sp_module_item_acq.ncs";
+const resource RESOURCE_SCRIPT_MODULE_ITEM_LOST     = R"sp_module_item_lost.ncs";
+const resource RESOURCE_SCRIPT_MODULE_SET_GAME_MODE = R"sp_module_set_game_mode.ncs";
+const resource RESOURCE_SCRIPT_MODULE_PPICKER_CLOSED = R"sp_module_ppicker_closed.ncs";
+
+/*******************************************************************************
+* CORE DIALOG RESOURCES
+*******************************************************************************/
+const resource GEN_DL_CAMP_EVENTS = R"party_camp.dlg";
+const resource GEN_DL_PARTY_EVENTS = R"party_events.dlg";
+
+
+/*******************************************************************************
+* FOLLOWERS
+*******************************************************************************/
+
+const string GEN_FL_ALISTAIR = "gen00fl_alistair";
+const string GEN_FL_DOG = "gen00fl_dog";
+const string GEN_FL_MORRIGAN = "gen00fl_morrigan";
+const string GEN_FL_WYNNE = "gen00fl_wynne";
+const string GEN_FL_SHALE = "gen00fl_shale";
+const string GEN_FL_STEN = "gen00fl_sten";
+const string GEN_FL_ZEVRAN = "gen00fl_zevran";
+const string GEN_FL_OGHREN = "gen00fl_oghren";
+const string GEN_FL_LELIANA = "gen00fl_leliana";
+const string GEN_FL_LOGHAIN = "gen00fl_loghain";
+
+
+/*******************************************************************************
+* ITEMS
+* NOTE: these must be in a core global file since they are referenced in
+* player_core
+*******************************************************************************/
+const string GEN_IM_GIFT_DUNCAN_SHIELD = "gen_im_gift_duncan_shield";
+const string GEN_IM_GIFT_ALISTAIR_AMULET = "gen_im_gift_alistair_amulet";
+const string GEN_IM_GIFT_DALISH_GLOVES = "gen_im_gift_dalish_gloves";
+const string GEN_IM_GIFT_ANTIVAN_BOOTS = "gen_im_gift_antivan_boots";
+
+/*******************************************************************************
+* Areas
+*******************************************************************************/
+
+const string GEN_AR_CAMP = "gen00ar_camp";
+const string PRE_AR_KINGS_CAMP = "pre100ar_kings_camp";
+
+/*******************************************************************************
+* Area Lists
+*******************************************************************************/
+
+const string RAN01AL_PLAINS = "ran01al_plains";
+
+/*******************************************************************************
+* Waypoints
+*******************************************************************************/
+
+const string RAN110WP_START = "ran110wp_start";
+const string PRE_WP_START = "prelude_start";
+
+/*******************************************************************************
+* XP Rewards
+*******************************************************************************/
+const int XP_CODEX = 50;
+
+/*******************************************************************************
+* Codex
+*******************************************************************************/
+const int CODEX_COUNT_LEVEL_1 = 1;
+const int CODEX_COUNT_LEVEL_2 = 3;
+const int CODEX_COUNT_LEVEL_3 = 7;</text>
+	</Agent>
+</Resource>

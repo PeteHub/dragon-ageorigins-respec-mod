@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="82" Folder="\_Game Effects\Effects\" ResRefName="effect_modify_attribute_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\effect_modify_attribute_h.nss?moduleid=1&amp;resrefid=82" Requested="0">
+	<Agent type="empty">
+		<ResRefName>effect_modify_attribute_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>// -----------------------------------------------------------------------------
+// effect_modifystrengths.nss
+// -----------------------------------------------------------------------------
+/*
+    Effect: Modify Attribute
+
+
+    */
+// -----------------------------------------------------------------------------
+// Owner: Georg Zoeller
+// -----------------------------------------------------------------------------
+
+#include "2da_constants_h"
+#include "events_h"
+#include "effect_constants_h"
+#include "attributes_h"
+
+const int EFFECT_MODIFY_ATTRIBUTE_ATTRIBUTE_ALL = -1000;
+const int EFFECT_MODIFY_ATTRIBUTE_ATTRIBUTE_RANDOM = -2000;
+
+void _ChangeAttributeModifier(object oCreature,int nAttribute,int nAmount)
+{
+//    Log_Systems( "+++ changing attribute " + IntToString(nAttribute) + " by " + IntToString(nAmount));
+    UpdateCreatureProperty(oCreature, nAttribute, IntToFloat(nAmount), PROPERTY_VALUE_MODIFIER);
+}
+
+effect EffectModifyAttribute(int nAttribute, int nValue )
+{
+    effect eEffect = Effect( EFFECT_TYPE_MODIFYATTRIBUTE);
+
+    if (nAttribute ==  EFFECT_MODIFY_ATTRIBUTE_ATTRIBUTE_RANDOM)
+    {
+        nAttribute = Random(6)+1;
+    }
+    eEffect = SetEffectInteger(eEffect, 0, nAttribute);
+    eEffect = SetEffectInteger(eEffect, 1, nValue);
+    return eEffect;
+}
+
+
+int Effects_HandleApplyEffectModifyAttribute(effect eEffect)
+{
+    int nAttribute = GetEffectInteger(eEffect,0);
+    int nAmount = GetEffectInteger(eEffect,1);
+
+    if (nAttribute == EFFECT_MODIFY_ATTRIBUTE_ATTRIBUTE_ALL)
+    {
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_DEXTERITY, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_CONSTITUTION, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_INTELLIGENCE, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_WILLPOWER, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_STRENGTH, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_MAGIC, nAmount);
+    }
+    else
+    {
+        _ChangeAttributeModifier(OBJECT_SELF, nAttribute, nAmount);
+    }
+
+
+    return TRUE;
+}
+
+
+int Effects_HandleRemoveEffectModifyAttribute(effect eEffect)
+{
+    int nAttribute = GetEffectInteger(eEffect,0);
+    int nAmount = GetEffectInteger(eEffect,1) * -1;
+
+
+    if (nAttribute == EFFECT_MODIFY_ATTRIBUTE_ATTRIBUTE_ALL)
+    {
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_DEXTERITY, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_CONSTITUTION, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_INTELLIGENCE, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_WILLPOWER, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_STRENGTH, nAmount);
+        _ChangeAttributeModifier(OBJECT_SELF, PROPERTY_ATTRIBUTE_MAGIC, nAmount);
+    }
+    else
+    {
+        _ChangeAttributeModifier(OBJECT_SELF, nAttribute, nAmount);
+
+    }
+    return TRUE;
+}</text>
+	</Agent>
+</Resource>

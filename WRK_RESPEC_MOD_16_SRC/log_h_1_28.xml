@@ -1,0 +1,902 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="28" Folder="\_Core Includes\" ResRefName="log_h" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="nss" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\log_h.nss?moduleid=1&amp;resrefid=28" Requested="0">
+	<Agent type="empty">
+		<ResRefName>log_h</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<text>//------------------------------------------------------------------------------
+// log_h - Design Log and Debug Framework
+//------------------------------------------------------------------------------
+/*
+    Provide designers with standarized functions to add log and debug messages
+    to the DejaInsight System.
+
+    Georg:
+    By default, the log functions will make use of LogTrace, which I wrote to
+    directly access DEJA_TRACE. If deja is not running or the game executable
+    has not been compiled with Deja support, the game will use ECLog instead.
+
+*/
+//------------------------------------------------------------------------------
+// @author yaron, georg
+//------------------------------------------------------------------------------
+
+
+#include "var_constants_h"
+#include "2da_constants_h"
+#include "design_tracking_h"
+
+// -----------------------------------------------------------------------------
+// Georg: This is the compiler side killswitch for DEJA/Eclipse Log output
+//        after Sunday, Feb 22, 2009, this defaults to commented out.
+//
+//        If you need log/deja output from your scripts to debug, you need to
+//        remove the 'NO' from the symbol. You should do so only ever in a local,
+//        temporary copy of this file and never while the file is checked out.
+//
+//        If you have questions regarding this mechanism, please talk to me.
+//
+//        Note: SHIP mode executables do not support the LogTrace command and as
+//              such will never provide deja/log output, even if this symbol
+//              is defined.
+//
+// -----------------------------------------------------------------------------
+#defsym NODEBUG
+// -----------------------------------------------------------------------------
+
+// Old Design side log killswitch, just leave it alone.
+const int LOG_ENABLED = TRUE;
+
+
+// -----------------------------------------------------------------------------
+// Georg: This is the compiler side killswitch for my Telemetry and Stats Awareness
+//        system at http://georg/SkyNetWeb/default.aspx.
+//
+//        When turned off, script side telemetry and event tracking will become
+//        non operational - you will no longer be able to file SmartBugs,
+//        and session tracking, analyis and developer achievements will not be
+//        available.
+//
+//        Note: SHIP mode executables do not have the Eclipse NetLayer enabled
+//              preventing communication with the SkyNet server. Defining this
+//              Symbol in SHIP mode will not do anyting.
+//
+// -----------------------------------------------------------------------------
+#defsym SKYNET
+// -----------------------------------------------------------------------------
+
+
+// severity / priorit settings
+const int LOG_SEVERITY_MESSAGE   = 0;
+const int LOG_SEVERITY_WARNING   = 2;
+const int LOG_SEVERITY_CRITICAL  = 3;
+
+// --- start deprecated section, left in until we can remove all legacy calls
+const int LOG_LEVEL_ERROR = LOG_SEVERITY_CRITICAL;
+const int LOG_LEVEL_DEBUG = LOG_SEVERITY_MESSAGE;
+const int LOG_LEVEL_WARNING = LOG_SEVERITY_WARNING ;
+const int LOG_LEVEL_CRITICAL = LOG_SEVERITY_CRITICAL;
+const int LOG_RULES_SUBTYPE_ATTACK = 1;
+const int LOG_RULES_SUBTYPE_DAMAGE = 2;
+const int LOG_SYSTEMS_SUBTYPE_GENERAL =3 ;
+const int LOG_SYSTEMS_SUBTYPE_TALK_TRIGGER = 4;
+const int LOG_SYSTEMS_SUBTYPE_APPROVAL = 5;
+const int LOG_RULES_SUBTYPE_DEATH = 6;
+// --- end deprecated section
+
+
+/** @brief Return the name / label of a command by ID.
+*
+*
+* @param nCommandId - The Command Id to look up.
+* @returns The contents of the label column in commands.xls
+* @author Georg Zoeller
+*/
+string Log_GetCommandNameById(int nCommandId);
+
+/** @brief Return the name / label of an event by ID.
+*
+*
+* @param nEventId - The event Id to look up.
+* @returns The contents of the label column in events.xls
+* @author Georg Zoeller
+*/
+string Log_GetEventNameById(int nEventId);
+
+
+/** @brief Return the name / label of a effect by ID.
+*
+*
+* @param nEventId - The effect Id to look up.
+* @returns The contents of the label column in events.xls
+* @author Georg Zoeller
+*/
+string Log_GetEffectNameById(int nEffectId);
+
+
+
+// -----------------------------------------------------------------------------
+// Helper Functions
+// -----------------------------------------------------------------------------
+
+
+
+
+// -----------------------------------------------------------------------------
+// Get the 2da table for an ability
+// -----------------------------------------------------------------------------
+int _GetAbilityTable(int nAbilityType);
+int _GetAbilityTable(int nAbilityType)
+{
+    // Which 2DA to read the data from
+    int n2DA = TABLE_ABILITIES_TALENTS;
+
+    if (nAbilityType == ABILITY_TYPE_SPELL)
+    {
+        n2DA = TABLE_ABILITIES_SPELLS;
+    }
+
+    return n2DA;
+}
+
+
+
+// -----------------------------------------------------------------------------
+// Get a human readable string for a command
+// -----------------------------------------------------------------------------
+string Log_GetCommandNameById(int nCommandId)
+{
+    string sRet = "";
+
+    #ifdef DEBUG
+        sRet = GetM2DAString(TABLE_COMMANDS,"Label",nCommandId) + "("+ IntToString(nCommandId) + ") ";
+    #endif
+
+    return sRet ;
+
+}
+
+// -----------------------------------------------------------------------------
+// Get a human readable string for an event
+// -----------------------------------------------------------------------------
+string Log_GetEventNameById(int nEventId)
+{
+
+    string sRet ="";
+
+    #ifdef DEBUG
+    sRet = GetM2DAString(TABLE_EVENTS,"Label",nEventId) + " ("+ IntToString(nEventId) + ") ";
+    #endif
+
+    return sRet;
+
+}
+
+// -----------------------------------------------------------------------------
+// Get a human readable string for an Effect
+// -----------------------------------------------------------------------------
+string Log_GetEffectNameById(int nEffectId)
+{
+
+    string sRet = "";
+
+    #ifdef DEBUG
+    sRet = GetM2DAString(TABLE_EFFECTS,"Label",nEffectId) + " ("+ IntToString(nEffectId) + ") ";
+    #endif
+
+    return sRet;
+}
+
+
+
+// -----------------------------------------------------------------------------
+// Get the type of an ability. This is mirrored from core_h
+// -----------------------------------------------------------------------------
+int _GetAbilityType(int nAbility)
+{
+    // mirrored from core_h to avoid circular includes
+    if (nAbility &gt;= ABI_BASE_ITEM_RANGE_START)
+    {
+        return ABILITY_TYPE_ITEM;
+    }
+    else if (nAbility &gt;= ABI_BASE_SKILL_RANGE_START)
+    {
+        return ABILITY_TYPE_SKILL;
+    }
+    else if (nAbility &gt;=  ABI_BASE_SPELL_RANGE_START)
+    {
+        return ABILITY_TYPE_SPELL;
+    }
+    else
+    {
+        return ABILITY_TYPE_TALENT;
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Get a human readable string for an ability
+// -----------------------------------------------------------------------------
+string Log_GetAbilityNameById(int nAbilityId)
+{
+    #ifdef DEBUG
+    int nType = _GetAbilityType(nAbilityId);
+    int nTable =  _GetAbilityTable(nType);
+    return (GetM2DAString(nTable,"LABEL",nAbilityId) + " (" + IntToString(nAbilityId) +")");
+    #endif
+
+    return "";
+
+}
+
+// -----------------------------------------------------------------------------
+// Get a human readable string for an ability
+// -----------------------------------------------------------------------------
+string Log_GetAttackResultNameById(int nAttackResult)
+{
+    #ifdef DEBUG
+    if (!LOG_ENABLED)
+    {
+        return "";
+    }
+
+    if (nAttackResult == COMBAT_RESULT_HIT)
+    {
+        return IntToString(nAttackResult) + " = COMMAND_RESULT_HIT";
+    }
+    else if (nAttackResult == COMBAT_RESULT_CRITICALHIT)
+    {
+        return IntToString(nAttackResult) + " = COMMAND_RESULT_CRITICALHIT";
+    }
+    else if (nAttackResult == COMBAT_RESULT_DEATHBLOW)
+    {
+        return IntToString(nAttackResult) + " = COMMAND_RESULT_DEATHBLOW";
+    }
+    else if (nAttackResult == COMBAT_RESULT_MISS)
+    {
+        return IntToString(nAttackResult) + " = COMMAND_RESULT_MISS";
+    }
+      else if (nAttackResult == COMBAT_RESULT_BACKSTAB)
+    {
+        return IntToString(nAttackResult) + " = COMMAND_RESULT_BACKSTAB";
+    }
+    else
+    {
+        return IntToString(nAttackResult) + " = COMMAND_RESULT_INVALID";
+    }
+    #endif
+
+    return "";
+
+}
+
+// -----------------------------------------------------------------------------
+// Get a human readable string for an ability
+// -----------------------------------------------------------------------------
+string Log_GetCommandStatusById(int nCommandStatus)
+{
+    string sStatus = "";
+
+    #ifdef DEBUG
+    switch (nCommandStatus)
+    {
+        case COMMAND_SUCCESSFUL:                    sStatus = "COMMAND_SUCCESSFUL";                 break;
+        case COMMAND_LOOPING:                       sStatus = "COMMAND_LOOPING";                    break;
+        case COMMAND_FAILED:                        sStatus = "COMMAND_FAILED";                     break;
+        case COMMAND_FAILED_COMMAND_CLEARED:        sStatus = "COMMAND_FAILED_COMMAND_CLEARED";     break;
+        case COMMAND_FAILED_INVALID_DATA:           sStatus = "COMMAND_FAILED_INVALID_DATA";        break;
+        case COMMAND_FAILED_INVALID_PATH:           sStatus = "COMMAND_FAILED_INVALID_PATH";        break;
+        case COMMAND_FAILED_NO_SPACE_IN_MELEE_RING: sStatus = "COMMAND_FAILED_NO_SPACE_IN_MELEE_RING"; break;
+        case COMMAND_FAILED_NO_LINE_OF_SIGHT:       sStatus = "COMMAND_FAILED_NO_LINE_OF_SIGHT";    break;
+        case COMMAND_FAILED_TARGET_DESTROYED:       sStatus = "COMMAND_FAILED_TARGET_DESTROYED ";   break;
+        case COMMAND_FAILED_DISABLED:              sStatus = "COMMAND_FAILED_DISABLED";             break;
+        case COMMAND_FAILED_PATH_ACTION_REQUIRED:   sStatus = "COMMAND_FAILED_PATH_ACTION_REQUIRED";break;
+        default:                                    sStatus = "*** Unknown command status ***";
+    }
+    #endif
+    return sStatus;
+}
+
+
+// -----------------------------------------------------------------------------
+// Get a human readable string for an ability type
+// -----------------------------------------------------------------------------
+string Log_GetAbilityTypeNameById(int nAbilityType)
+{
+    string sRet = "";
+
+    #ifdef DEBUG
+    switch (nAbilityType)
+    {
+        case ABILITY_TYPE_ITEM:   sRet ="ABILITY_TYPE_ITEM";   break;
+        case ABILITY_TYPE_SKILL:  sRet ="ABILITY_TYPE_SKILL";  break;
+        case ABILITY_TYPE_SPELL:  sRet ="ABILITY_TYPE_SPELL";  break;
+        case ABILITY_TYPE_TALENT: sRet ="ABILITY_TYPE_TALENT"; break;
+        default:                  sRet = "*** Unknown/Invalid ability type***";
+    }
+    #endif
+    return sRet;
+}
+
+// -----------------------------------------------------------------------------
+// Returns a human readable string for a placeable action
+// -----------------------------------------------------------------------------
+string Log_GetPlaceableActionNameByID(int nAction)
+{
+    string sAction = "" ;
+
+    #ifdef DEBUG
+    switch (nAction)
+    {
+        case PLACEABLE_ACTION_USE:             sAction = "PLACEABLE_ACTION_USE";            break;
+        case PLACEABLE_ACTION_OPEN:            sAction = "PLACEABLE_ACTION_OPEN";           break;
+        case PLACEABLE_ACTION_CLOSE:           sAction = "PLACEABLE_ACTION_CLOSE";          break;
+        case PLACEABLE_ACTION_AREA_TRANSITION: sAction = "PLACEABLE_ACTION_AREA_TRANSITION";break;
+        case PLACEABLE_ACTION_DIALOG:          sAction = "PLACEABLE_ACTION_DIALOG";         break;
+        case PLACEABLE_ACTION_EXAMINE:         sAction = "PLACEABLE_ACTION_EXAMINE";        break;
+        case PLACEABLE_ACTION_TRIGGER_TRAP:    sAction = "PLACEABLE_ACTION_TRIGGER_TRAP";   break;
+        case PLACEABLE_ACTION_DISARM:          sAction = "PLACEABLE_ACTION_DISARM";         break;
+        case PLACEABLE_ACTION_UNLOCK:          sAction = "PLACEABLE_ACTION_UNLOCK";         break;
+        case PLACEABLE_ACTION_OPEN_INVENTORY:  sAction = "PLACEABLE_ACTION_OPEN_INVENTORY"; break;
+        case PLACEABLE_ACTION_FLIP_COVER:      sAction = "PLACEABLE_ACTION_FLIP_COVER";     break;
+        case PLACEABLE_ACTION_USE_COVER:       sAction = "PLACEABLE_ACTION_USE_COVER";      break;
+        case PLACEABLE_ACTION_LEAVE_COVER:     sAction = "PLACEABLE_ACTION_LEAVE_COVER";    break;
+        case PLACEABLE_ACTION_TOPPLE:          sAction = "PLACEABLE_ACTION_TOPPLE";         break;
+        case PLACEABLE_ACTION_DESTROY:         sAction = "PLACEABLE_ACTION_DESTROY";        break;
+        default:                               sAction = "*** Unknown action ***";
+    }
+    #endif
+    return sAction;
+}
+
+/**
+*  @brief Write a log message with origin information to a channel
+*
+*  Standard log handler for designer use. Please provide the file and function you
+*  are calling the function from in sOrigin.
+*  You can use oTarget to associate the
+*  function call with a specific object (such as the target of an attack). Do not
+*  pass OBJECT_SELF as that information is already contained in the log scope anyway.
+*
+*  @example: Log_Trace(LOG_CHANNEL_GENERAL,"myscript.myfunction", "hello world", oObject).
+*
+*  @param nLogChannel A LOG_CHANNEL_* constant defining the deja channel to write to.
+*                     If you need additional channels, please talk to georg
+*  @param sOrigin   The file and function you are calling from (e.g. "core_h.GetPlayerName")
+*  @param sMessage  Your log message
+*  @param nSeverity The LOG_SEVERITY_* severity of the mesage.
+*
+*  @sa Log_Msg.
+*
+*  @author georg
+**/
+void Log_Trace(int nLogChannel, string sOrigin = "", string sMessage = "", object oTarget = OBJECT_INVALID, int nPriority = LOG_SEVERITY_MESSAGE );
+void Log_Trace(int nLogChannel, string sOrigin = "", string sMessage = "", object oTarget = OBJECT_INVALID, int nPriority = LOG_SEVERITY_MESSAGE )
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        LogTrace(nLogChannel, "[" + sOrigin + "] " + sMessage, oTarget);
+    }
+    #endif
+}
+
+/**
+*  @brief Write a log message with origin information to a channel
+*
+*  Standard log handler for designer use. Please use Log_Trace instead when possible
+*
+*  You can use oTarget to associate the function call with a specific object
+*  (such as the target of an attack). Do not pass OBJECT_SELF as that information
+*  is already contained in the log scope anyway.
+*
+*  @example: Log_Trace(LOG_CHANNEL_GENERAL,"myscript.myfunction", "hello world", oObject).
+*
+*  @param nLogChannel A LOG_CHANNEL_* constant defining the deja channel to write to.
+*                     If you need additional channels, please talk to georg
+*  @param sMessage  Your log message
+*  @param nSeverity The LOG_SEVERITY_* severity of the mesage.
+*
+*  @sa Log_Trace
+*
+*  @author georg
+**/
+void Log_Msg(int nLogChannel, string sMessage = "", object oTarget = OBJECT_INVALID, int nPriority = LOG_SEVERITY_MESSAGE);
+void Log_Msg(int nLogChannel, string sMessage = "", object oTarget = OBJECT_INVALID, int nPriority = LOG_SEVERITY_MESSAGE)
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+
+        LogTrace(nLogChannel, sMessage, oTarget);
+    }
+    #endif
+}
+
+// -----------------------------------------------------------------------------
+// The functions below do not have an interface declaration on purpose
+// feel free to ask georg why...
+// -----------------------------------------------------------------------------
+
+/**
+*  @brief Specialized version of Log_Trace for command queue debugging
+*
+
+*  @param sOrigin   The file and function you are calling from (e.g. "core_h.GetPlayerName")
+*  @param cmd       The Command to debug
+*  @param oTarget   The command target
+*
+*  @author georg
+**/
+void Log_Trace_Commands(string sOrigin, command cmd, object oTarget)
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        int nCommandType = GetCommandType(cmd);
+        Log_Trace (LOG_CHANNEL_COMMANDS, sOrigin, Log_GetCommandNameById(nCommandType), oTarget);
+    }
+    #endif
+}
+
+/**
+*  @brief Specialized version of Log_Trace to message scripting errors to designers
+*
+*  This writes to LOG_CHANNEL_DESIGN_SCRIPTERROR
+*
+*  @param sOrigin   The file and function you are calling from (e.g. "core_h.GetPlayerName")
+*  @param sMessage  The message you want to put into the log
+*  @param oTarget   Optional target object
+*
+*  @author georg
+**/
+
+void Log_Trace_Scripting_Error (string sOrigin, string sMessage, object oTarget = OBJECT_INVALID)
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        Log_Trace(LOG_CHANNEL_DESIGN_SCRIPTERROR, sOrigin, sMessage, oTarget);
+    }
+    #endif
+}
+
+
+/**
+*  @brief Specialized version of Log_Trace to debug effects
+*
+*  This writes to LOG_CHANNEL_EFFECTS
+*
+*  @param sOrigin    The file and function you are calling from (e.g. "core_h.GetPlayerName")
+*  @param eEffect    The Effect to debug
+*  @param sMessage   Optional message
+*  @param oTarget    Optional target information
+*
+*  @author georg
+**/
+void Log_Trace_Effects(string sOrigin, effect eEffect, string sMessage, object oTarget = OBJECT_INVALID, int nDurationType = -1, int nAbilityId = -1)
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        int    nEffectId = GetEffectType(eEffect);
+        string sCreator  = GetTag(GetEffectCreator(eEffect));
+
+        if (nDurationType== -1)
+        {
+            nDurationType = GetEffectDurationType(eEffect);
+        }
+
+        if (nAbilityId == -1)
+        {
+            nAbilityId = GetEffectAbilityID(eEffect);
+        }
+
+        string sInfo = Log_GetEffectNameById(nEffectId) + ", duration: " + IntToString(nDurationType) + ", ability: " + IntToString(nAbilityId) + ", creator: " + sCreator ;
+
+        Log_Trace(LOG_CHANNEL_EFFECTS, sOrigin, sMessage + " " + sInfo, oTarget);
+
+    }
+    #endif
+}
+
+
+/**
+*  @brief Specialized version of Log_Trace to debug combat
+*
+*  This writes to LOG_CHANNEL_COMBAT, unless changed.
+*
+*  @param sOrigin    The file and function you are calling from (e.g. "core_h.GetPlayerName")
+*  @param sMessage   The log message
+*  @param oAttacker  Attacking Object
+*  @param oTarget    Target / Defender / Victim object
+*  @param oTarget    Target / Defender / Victim object
+*  @param nLogChannel The log channel to write to (default LOG_CHANNEL_COMBAT)
+*  @param nSeverity   The log severity
+*
+*  @author georg
+**/
+void Log_Trace_Combat(string sOrigin, string sMessage = "", object oAttacker = OBJECT_INVALID, object oTarget = OBJECT_INVALID, int nLogChannel = LOG_CHANNEL_COMBAT, int nSeverity = LOG_SEVERITY_MESSAGE )
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        LogTrace(nLogChannel, sOrigin + " " + sMessage + (IsObjectValid(oAttacker)? ". Attacker: " + GetTag(oAttacker) : ""), oTarget);
+    }
+    #endif
+}
+
+
+/**
+*  @brief Specialized version of Log_Trace to debug combat
+*
+*  This writes to LOG_CHANNEL_AI
+*
+*  @param sOrigin    The file and function you are calling from (e.g. "core_h.GetPlayerName")
+*  @param sMessage   The log message
+*  @param nSeverity   The log severity
+*
+*  @author Yaron
+**/
+void Log_Trace_AI(string sOrigin, string sMessage = "", int nSeverity = LOG_SEVERITY_MESSAGE )
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        string sTag = GetTag(OBJECT_SELF) + "::";
+        Log_Trace(LOG_CHANNEL_AI, sTag + sOrigin, sMessage, OBJECT_INVALID, nSeverity);
+    }
+    #endif
+}
+
+/**
+*  @brief Specialized version of Log_Trace to debug combat
+*
+*  This writes to LOG_CHANNEL_THREAT
+*
+*  @param sOrigin    The file and function you are calling from (e.g. "core_h.GetPlayerName")
+*  @param sMessage   The log message
+*  @param nSeverity   The log severity
+*
+*  @author Yaron
+**/
+void Log_Trace_Threat(string sOrigin, string sMessage = "", int nSeverity = LOG_SEVERITY_MESSAGE )
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        string sTag = GetTag(OBJECT_SELF) + "::";
+        Log_Trace(LOG_CHANNEL_THREAT, sTag + sOrigin, sMessage, OBJECT_INVALID, nSeverity);
+    }
+    #endif
+}
+
+
+
+/**
+*  @brief Specialized version of Log_Trace to debug plot changes
+*
+*  This writes to LOG_CHANNEL_PLOT
+*
+*  @param sOrigin    The file and function you are calling from (e.g. "core_h.GetPlayerName")
+*  @param sPlot      The plot resref
+*  @param nPlotFlag  The flag that is being queried or touched
+*  @param nCurrent   The current value of that flag
+*  @param nNewValue  The new value of the flag (leave default there is no new value)
+*
+*  @author georg
+**/
+
+void Log_Trace_Plot(string sOrigin, string sPlot, int nPlotFlag, int nCurrent, int nNewValue = -9999)
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        Log_Trace(LOG_CHANNEL_PLOT, sOrigin,
+                  sPlot + " - Flag: " + IntToString(nPlotFlag) +
+                          " Value: " + IntToString(nCurrent) +
+                            ((nNewValue != -9999)?  " New:" + IntToString(nNewValue) : ""));
+    }
+    #endif
+}
+
+
+/**
+*  @brief Specialized version of Log_Trace to debug spellscripts
+*
+*  This writes to LOG_CHANNEL_COMBAT_ABILITY
+*
+*  @param sOrigin    The file and function you are calling from (e.g. "core_h.GetPlayerName")
+*  @param sMessage   LogMessage
+*  @param nAbilityId SpellID
+*  @param oTarget    Spell Target
+*  @param nSeverity  Message Severity
+*
+*  @author georg
+**/
+
+void Log_Trace_Spell(string sOrigin, string sMessage, int nAbilityId, object oTarget = OBJECT_INVALID, int nSeverity = LOG_SEVERITY_MESSAGE )
+{
+
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        sOrigin = GetCurrentScriptName() + "." + sOrigin;
+        string sSpell = Log_GetAbilityNameById(nAbilityId);
+        Log_Trace(LOG_CHANNEL_COMBAT_ABILITY, sOrigin, sSpell + ": " + sMessage, oTarget, nSeverity );
+    }
+    #endif
+}
+
+
+/**
+*  @brief Specialized version of Log_Trace to debug Events firing
+*
+*  This writes to LOG_CHANNEL_PLOT
+*
+*  @param sOrigin    The name of the calling function (e.g. "core_h.GetPlayerName")
+*  @param ev         The event being debugged.
+*
+*  @author georg
+**/
+void Log_Events(string sOrigin, event ev, string sMessage = "", int nLogChannel = LOG_CHANNEL_EVENTS)
+{
+    #ifdef DEBUG
+    if (!LOG_ENABLED)
+        return;
+
+    int     nEvent = GetEventType(ev);
+    string  sDetails;
+    object  oTarget;
+
+    switch (nEvent)
+    {
+        case EVENT_TYPE_SPAWN:
+        {
+            if (GetObjectType(OBJECT_SELF) == OBJECT_TYPE_CREATURE)
+            {
+                sDetails = "Team: " + ToString(GetTeamId(OBJECT_SELF));
+            }
+            break;
+        }
+
+        case EVENT_TYPE_DIALOGUE:
+        {
+            string sConv = ResourceToString(GetEventResource(ev, 0));
+            sDetails = "Listener: " + ToString(GetEventCreator(ev))
+                        + ", Conversation: " + (sConv == "" ? "&lt;default&gt;" : sConv);
+            break;
+        }
+
+        case EVENT_TYPE_ON_ORDER_RECEIVED:
+        {
+            sDetails = "Target: " + ToString(GetEventTarget(ev));
+            break;
+        }
+
+        case EVENT_TYPE_ATTACK_IMPACT:
+        {
+            object[] arTarget;
+            int i;
+            for (i = 1; IsObjectValid(GetEventObject(ev, i)); i++)
+                arTarget[i-1] = GetEventObject(ev, i);
+
+            sDetails = "Targets: " + ToString(GetArraySize(arTarget))
+                    + ", CombatResult: "   + ToString(GetEventInteger(ev, 0))
+                    + ", DamageEffect: "   + ToString(GetEventInteger(ev, 1));
+            break;
+        }
+
+        case EVENT_TYPE_COMMAND_PENDING:
+        {
+            oTarget        = GetEventObject(ev, 1);
+            int nCommandId = GetEventInteger(ev, 0);
+            int nSubType   = GetEventInteger(ev, 1); // ability type for CommandUseAbility, # of attacks for CommandAttack
+
+            sDetails = Log_GetCommandNameById(nCommandId);
+
+             if (nCommandId == COMMAND_TYPE_USE_ABILITY)
+             {
+                sDetails += ", Subtype: " + Log_GetAbilityTypeNameById(nSubType)
+                            + "(" + ToString(nSubType) + "), "
+                            + Log_GetAbilityNameById(nSubType);
+             }
+             else if (nCommandId == COMMAND_TYPE_ATTACK)
+             {
+                sDetails += ", #Attacks: " + IntToString(nSubType) ;
+             }
+             else
+             {
+                sDetails += ", Subtype: " + IntToString(nSubType) ;
+             }
+             break;
+        }
+
+        case EVENT_TYPE_COMMAND_COMPLETE:
+        {
+            int nStatus  = GetEventInteger(ev, 1);
+            int nSubType = GetEventInteger(ev, 2);
+
+            sDetails = Log_GetCommandNameById(GetEventInteger(ev, 0))
+                        + (nSubType ? (", Subtype: " + ToString(nSubType)) : "")
+                        + ", Status: " + Log_GetCommandStatusById(nStatus) + " (" + ToString(nStatus) + ")";
+            break;
+        }
+
+        case EVENT_TYPE_REACHED_WAYPOINT:
+        {
+            sDetails = "Reached location " + ToString(GetEventInteger(ev, 0)) + " of " + ToString(GetEventInteger(ev, 1));
+            break;
+        }
+
+        case EVENT_TYPE_ABILITY_CAST_IMPACT:
+        case EVENT_TYPE_ABILITY_CAST_START:
+        {
+            oTarget = GetEventObject(ev, 1);
+            int nAbility = GetEventInteger(ev, 0);
+
+            sDetails = Log_GetAbilityNameById(nAbility);
+            break;
+        }
+
+        case EVENT_TYPE_EQUIP:
+        case EVENT_TYPE_UNEQUIP:
+        case EVENT_TYPE_INVENTORY_ADDED:
+        case EVENT_TYPE_INVENTORY_REMOVED:
+        {
+                sDetails = "Item: " + ToString(GetEventObject(ev, 0));
+                break;
+        }
+
+        case EVENT_TYPE_PLACEABLE_ONCLICK:
+        {
+            sDetails = "Target: " + ToString(GetEventTarget(ev));
+            break;
+        }
+
+        case EVENT_TYPE_PERCEPTION_APPEAR:
+        case EVENT_TYPE_PERCEPTION_DISAPPEAR:
+        {
+            sDetails = "Object: " + ToString(GetEventObject(ev, 0));
+            break;
+        }
+
+        case EVENT_TYPE_DAMAGED:
+        {
+            sDetails = "Damager: "    + ToString(GetEventCreator(ev))
+                        + ", Damage: " + ToString(GetEventFloat(ev, 0))
+                        + ", Type: "   + ToString(GetEventInteger(ev, 0));
+            break;
+        }
+
+        case EVENT_TYPE_DEATH:
+        {
+            sDetails = "Killer: " + ToString(GetEventCreator(ev));
+            break;
+        }
+
+        case EVENT_TYPE_ENTER:
+        {
+            if (GetObjectType(GetEventCreator(ev)) == OBJECT_TYPE_PLACEABLE &amp;&amp; GetLocalInt(GetEventCreator(ev), PLC_TRAP_TYPE) &gt; 0)
+                sDetails = "Trap: " + ToString(GetEventCreator(ev)) + ", ";
+            sDetails += "Target: " + ToString(GetEventTarget(ev));
+            break;
+        }
+
+        case 1050:  // EVENT_TYPE_TRAP_ARM:
+        {
+            sDetails = "Owner: " + ToString(GetEventObject(ev, 0));
+            break;
+        }
+
+        case EVENT_TYPE_TRAP_TRIGGERED:
+        {
+            sDetails = "Target: " + ToString(GetEventObject(ev, 0));
+            break;
+        }
+
+        case 1051:  // EVENT_TYPE_TRAP_TRIGGER_ENTER:
+        {
+            sDetails = "Target: " + ToString(GetEventTarget(ev))
+                    + ", Trap: " + ToString(GetEventCreator(ev))
+                    + ", Trap Type: " + ToString(GetLocalInt(GetEventCreator(ev), PLC_TRAP_TYPE))
+                    + ", AOE tag: " + GetEventString(ev, 0);
+            break;
+
+        }
+
+        case EVENT_TYPE_USE:
+        {
+            int nAction = GetPlaceableAction(OBJECT_SELF);
+            sDetails = Log_GetPlaceableActionNameByID(nAction) + " (" + ToString(nAction) + ") ";
+
+            if (nAction == PLACEABLE_ACTION_AREA_TRANSITION)
+            {
+                sDetails += "Area: " + GetLocalString(OBJECT_SELF, PLC_AT_DEST_AREA_TAG)
+                        + ", Waypoint: " + GetLocalString(OBJECT_SELF, PLC_AT_DEST_TAG);
+            }
+            else if (nAction == PLACEABLE_ACTION_UNLOCK)
+            {
+                string sKeyTag = GetPlaceableKeyTag(OBJECT_SELF);
+                sDetails += "LockLevel: "   + ToString(GetPlaceablePickLockLevel(OBJECT_SELF))
+                        + ", KeyTag: "      + sKeyTag
+                        + ", KeyRequired: " + ToString(GetPlaceableKeyRequired(OBJECT_SELF))
+                        + ", RemoveKey: "   + ToString(GetPlaceableAutoRemoveKey(OBJECT_SELF));
+                if (sKeyTag != "")
+                    sDetails += ", PlayerHasKey: " + ToString(IsObjectValid(GetItemPossessedBy(GetEventCreator(ev), sKeyTag)));
+            }
+            break;
+        }
+
+        case 1026: //EVENT_TYPE_AMBIENT_CONTINUE:
+        {
+            object oInstigator = GetEventObject(ev, 0);
+            if (IsObjectValid(oInstigator))
+                sDetails = "Instigator: " + ToString(oInstigator);
+            break;
+        }
+    }
+
+    string sFinalMessage = "[" + GetCurrentScriptName() + ((sOrigin == "") ? "" : ".") + sOrigin + "] "
+                            + Log_GetEventNameById(nEvent) + sDetails + " " + sMessage;
+
+    LogTrace(nLogChannel, sFinalMessage, oTarget);
+    #endif
+}
+
+
+
+void Log_Systems(string s = "", int n = 0, object o = OBJECT_INVALID,  int n2 = 0, int n3 = 0, int n4= 0)
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED == 2)
+    {
+        Log_Trace(LOG_CHANNEL_DESIGN_HACK,"log_h.Log_Systems", "deprecated function Log_Systems called, please fix! " + s,o);
+    }
+    #endif
+
+}
+
+void Log_Rules(string s = "", int n = 0, object o = OBJECT_INVALID,  object o2 = OBJECT_INVALID, int n2 = 0, int n3 = 0, string ss= "")
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED == 2)
+    {
+        Log_Trace(LOG_CHANNEL_DESIGN_HACK,"log_h.Log_Rules", "deprecated function Log_Rules called, please fix! " + s,o);
+    }
+    #endif
+}
+
+
+void Log_AI(string s = "", int n2 = 0, object o = OBJECT_INVALID,  object o2 = OBJECT_INVALID)
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED == 2)
+    {
+        Log_Trace(LOG_CHANNEL_DESIGN_HACK,"log_h.Log_AI", "deprecated function Log_AI called, please fix! " + s);
+    }
+    #endif
+}
+
+void Log_Plot(string s = "", int n2 = 0, object o = OBJECT_INVALID,  object o2 = OBJECT_INVALID)
+{
+    #ifdef DEBUG
+    if (LOG_ENABLED == 2)
+    {
+        Log_Trace(LOG_CHANNEL_DESIGN_HACK,"log_h.Log_AI", "deprecated function Log_AI called, please fix! " + s);
+    }
+    #endif
+}
+
+
+void Log_Chargen(string sLocation , string sMessage, object oScope = OBJECT_INVALID)
+{
+
+    #ifdef DEBUG
+    if (LOG_ENABLED)
+    {
+        Log_Trace(LOG_CHANNEL_EVENTS_CHARGEN, sLocation,sMessage, oScope);
+    }
+    #endif
+}</text>
+	</Agent>
+</Resource>

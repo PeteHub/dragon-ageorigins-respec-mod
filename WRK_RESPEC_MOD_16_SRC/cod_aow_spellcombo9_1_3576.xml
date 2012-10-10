@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="1" OwnerModuleID="1" ResRefID="3576" Folder="\_Codex\Art of War\" ResRefName="cod_aow_spellcombo9" IsCore="1" OwnerIsCore="1" Type="3" State="0" ObjectName="" Relationship="" ResType="plo" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\cod_aow_spellcombo9.plo?moduleid=1&amp;resrefid=3576" Requested="0">
+	<Agent type="empty">
+		<ResRefName>cod_aow_spellcombo9</ResRefName>
+		<LocalCopy type="bool">False</LocalCopy>
+		<name>Shattering</name>
+		<NameStringID type="i4">49696</NameStringID>
+		<NameRequiresReTranslation type="bool">False</NameRequiresReTranslation>
+		<GUID>1D9F7C93CD254D2BAD40570702940982</GUID>
+		<ScriptURI>bw-db://.\BWDATOOLSET/bw_dragonage_content?resrefid=7</ScriptURI>
+		<Priority type="i4">1</Priority>
+		<JournalImage/>
+		<ParentPlotURI/>
+		<EntryType type="i4">11</EntryType>
+		<AllowPausing type="bool">False</AllowPausing>
+		<StatusList type="empty">
+			<Agent type="empty">
+				<Flag type="i4">0</Flag>
+				<name>COD_AOW_SPELLCOMBO_9_SHATTER</name>
+				<Final type="bool">False</Final>
+				<Repeatable type="bool">False</Repeatable>
+				<JournalText>&lt;summary&gt;About the Shattering spell combination.&lt;/summary&gt;
+A creature frozen or petrified by magic, as from the spells Petrify or Cone of Cold, is in a vulnerable state, subject to shattering if excessive force is applied to just the right spot. A critical hit from any weapon may suffice, and the spells Stonefist and Crushing Prison have been known to achieve the effect as well.</JournalText>
+				<JournalTextStringID type="i4">49695</JournalTextStringID>
+				<JournalTextRequiresReTranslation type="bool">False</JournalTextRequiresReTranslation>
+				<RewardID type="i4">0</RewardID>
+				<Comment/>
+				<DefaultValue type="i4">0</DefaultValue>
+				<AreaLocationTag/>
+				<OfferID/>
+				<PlotAssistInfoList type="empty"/>
+			</Agent>
+		</StatusList>
+	</Agent>
+</Resource>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Resource ModuleID="7" OwnerModuleID="7" ResRefID="7956" Folder="\" ResRefName="string1089623102" IsCore="0" OwnerIsCore="0" Type="3" State="0" ObjectName="" Relationship="" ResType="str" URI="bw-db://.\BWDATOOLSET/bw_dragonage_content\string1089623102.str?moduleid=7&amp;resrefid=7956" Requested="1">
+	<Agent compactmode="1">
+		<StringID>1089623102</StringID>
+		<VersionID>11195</VersionID>
+		<StringTypeID>24</StringTypeID>
+		<StringTableID>7</StringTableID>
+		<OwnerModuleID>7</OwnerModuleID>
+		<LanguageVariantID>1</LanguageVariantID>
+		<OwnerResRefID>7</OwnerResRefID>
+		<MinorUpdateCount>1</MinorUpdateCount>
+		<State>0</State>
+		<Owner>None</Owner>
+		<text>It seems mysterious Ravens from far away lands appeared all over Ferelden. Who knows what they brought along...
+
+This addin allows the player to unlearn all specializations, attribute points, spells or talents and skills they have spent on themselves or their companions.</text>
+		<Description>Mod description</Description>
+		<StringTableName>Character Respec Mod Talk Table</StringTableName>
+		<OwnerModuleName>Character Respec Mod</OwnerModuleName>
+		<CreatedBy>TRUST\Peter</CreatedBy>
+		<MajorUpdateBy>TRUST\Peter</MajorUpdateBy>
+		<MinorUpdateBy>TRUST\Peter</MinorUpdateBy>
+	</Agent>
+</Resource>
